@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             StageSeeder::class,
             WorkflowTemplateSeeder::class,
             UnitSeeder::class,
+            SimutuOrganisasiSeeder::class,
             EmailTemplateSeeder::class,
             InterviewTemplateSeeder::class,
             DiscQuestionSeeder::class,
