@@ -38,11 +38,6 @@ use App\Http\Controllers\ValidateApplicationStepController;
 use App\Http\Controllers\WorkflowTemplateController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => auth()->check()
-    ? redirect()->route('dashboard')
-    : redirect()->route('login')
-);
-
 Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show')->middleware('throttle:token-access');
 Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:public-submit');
 
@@ -53,7 +48,7 @@ Route::get('/tes-mbti/{token}', [MbtiTestController::class, 'show'])->name('tes-
 Route::post('/tes-mbti/{token}', [MbtiTestController::class, 'submit'])->name('tes-mbti.submit')->middleware('throttle:public-submit');
 
 Route::middleware('throttle:public-browse')->group(function () {
-    Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
+    Route::get('/', [CareerController::class, 'index'])->name('karier.index');
     Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
     Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
     Route::post('/karier/{vacancy}/lamar/validate', ValidateApplicationStepController::class)->name('karier.lamar.validate');
