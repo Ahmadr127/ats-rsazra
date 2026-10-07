@@ -40,7 +40,6 @@ use App\Http\Controllers\VacancyPipelineController;
 use App\Http\Controllers\VacancyTestController;
 use App\Http\Controllers\ValidateApplicationStepController;
 use App\Http\Controllers\WorkflowTemplateController;
-use App\Http\Middleware\ForcePasswordChange;
 use App\Models\Vacancy;
 use App\Support\Permissions;
 use Illuminate\Support\Facades\Route;
@@ -80,7 +79,7 @@ Route::middleware(['signed', 'throttle:signed-access'])->group(function () {
     Route::post('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'reject'])->name('offering.reject.submit');
 });
 
-Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/ubah-password', [PasswordChangeController::class, 'show'])->name('password.change');
     Route::post('/ubah-password', [PasswordChangeController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
 
