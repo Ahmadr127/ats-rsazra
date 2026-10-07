@@ -1,21 +1,6 @@
 <x-layouts.public title="Tes MBTI - {{ $submission->application->vacancy->judul_posisi }} - RS Azra" main-class="w-full bg-paper">
 
 <style>
-    .exam-wrap { width: 100%; padding: 56px 4vw 96px; }
-    .exam-eyebrow {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 12px; color: #005f5c;
-        text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500;
-        margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
-    }
-    .exam-eyebrow::before { content: ""; width: 28px; height: 1px; background: rgb(0,119,116); }
-    .exam-h1 {
-        font-family: "IBM Plex Serif", Georgia, serif; font-weight: 500;
-        font-size: clamp(34px, 4.6vw, 58px); line-height: 1.04; letter-spacing: -0.02em;
-        margin: 0 0 14px; color: #0d1614; text-wrap: balance;
-    }
-    .exam-lede { font-size: 17px; line-height: 1.6; color: #2a3835; max-width: 72ch; margin: 0; }
-    .exam-lede strong { color: #0d1614; }
     .exam-bar {
         position: sticky; top: 80px; z-index: 40;
         background: #0d1614; color: #fff;
@@ -28,7 +13,6 @@
     .exam-progress { height: 3px; background: rgba(255,255,255,0.15); }
     .exam-progress > div { height: 100%; background: rgb(129,189,65); transition: width 0.3s; }
     .exam-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
-    .exam-q { background: #fff; border: 1px solid #d9ddd9; padding: 28px; }
     .exam-q-head { display: flex; gap: 16px; align-items: baseline; margin-bottom: 18px; }
     .exam-q-num {
         font-family: "IBM Plex Serif", serif; font-size: 26px; font-weight: 500;
@@ -55,16 +39,6 @@
         margin-top: 40px; border-top: 2px solid #0d1614; padding-top: 24px; flex-wrap: wrap;
     }
     .exam-hint { font-size: 14px; color: #5a6864; margin: 0; }
-    .exam-submit {
-        background: rgb(0,119,116); color: #fff; border: 0;
-        padding: 16px 40px; font-size: 16px; font-weight: 600; cursor: pointer;
-        font-family: "IBM Plex Sans", system-ui, sans-serif; transition: background 0.15s, opacity 0.15s;
-    }
-    .exam-submit:hover:not(:disabled) { background: rgb(0,88,85); }
-    .exam-submit:disabled { background: #d9ddd9; color: #8a948f; cursor: not-allowed; }
-    .exam-submit small { font-weight: 400; font-size: 13px; margin-left: 8px; }
-    .exam-done { width: 100%; padding: 72px 4vw 96px; }
-    .exam-done-card { background: #fff; border: 1px solid #0d1614; padding: 48px; margin-top: 32px; }
     .exam-dl { margin: 0; }
     .exam-dl-row { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid #ebeeea; }
     .exam-dl-row:last-child { border-bottom: 0; }
@@ -77,19 +51,16 @@
         .exam-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
-        .exam-wrap { padding: 36px 4vw 64px; }
-        .exam-q { padding: 20px; }
         .exam-foot { flex-direction: column; align-items: stretch; }
-        .exam-submit { width: 100%; }
     }
 </style>
 
 @if ($submission->isSubmitted())
-    <div class="exam-done">
-        <div class="exam-eyebrow">Tes MBTI · Terkirim</div>
-        <h1 class="exam-h1">Jawaban Anda sudah kami terima.</h1>
-        <p class="exam-lede">Tim HR akan meninjau hasil asesmen dan menghubungi Anda melalui email.</p>
-        <div class="exam-done-card">
+    <div class="container-public section">
+        <div class="badge badge-primary">Tes MBTI · Terkirim</div>
+        <h1 class="offer-h1">Jawaban Anda sudah kami terima.</h1>
+        <p class="offer-lede">Tim HR akan meninjau hasil asesmen dan menghubungi Anda melalui email.</p>
+        <div class="card" style="margin-top: 32px;">
             <dl class="exam-dl">
                 <div class="exam-dl-row">
                     <dt class="exam-dl-label">Posisi</dt>
@@ -104,10 +75,10 @@
         <p class="exam-hint" style="margin-top: 20px;">Halaman ini dapat ditutup.</p>
     </div>
 @else
-    <div class="exam-wrap" x-data="mbtiEngine()">
-        <div class="exam-eyebrow">Tes MBTI · RS Azra</div>
-        <h1 class="exam-h1">{{ $submission->application->vacancy->judul_posisi }}</h1>
-        <p class="exam-lede">
+    <div class="container-public section" x-data="mbtiEngine()">
+        <div class="badge badge-primary">Tes MBTI · RS Azra</div>
+        <h1 class="offer-h1">{{ $submission->application->vacancy->judul_posisi }}</h1>
+        <p class="offer-lede">
             Untuk setiap pasangan pernyataan di bawah ini, pilih yang
             <strong>paling mencerminkan diri Anda</strong>.
             Tidak ada jawaban benar atau salah — jawablah dengan jujur sesuai kepribadian Anda.
@@ -129,7 +100,7 @@
 
             <div class="exam-grid">
                 @foreach ($questions as $index => $question)
-                    <div class="exam-q"
+                    <div class="card"
                          x-data="mbtiQuestion({{ $question->id }})"
                          @answer-change="$dispatch('mbti-answered', { id: {{ $question->id }}, answered: selected !== null })">
                         <div class="exam-q-head">
@@ -169,7 +140,7 @@
                 <button type="submit"
                     @click="confirmSubmit($event)"
                     :disabled="answered < {{ $questions->count() }}"
-                    class="exam-submit">
+                    class="btn btn-primary">
                     Kirim Jawaban
                     <small x-show="answered < {{ $questions->count() }}"><span x-text="{{ $questions->count() }} - answered"></span> belum dijawab</small>
                 </button>

@@ -1,20 +1,6 @@
 <x-layouts.public title="Tes Kompetensi - {{ $submission->application->vacancy->judul_posisi }} - RS Azra" main-class="w-full bg-paper">
 
 <style>
-    .exam-wrap { width: 100%; padding: 56px 4vw 96px; }
-    .exam-eyebrow {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 12px; color: #005f5c;
-        text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500;
-        margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
-    }
-    .exam-eyebrow::before { content: ""; width: 28px; height: 1px; background: rgb(0,119,116); }
-    .exam-h1 {
-        font-family: "IBM Plex Serif", Georgia, serif; font-weight: 500;
-        font-size: clamp(34px, 4.6vw, 58px); line-height: 1.04; letter-spacing: -0.02em;
-        margin: 0 0 14px; color: #0d1614; text-wrap: balance;
-    }
-    .exam-lede { font-size: 17px; line-height: 1.6; color: #2a3835; max-width: 68ch; margin: 0; }
     .exam-bar {
         position: sticky; top: 80px; z-index: 40;
         background: #0d1614; color: #fff;
@@ -37,10 +23,6 @@
         display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
         margin-top: 40px;
     }
-    .exam-q {
-        background: #fff; border: 1px solid #d9ddd9;
-        padding: 28px; display: flex; flex-direction: column; gap: 18px;
-    }
     .exam-q-head { display: flex; gap: 16px; align-items: flex-start; }
     .exam-q-num {
         font-family: "IBM Plex Serif", serif; font-size: 26px; font-weight: 500;
@@ -62,25 +44,11 @@
     .exam-opt:hover { border-color: rgb(0,119,116); background: #f4faf9; }
     .exam-opt input { width: 20px; height: 20px; margin-top: 1px; accent-color: rgb(0,119,116); flex-shrink: 0; cursor: pointer; }
     .exam-opt span { font-size: 16px; line-height: 1.5; color: #2a3835; }
-    .exam-essay {
-        width: 100%; border: 1px solid #d9ddd9; background: #fafaf9;
-        padding: 14px 16px; font-size: 16px; line-height: 1.6; color: #0d1614;
-        font-family: "IBM Plex Sans", system-ui, sans-serif; outline: none; resize: vertical;
-    }
-    .exam-essay:focus { border-color: rgb(0,119,116); background: #fff; }
     .exam-foot {
         display: flex; align-items: center; justify-content: space-between; gap: 16px;
         margin-top: 40px; border-top: 2px solid #0d1614; padding-top: 24px; flex-wrap: wrap;
     }
     .exam-hint { font-size: 14px; color: #5a6864; margin: 0; }
-    .exam-submit {
-        background: rgb(0,119,116); color: #fff; border: 0;
-        padding: 16px 40px; font-size: 16px; font-weight: 600; cursor: pointer;
-        font-family: "IBM Plex Sans", system-ui, sans-serif; transition: background 0.15s;
-    }
-    .exam-submit:hover { background: rgb(0,88,85); }
-    .exam-done { width: 100%; padding: 72px 4vw 96px; }
-    .exam-done-card { background: #fff; border: 1px solid #0d1614; padding: 48px; }
     .exam-dl { margin: 28px 0 0; }
     .exam-dl-row { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid #ebeeea; }
     .exam-dl-row:last-child { border-bottom: 0; }
@@ -93,21 +61,18 @@
         .exam-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
-        .exam-wrap { padding: 36px 4vw 64px; }
-        .exam-q { padding: 20px; }
         .exam-bar { top: 80px; }
         .exam-timer { font-size: 18px; }
         .exam-foot { flex-direction: column; align-items: stretch; }
-        .exam-submit { width: 100%; }
     }
 </style>
 
 @if ($submission->isSubmitted())
-    <div class="exam-done">
-        <div class="exam-eyebrow">Tes Kompetensi · Terkirim</div>
-        <h1 class="exam-h1">Jawaban Anda sudah kami terima.</h1>
-        <p class="exam-lede">Tim HR akan meninjau hasil tes dan menghubungi Anda melalui email.</p>
-        <div class="exam-done-card" style="margin-top: 32px;">
+    <div class="container-public section">
+        <div class="badge badge-primary">Tes Kompetensi · Terkirim</div>
+        <h1 class="offer-h1">Jawaban Anda sudah kami terima.</h1>
+        <p class="offer-lede">Tim HR akan meninjau hasil tes dan menghubungi Anda melalui email.</p>
+        <div class="card" style="margin-top: 32px;">
             <dl class="exam-dl">
                 <div class="exam-dl-row">
                     <dt class="exam-dl-label">Posisi</dt>
@@ -122,10 +87,10 @@
         <p class="exam-hint" style="margin-top: 20px;">Halaman ini dapat ditutup.</p>
     </div>
 @else
-    <div class="exam-wrap" x-data="testEngine({{ $submission->remainingSeconds() }})">
-        <div class="exam-eyebrow">Tes Kompetensi · RS Azra</div>
-        <h1 class="exam-h1">{{ $submission->application->vacancy->judul_posisi }}</h1>
-        <p class="exam-lede">Jawab semua pertanyaan di bawah ini. Tes akan otomatis terkirim saat waktu habis.</p>
+    <div class="container-public section" x-data="testEngine({{ $submission->remainingSeconds() }})">
+        <div class="badge badge-primary">Tes Kompetensi · RS Azra</div>
+        <h1 class="offer-h1">{{ $submission->application->vacancy->judul_posisi }}</h1>
+        <p class="offer-lede">Jawab semua pertanyaan di bawah ini. Tes akan otomatis terkirim saat waktu habis.</p>
 
         <div class="exam-bar">
             <div class="exam-bar-inner">
@@ -147,7 +112,7 @@
 
             <div class="exam-grid">
                 @foreach ($questions as $index => $question)
-                    <div class="exam-q">
+                    <div class="card">
                         <div class="exam-q-head">
                             <span class="exam-q-num">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
                             <div>
@@ -176,7 +141,7 @@
                                 name="answers[{{ $question->id }}]"
                                 rows="5"
                                 placeholder="Tulis jawaban Anda di sini..."
-                                class="exam-essay"
+                                class="form-input"
                             ></textarea>
                         @endif
                     </div>
@@ -187,7 +152,7 @@
                 <p class="exam-hint">Periksa kembali sebelum mengirim. Jawaban yang terkirim tidak dapat diubah.</p>
                 <button type="submit"
                     @click="confirmSubmit($event)"
-                    class="exam-submit">
+                    class="btn btn-primary">
                     Kirim Jawaban
                 </button>
             </div>

@@ -1,168 +1,64 @@
 <x-layouts.public title="{{ $vacancy->judul_posisi }} - RS Azra" main-class="w-full bg-paper">
 
-<style>
-    .detail-wrap {
-        width: 100%;
-        padding: 56px 4vw 80px;
-    }
-    .detail-back {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; text-transform: uppercase;
-        letter-spacing: 0.1em; color: #5a6864;
-        text-decoration: none;
-        display: inline-flex; align-items: center; gap: 8px;
-        margin-bottom: 40px;
-        transition: color 0.15s;
-    }
-    .detail-back:hover { color: rgb(0,119,116); }
-    .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 360px;
-        gap: 64px;
-        align-items: start;
-    }
-    /* Left column */
-    .detail-eyebrow {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; color: #005f5c;
-        text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500;
-        margin-bottom: 16px;
-        display: flex; align-items: center; gap: 10px;
-    }
-    .detail-eyebrow::before {
-        content: ""; width: 28px; height: 1px; background: rgb(0,119,116);
-    }
-    .detail-title {
-        font-family: "IBM Plex Serif", Georgia, serif;
-        font-weight: 500;
-        font-size: clamp(32px, 4.4vw, 54px);
-        line-height: 1.06; letter-spacing: -0.02em;
-        margin: 0 0 24px; color: #0d1614;
-    }
-    .detail-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 32px; }
-    .detail-tag {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 10.5px; text-transform: uppercase;
-        letter-spacing: 0.06em; padding: 4px 10px;
-        background: #efede5; color: #2a3835; border-radius: 2px;
-    }
-    .detail-tag.dept { background: #e5f1f0; color: #005f5c; }
-    .detail-section { margin-bottom: 36px; }
-    .detail-section-h {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; text-transform: uppercase;
-        letter-spacing: 0.1em; font-weight: 600;
-        color: #0d1614; margin: 0 0 12px;
-        border-top: 2px solid #0d1614;
-        padding-top: 14px;
-    }
-    .detail-body {
-        font-size: 16px; line-height: 1.65; color: #2a3835;
-        white-space: pre-line; max-width: 100ch;
-    }
-
-    /* Right sidebar */
-    .detail-sidebar {
-        position: sticky; top: 100px;
-    }
-    .sidebar-card {
-        border: 1px solid #0d1614;
-        background: #fff;
-        overflow: hidden;
-    }
-    .sidebar-card-h {
-        padding: 16px 20px;
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; text-transform: uppercase;
-        letter-spacing: 0.1em; font-weight: 600;
-    }
-    .sidebar-meta { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .sidebar-row {}
-    .sidebar-row-label {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 10px; text-transform: uppercase;
-        letter-spacing: 0.08em; color: #8a948f;
-        margin-bottom: 4px;
-    }
-    .sidebar-row-val {
-        font-size: 15px; font-weight: 500; color: #0d1614;
-    }
-    .apply-cta {
-        display: block; text-align: center;
-        /*background: rgb(0,119,116); color: white;*/
-        padding: 16px 20px;
-        font-size: 15px; font-weight: 600;
-        text-decoration: none;
-        font-family: "IBM Plex Sans", system-ui, sans-serif;
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        transition: background 0.15s;
-        margin: 0 20px 20px;
-    }
-    /*.apply-cta:hover { background: rgb(0,88,85); }*/
-
-    @media (max-width: 900px) {
-        .detail-wrap { padding: 32px 4vw 60px; }
-        .detail-grid { grid-template-columns: 1fr; gap: 32px; }
-        .detail-sidebar { position: static; }
-    }
-</style>
-
-<div class="detail-wrap">
-    <a href="{{ route('karier.index') }}" class="detail-back">
+<div class="container-public py-14">
+    <a href="{{ route('karier.index') }}" class="btn btn-ghost btn-sm inline-flex items-center gap-2 mb-10">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
         Kembali ke Lowongan
     </a>
 
-    <div class="detail-grid">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-16 items-start">
         {{-- Left: job detail --}}
         <div>
-            <div class="detail-eyebrow">{{ $vacancy->unit->nama }}</div>
-            <h1 class="detail-title">{{ $vacancy->judul_posisi }}</h1>
-            <div class="detail-tags">
-                <span class="detail-tag dept">{{ $vacancy->unit->nama }}</span>
-                <span class="detail-tag">{{ $vacancy->jenis_pekerjaan->label() }}</span>
+            <div class="flex items-center gap-2.5 text-brand-teal text-xs font-bold uppercase tracking-wider mb-4">
+                <span class="w-7 h-px bg-brand-teal"></span>
+                {{ $vacancy->unit->nama }}
+            </div>
+            <h1 class="font-jakarta text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">{{ $vacancy->judul_posisi }}</h1>
+            <div class="flex flex-wrap gap-1.5 mt-6 mb-8">
+                <span class="badge badge-primary">{{ $vacancy->unit->nama }}</span>
+                <span class="badge badge-outline">{{ $vacancy->jenis_pekerjaan->label() }}</span>
                 @if ($vacancy->created_at->gte(now()->subDays(3)))
-                    <span class="detail-tag" style="background:#f0f7e6;color:#5e9425;">Baru</span>
+                    <span class="badge badge-success">Baru</span>
                 @endif
                 @if ($vacancy->tenggat_lamaran->lte(now()->addDays(7)))
-                    <span class="detail-tag" style="background:#f8e6e1;color:#b54327;">Mendesak</span>
+                    <span class="badge badge-danger">Mendesak</span>
                 @endif
             </div>
 
-            <div class="detail-section">
-                <h2 class="detail-section-h">Deskripsi Pekerjaan</h2>
-                <div class="detail-body">{{ $vacancy->deskripsi_pekerjaan }}</div>
+            <div class="mb-9">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-t-2 border-slate-900 pt-3.5 mb-3">Deskripsi Pekerjaan</h2>
+                <div class="text-base leading-relaxed text-slate-700 whitespace-pre-line">{{ $vacancy->deskripsi_pekerjaan }}</div>
             </div>
 
-            <div class="detail-section">
-                <h2 class="detail-section-h">Kualifikasi</h2>
-                <div class="detail-body">{{ $vacancy->kualifikasi }}</div>
+            <div class="mb-9">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-t-2 border-slate-900 pt-3.5 mb-3">Kualifikasi</h2>
+                <div class="text-base leading-relaxed text-slate-700 whitespace-pre-line">{{ $vacancy->kualifikasi }}</div>
             </div>
         </div>
 
         {{-- Right: sidebar --}}
-        <aside class="detail-sidebar">
-            <div class="sidebar-card">
-                <div class="sidebar-card-h bg-primary text-white">Detail Posisi</div>
-                <div class="sidebar-meta">
-                    <div class="sidebar-row">
-                        <div class="sidebar-row-label">Jenis Pekerjaan</div>
-                        <div class="sidebar-row-val">{{ $vacancy->jenis_pekerjaan->label() }}</div>
+        <aside class="lg:sticky lg:top-24">
+            <div class="card overflow-hidden">
+                <div class="px-5 py-4 bg-primary text-white text-xs font-bold uppercase tracking-wider">Detail Posisi</div>
+                <div class="p-5 flex flex-col gap-4">
+                    <div>
+                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Jenis Pekerjaan</div>
+                        <div class="text-[15px] font-medium text-slate-900">{{ $vacancy->jenis_pekerjaan->label() }}</div>
                     </div>
-                    <div class="sidebar-row">
-                        <div class="sidebar-row-label">Jumlah Posisi</div>
-                        <div class="sidebar-row-val">{{ $vacancy->jumlah_posisi }}</div>
+                    <div>
+                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Jumlah Posisi</div>
+                        <div class="text-[15px] font-medium text-slate-900">{{ $vacancy->jumlah_posisi }}</div>
                     </div>
-                    <div class="sidebar-row">
-                        <div class="sidebar-row-label">Tenggat Lamaran</div>
-                        <div class="sidebar-row-val">{{ $vacancy->tenggat_lamaran->format('d M Y') }}</div>
+                    <div>
+                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Tenggat Lamaran</div>
+                        <div class="text-[15px] font-medium text-slate-900">{{ $vacancy->tenggat_lamaran->format('d M Y') }}</div>
                     </div>
-                    <div class="sidebar-row">
-                        <div class="sidebar-row-label">Ditayangkan</div>
-                        <div class="sidebar-row-val">{{ $vacancy->created_at->locale('id')->diffForHumans() }}</div>
+                    <div>
+                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Ditayangkan</div>
+                        <div class="text-[15px] font-medium text-slate-900">{{ $vacancy->created_at->locale('id')->diffForHumans() }}</div>
                     </div>
                 </div>
-                <a href="{{ route('karier.lamar', $vacancy) }}" class="apply-cta bg-secondary text-white hover:bg-secondary-dark">
+                <a href="{{ route('karier.lamar', $vacancy) }}" class="btn btn-primary mx-5 mb-5 justify-center">
                     Lamar Sekarang
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
                 </a>

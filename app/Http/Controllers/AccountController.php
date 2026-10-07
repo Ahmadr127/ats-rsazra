@@ -128,8 +128,6 @@ class AccountController extends Controller
     private static function authorizeAccountUpdate(User $actor, User $target): void
     {
         $actor->requirePermission(Permissions::ACCOUNT_UPDATE);
-
-        abort_if($actor->is($target), 403);
     }
 
     public function toggleAktif(User $user): RedirectResponse

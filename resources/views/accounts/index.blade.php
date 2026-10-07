@@ -5,6 +5,7 @@
             <h1 class="text-xl font-semibold text-gray-900">Akun Pengguna</h1>
             <p class="text-xs text-gray-500 mt-0.5">Manajemen akun login karyawan RS Azra</p>
         </div>
+        @permission('account.create')
         <a
             href="{{ route('akun.create') }}"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
@@ -14,6 +15,7 @@
             </svg>
             Buat Akun
         </a>
+        @endpermission
     </div>
 
     @php
