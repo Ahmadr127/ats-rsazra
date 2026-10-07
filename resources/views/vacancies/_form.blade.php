@@ -18,6 +18,43 @@
             @enderror
         </div>
 
+        <div>
+            <label for="slug" class="block text-xs font-medium text-gray-700 mb-1">Slug URL</label>
+            <div class="flex items-stretch">
+                <span class="inline-flex items-center px-2.5 text-xs text-gray-500 bg-gray-50 border border-r-0 border-gray-200 rounded-l">/karier/</span>
+                <input
+                    type="text"
+                    id="slug"
+                    name="slug"
+                    value="{{ old('slug', $lowongan->slug ?? '') }}"
+                    placeholder="otomatis-dari-judul"
+                    class="flex-1 min-w-0 px-2.5 py-1.5 text-xs border rounded-r bg-white focus-ring @error('slug') border-red-400 @else border-gray-200 @enderror"
+                >
+            </div>
+            <p class="mt-1 text-[11px] text-gray-500">Dikosongkan = dibuat otomatis dari judul. Slug lama tetap bisa diakses dan dialihkan permanen (301).</p>
+            @error('slug')
+                <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <script>
+            (function () {
+                var judul = document.getElementById('judul_posisi');
+                var slug = document.getElementById('slug');
+                if (!judul || !slug) return;
+                var manual = slug.value !== '';
+                slug.addEventListener('input', function () { manual = true; });
+                judul.addEventListener('input', function () {
+                    if (manual) return;
+                    slug.value = judul.value
+                        .toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/^-+|-+$/g, '');
+                });
+            })();
+        </script>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <x-autocomplete-select
                 name="unit_id"
@@ -145,6 +182,33 @@
                 <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
             @enderror
         </div>
+
+        <div>
+            <label for="meta_description" class="block text-xs font-medium text-gray-700 mb-1">Deskripsi Meta (SEO) <span class="text-gray-400 font-normal">opsional</span></label>
+            <textarea
+                id="meta_description"
+                name="meta_description"
+                rows="2"
+                maxlength="160"
+                placeholder="Satu-dua kalimat untuk hasil pencarian Google..."
+                class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring resize-y @error('meta_description') border-red-400 @else border-gray-200 @enderror"
+            >{{ old('meta_description', $lowongan->meta_description ?? '') }}</textarea>
+            <p class="mt-1 text-[11px] text-gray-500"><span id="meta-count">0</span>/160 karakter. Dikosongkan = cuplikan otomatis dari deskripsi pekerjaan.</p>
+            @error('meta_description')
+                <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <script>
+            (function () {
+                var meta = document.getElementById('meta_description');
+                var count = document.getElementById('meta-count');
+                if (!meta || !count) return;
+                var update = function () { count.textContent = meta.value.length; };
+                meta.addEventListener('input', update);
+                update();
+            })();
+        </script>
 
         <div x-data="{ preview: null }">
             <label for="flyer" class="block text-xs font-medium text-gray-700 mb-1">

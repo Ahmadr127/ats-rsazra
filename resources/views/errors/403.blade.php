@@ -1,12 +1,8 @@
 <x-layouts.guest title="Akses Ditolak - ATS RS Azra">
-    <div class="bg-white rounded-lg shadow-md p-8 text-center">
-        <div class="text-6xl font-bold text-red-500 mb-4">403</div>
-        <h1 class="text-xl font-bold text-gray-800 mb-2">Akses Ditolak</h1>
-        <p class="text-gray-600 mb-6">
-            Anda tidak memiliki izin untuk mengakses halaman ini.
-        </p>
-        <a href="{{ route('dashboard') }}" class="text-blue-600 hover:text-blue-800">
-            Kembali ke Dashboard
-        </a>
-    </div>
+    <x-ui.card class="text-center">
+        <p class="text-[25px] font-bold text-red-600">403</p>
+        <h1 class="ui-section-title mt-2">Akses Ditolak</h1>
+        <p class="ui-help mx-auto mt-2 max-w-sm">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+        <x-ui.button href="{{ route('dashboard') }}" class="mt-6 w-full">Kembali ke Dashboard</x-ui.button>
+    </x-ui.card>
 </x-layouts.guest>

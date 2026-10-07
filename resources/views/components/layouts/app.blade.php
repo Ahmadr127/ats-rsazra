@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'ATS RS Azra' }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-page min-h-screen" x-data="{ sidebarOpen: true }">
@@ -45,7 +46,7 @@
         {{-- Brand --}}
         <div class="flex items-center gap-3 px-5 py-4 border-b border-white/10 shrink-0">
             <img
-                src="{{ asset('images/logo.jpg') }}"
+                src="{{ asset('images/logo.png') }}"
                 alt="RS Azra"
                 class="w-10 h-10 rounded-xl object-cover shrink-0 ring-2 ring-white/20"
             >
@@ -169,6 +170,19 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <span>Template Email</span>
+            </a>
+            @endcan
+
+            @can('viewAny', App\Models\SiteSetting::class)
+            <a
+                href="{{ route('pengaturan-tampilan.edit') }}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
+                    {{ request()->routeIs('pengaturan-tampilan.*') ? 'bg-secondary text-white font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white' }}"
+            >
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.043-1.622m-4.043 1.622a15.994 15.994 0 01-1.622 3.395m1.622-3.395a15.996 15.996 0 00-3.395-1.622m3.395 1.622L12 21.75M16.5 3.75l3.75 3.75" />
+                </svg>
+                <span>Tampilan Karier</span>
             </a>
             @endcan
 

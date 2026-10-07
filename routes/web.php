@@ -27,6 +27,8 @@ use App\Http\Controllers\OfferingLetterController;
 use App\Http\Controllers\OfferingResponseController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionBankTemplateController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestReviewController;
 use App\Http\Controllers\UnitController;
@@ -36,12 +38,11 @@ use App\Http\Controllers\VacancyPipelineController;
 use App\Http\Controllers\VacancyTestController;
 use App\Http\Controllers\ValidateApplicationStepController;
 use App\Http\Controllers\WorkflowTemplateController;
+use App\Models\Vacancy;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => auth()->check()
-    ? redirect()->route('dashboard')
-    : redirect()->route('login')
-);
+Route::get('/', [CareerController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show')->middleware('throttle:token-access');
 Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:public-submit');
@@ -54,6 +55,13 @@ Route::post('/tes-mbti/{token}', [MbtiTestController::class, 'submit'])->name('t
 
 Route::middleware('throttle:public-browse')->group(function () {
     Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
+    // URL ID lama (/karier/1) dialihkan permanen ke URL slug demi SEO.
+    Route::get('/karier/{id}', function (int $id) {
+        $vacancy = Vacancy::findOrFail($id);
+        abort_unless($vacancy->slug, 404, 'Slug lowongan belum dibuat. Jalankan migrasi database.');
+
+        return redirect()->route('karier.show', $vacancy, 301);
+    })->whereNumber('id');
     Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
     Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
     Route::post('/karier/{vacancy}/lamar/validate', ValidateApplicationStepController::class)->name('karier.lamar.validate');
@@ -117,6 +125,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengaturan/template-email', [EmailTemplateController::class, 'index'])->name('template-email.index');
     Route::get('/pengaturan/template-email/{templateEmail}/edit', [EmailTemplateController::class, 'edit'])->name('template-email.edit');
     Route::put('/pengaturan/template-email/{templateEmail}', [EmailTemplateController::class, 'update'])->name('template-email.update');
+
+    Route::get('/pengaturan/tampilan', [SiteSettingController::class, 'edit'])->name('pengaturan-tampilan.edit');
+    Route::put('/pengaturan/tampilan', [SiteSettingController::class, 'update'])->name('pengaturan-tampilan.update');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
 

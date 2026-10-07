@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
 html {
-    font-size: 90%;
+    font-size: 100%;
+}
+
+body {
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Hide Alpine-cloaked elements until Alpine initializes */
@@ -33,12 +37,7 @@ html {
 }
 
 @theme {
-    --font-sans:
-        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
-    --font-serif: "IBM Plex Serif", Georgia, serif;
-    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
     --color-primary: rgb(0, 119, 116);
     --color-primary-dark: rgb(0, 88, 85);
@@ -57,4 +56,148 @@ html {
     --color-paper: #f7f6f1;
     --color-paper-2: #efede5;
     --color-primary-50: #e5f1f0;
+}
+
+/* ── Public UI kit: professional minimalist, Inter 12–25px, full-width ── */
+/* Masuk layer components agar utilities Tailwind (mis. lg:hidden) tetap menang. */
+@layer components {
+.ui-shell {
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+    .ui-shell {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .ui-shell {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+.ui-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.ui-eyebrow::before {
+    content: "";
+    width: 1.75rem;
+    height: 2px;
+    background: var(--color-primary);
+}
+
+.ui-title {
+    font-size: 25px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+}
+
+.ui-subtitle {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-ink-3);
+}
+
+.ui-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+}
+
+.ui-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-3);
+}
+
+.ui-help {
+    font-size: 13px;
+    color: var(--color-ink-3);
+    line-height: 1.5;
+}
+
+.ui-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(13, 22, 20, 0.05);
+}
+
+.ui-input,
+.ui-textarea,
+.ui-select {
+    width: 100%;
+    font-size: 14px;
+    color: var(--color-ink);
+    background: var(--color-paper);
+    border: 1px solid var(--color-line);
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.875rem;
+}
+
+.ui-input::placeholder,
+.ui-textarea::placeholder {
+    color: var(--color-ink-4);
+}
+
+.ui-input:focus,
+.ui-textarea:focus,
+.ui-select:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 119, 116, 0.15);
+}
+
+.ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 0.625rem;
+    padding: 0.6875rem 1.25rem;
+    border: 1px solid transparent;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.ui-btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.ui-btn-primary:hover {
+    background: var(--color-primary-dark);
+}
+
+.ui-btn-secondary {
+    background: #fff;
+    color: var(--color-ink);
+    border-color: var(--color-line);
+}
+
+.ui-btn-secondary:hover {
+    border-color: var(--color-ink);
+}
 }

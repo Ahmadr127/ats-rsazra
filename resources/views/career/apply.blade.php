@@ -2,12 +2,18 @@
 
 <style>
     .apply-wrap {
-        max-width: 1320px; margin: 0 auto;
-        padding: 56px 28px 80px;
+        width: 100%; margin: 0 auto;
+        padding: 32px 16px 80px;
         overflow-x: hidden;
     }
+    @media (min-width: 640px) {
+        .apply-wrap { padding-left: 24px; padding-right: 24px; }
+    }
+    @media (min-width: 1024px) {
+        .apply-wrap { padding-left: 32px; padding-right: 32px; }
+    }
     .apply-back {
-        font-family: "IBM Plex Mono", monospace;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 11px; text-transform: uppercase;
         letter-spacing: 0.1em; color: #5a6864;
         text-decoration: none;
@@ -17,66 +23,60 @@
     }
     .apply-back:hover { color: rgb(0,119,116); }
 
-    /* Wizard header */
+    /* Wizard header — compact white card: title left, progress right */
     .apply-header {
-        /*border-bottom: 1px solid #d9ddd9;*/
-        padding-bottom: 32px;
-        margin-bottom: 40px;
+        background: #fff;
+        border: 1px solid #d9ddd9;
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgba(13, 22, 20, 0.05);
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
     }
-    .apply-eyebrow {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; color: #005f5c;
-        text-transform: uppercase; letter-spacing: 0.14em;
-        display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    .apply-head-left { min-width: 0; }
+    .apply-back {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 12px; font-weight: 600; color: #5a6864;
+        text-decoration: none;
+        margin-bottom: 8px;
+        transition: color 0.15s;
     }
-    .apply-eyebrow::before { content:""; width:28px; height:1px; background:rgb(0,119,116); }
+    .apply-back:hover { color: rgb(0,119,116); }
     .apply-title {
-        font-family: "IBM Plex Serif", serif;
-        font-weight: 500; font-size: clamp(24px,3vw,36px);
-        letter-spacing: -0.02em; margin: 0 0 6px; color: #0d1614;
+        font-family: "Inter", system-ui, sans-serif;
+        font-weight: 700; font-size: 20px;
+        letter-spacing: -0.01em; margin: 0 0 2px; color: #0d1614;
     }
-    .apply-subtitle { font-size: 14px; color: #5a6864; }
-
-    /* Step progress */
-    .step-progress {
-        display: flex; gap: 0; margin: 32px 0 0;
-        overflow-x: auto; padding-bottom: 2px;
+    .apply-subtitle { font-size: 13px; color: #5a6864; margin: 0; }
+    .apply-head-progress { width: 220px; flex-shrink: 0; }
+    .apply-step-label {
+        font-size: 12px; font-weight: 600; color: #0d1614;
+        margin: 0 0 8px; text-align: right;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .step-dot {
-        display: flex; align-items: center; flex: 1; min-width: 0;
-        cursor: default;
+    .seg-bar { display: flex; gap: 4px; }
+    .seg-bar i {
+        flex: 1; height: 6px; border-radius: 999px;
+        background: #ebeeea;
+        transition: background 0.2s;
     }
-    .step-dot:not(:last-child)::after {
-        content: ""; flex: 1; height: 2px;
-        background: #d9ddd9;
-        margin: 0 4px; transition: background 0.3s;
-    }
-    .step-dot.done:not(:last-child)::after { background: rgb(0,119,116); }
-    .step-circle {
-        width: 32px; height: 32px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 12px; font-weight: 600;
-        background: #efede5; color: #8a948f;
-        border: 2px solid #d9ddd9;
-        transition: all 0.2s;
-        flex-shrink: 0;
-    }
-    .step-dot.active .step-circle {
-        background: rgb(0,119,116); color: white;
-        border-color: rgb(0,119,116);
-    }
-    .step-dot.done .step-circle {
-        background: #e5f1f0; color: rgb(0,119,116);
-        border-color: rgb(0,119,116);
+    .seg-bar i.done, .seg-bar i.active { background: rgb(0,119,116); }
+    @media (max-width: 640px) {
+        .apply-header { flex-direction: column; align-items: stretch; }
+        .apply-head-progress { width: 100%; }
+        .apply-step-label { text-align: left; }
     }
 
     /* Form layout */
     .apply-body {
         display: grid;
-        grid-template-columns: 1fr 280px;
-        gap: 48px;
+        grid-template-columns: 1fr 300px;
+        gap: 24px;
         align-items: start;
+        width: 100%;
     }
     .apply-form-main { min-width: 0; }
     .apply-sidebar {
@@ -84,13 +84,23 @@
         min-width: 0;
     }
 
-    /* Step panels */
+    /* Step panels — white card on beige base so inputs never float on paper */
     .step-panel { display: none; }
-    .step-panel.active { display: block; }
+    .step-panel.active {
+        display: block;
+        background: #fff;
+        border: 1px solid #d9ddd9;
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgba(13, 22, 20, 0.05);
+        padding: 20px;
+    }
+    @media (min-width: 640px) {
+        .step-panel.active { padding: 24px; }
+    }
 
     /* Section headings */
     .form-section-h {
-        font-family: "IBM Plex Mono", monospace;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 11px; text-transform: uppercase;
         letter-spacing: 0.1em; font-weight: 600;
         color: #0d1614; margin: 0 0 20px;
@@ -112,22 +122,22 @@
     .field {}
     .field label {
         display: block;
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 10px; text-transform: uppercase;
-        letter-spacing: 0.08em; color: #5a6864; font-weight: 600;
+        font-family: "Inter", system-ui, sans-serif;
+        font-size: 12px; text-transform: uppercase;
+        letter-spacing: 0.06em; color: #5a6864; font-weight: 600;
         margin-bottom: 6px;
     }
     .field label .req { color: #b54327; }
     .field input:not([type="checkbox"]):not([type="radio"]), .field select, .field textarea {
         width: 100%;
         border: 1px solid #d9ddd9;
-        background: #fafaf9;
+        background: #fff;
         padding: 10px 12px;
         font-size: 14px; color: #0d1614;
-        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        font-family: "Inter", system-ui, sans-serif;
         outline: none;
         transition: border-color 0.15s;
-        border-radius: 0;
+        border-radius: 10px;
         appearance: none;
     }
     .field input[type="checkbox"], .field input[type="radio"] { appearance: auto; }
@@ -145,17 +155,18 @@
         border-color: #b54327; background: #fdf4f2;
     }
 
-    /* Adjustable sections */
+    /* Adjustable sections — beige sub-container inside the white step card */
     .adj-section { margin-bottom: 28px; }
     .adj-item {
         border: 1px solid #d9ddd9;
+        border-radius: 10px;
         padding: 18px;
         margin-bottom: 12px;
         position: relative;
-        background: #fff;
+        background: #f7f6f1;
     }
     .adj-item-num {
-        font-family: "IBM Plex Mono", monospace;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 10px; text-transform: uppercase;
         letter-spacing: 0.06em; color: #8a948f; margin-bottom: 14px;
     }
@@ -170,40 +181,46 @@
         padding: 9px 16px;
         border: 1px dashed #0d1614;
         background: none; cursor: pointer;
-        font-family: "IBM Plex Mono", monospace;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 11px; text-transform: uppercase;
         letter-spacing: 0.08em; color: #2a3835;
         transition: border-color 0.15s, color 0.15s;
     }
     .adj-add:hover { border-color: rgb(0,119,116); color: rgb(0,119,116); }
 
-    /* Nav buttons */
+    /* Nav buttons — own white bar below the step card */
     .step-nav {
         display: flex; align-items: center;
         justify-content: space-between;
-        margin-top: 40px; padding-top: 24px;
-        border-top: 1px solid #d9ddd9;
+        margin-top: 16px; padding: 16px 20px;
+        border: 1px solid #d9ddd9;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(13, 22, 20, 0.05);
         gap: 16px;
+    }
+    @media (min-width: 640px) {
+        .step-nav { padding: 16px 24px; }
     }
     .btn-prev {
         display: inline-flex; align-items: center; gap: 8px;
         padding: 11px 20px;
-        border: 1px solid #0d1614;
+        border: 1px solid #d9ddd9;
         background: white; color: #0d1614;
-        font-size: 13px; font-weight: 600; cursor: pointer;
-        font-family: "IBM Plex Sans", system-ui, sans-serif;
-        transition: background 0.15s;
-        border-radius: 0;
+        font-size: 14px; font-weight: 600; cursor: pointer;
+        font-family: "Inter", system-ui, sans-serif;
+        transition: border-color 0.15s;
+        border-radius: 10px;
     }
-    .btn-prev:hover { background: #efede5; }
+    .btn-prev:hover { border-color: #0d1614; }
     .btn-next, .btn-submit {
         display: inline-flex; align-items: center; gap: 8px;
         padding: 11px 24px;
         background: rgb(0,119,116); color: white;
-        border: none; font-size: 13px; font-weight: 600;
-        cursor: pointer; font-family: "IBM Plex Sans", system-ui, sans-serif;
+        border: none; font-size: 14px; font-weight: 600;
+        cursor: pointer; font-family: "Inter", system-ui, sans-serif;
         transition: background 0.15s;
-        border-radius: 0;
+        border-radius: 10px;
     }
     .btn-next:hover, .btn-submit:hover { background: rgb(0,88,85); }
 
@@ -216,13 +233,13 @@
     .sidebar-card-h {
         /*background: #0d1614; color: #fff;*/
         padding: 14px 18px;
-        font-family: "IBM Plex Mono", monospace;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 11px; text-transform: uppercase;
         letter-spacing: 0.1em; font-weight: 600;
     }
     .sidebar-body { padding: 18px; }
     .sidebar-pos {
-        font-family: "IBM Plex Serif", serif;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 17px; font-weight: 500; color: #0d1614;
         margin-bottom: 4px;
     }
@@ -238,12 +255,12 @@
         display: flex; align-items: center; gap: 10px;
         font-size: 13px; color: #8a948f;
         padding: 6px 0; border-bottom: 1px solid #efede5;
-        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        font-family: "Inter", system-ui, sans-serif;
     }
     .step-list-item.active { color: #0d1614; font-weight: 600; }
     .step-list-item.done { color: var(--color-secondary); }
     .step-list-num {
-        font-family: "IBM Plex Mono", monospace;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 10px; width: 20px; text-align: center;
         flex-shrink: 0;
     }
@@ -256,36 +273,32 @@
     }
     @media (max-width: 600px) {
         .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
-        .step-progress { gap: 0; }
-        .step-circle { width: 26px; height: 26px; font-size: 10px; }
         .step-counter { display: none; }
+        .step-nav { flex-direction: column-reverse; align-items: stretch; }
+        .step-nav .btn-prev, .step-nav .btn-next, .step-nav .btn-submit { justify-content: center; width: 100%; }
     }
 </style>
 
 <div class="apply-wrap" x-data="applyWizard()" x-init="init()">
 
-    <a href="{{ route('karier.show', $vacancy) }}" class="apply-back">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
-        Kembali ke Detail Lowongan
-    </a>
-
-    {{-- Header --}}
+    {{-- Header: white card, title left, progress right --}}
     <div class="apply-header">
-        <div class="apply-eyebrow">{{ $vacancy->unit->nama }}</div>
-        <h1 class="apply-title">Formulir Lamaran</h1>
-        <p class="apply-subtitle">{{ $vacancy->judul_posisi }}</p>
+        <div class="apply-head-left">
+            <a href="{{ route('karier.show', $vacancy) }}" class="apply-back">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+                Kembali
+            </a>
+            <h1 class="apply-title">Formulir Lamaran</h1>
+            <p class="apply-subtitle">{{ $vacancy->judul_posisi }} &middot; {{ $vacancy->unit->nama }}</p>
+        </div>
 
-        {{-- Step progress bar --}}
-        <div class="step-progress">
-            @foreach (['Identitas', 'Keluarga', 'Pendidikan', 'Organisasi', 'Kerja', 'Minat', 'Referensi', 'Lain-Lain'] as $i => $label)
-                <div class="step-dot"
-                     :class="{ active: step === {{ $i + 1 }}, done: step > {{ $i + 1 }} }">
-                    <div class="step-circle">
-                        <span x-show="step <= {{ $i + 1 }}">{{ $i + 1 }}</span>
-                        <span x-show="step > {{ $i + 1 }}">✓</span>
-                    </div>
-                </div>
-            @endforeach
+        <div class="apply-head-progress">
+            <p class="apply-step-label" x-text="'Langkah ' + step + ' dari 8 · ' + steps[step - 1]"></p>
+            <div class="seg-bar" aria-hidden="true">
+                @for ($i = 1; $i <= 8; $i++)
+                    <i :class="{ active: step === {{ $i }}, done: step > {{ $i }} }"></i>
+                @endfor
+            </div>
         </div>
     </div>
 
@@ -302,16 +315,20 @@
                 @endif
 
                 {{-- Restore banner --}}
-                <div id="ats-restore-banner" x-show="hasSavedData" x-cloak style="background:#f0f9f6;border:1px solid #a3d4cc;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#1a4a46;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-                    <div>
-                        <strong>Terdapat data yang tersimpan.</strong>
-                        Lanjutkan dari sesi sebelumnya? <em>File CV dan STR/SIP perlu diunggah ulang.</em>
+                <x-ui.alert
+                    tone="info"
+                    title="Terdapat data yang tersimpan."
+                    id="ats-restore-banner"
+                    x-show="hasSavedData"
+                    x-cloak
+                    class="mb-5"
+                >
+                    Lanjutkan dari sesi sebelumnya? <em>File CV dan STR/SIP perlu diunggah ulang.</em>
+                    <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <x-ui.button x-on:click="restoreProgress()" class="py-2! text-[13px]">Lanjutkan</x-ui.button>
+                        <x-ui.button variant="secondary" x-on:click="discardProgress()" class="py-2! text-[13px]">Hapus</x-ui.button>
                     </div>
-                    <div style="display:flex;gap:8px;flex-shrink:0;">
-                        <button type="button" @click="restoreProgress()" style="background:#007774;color:#fff;border:none;padding:6px 14px;font-size:12px;cursor:pointer;border-radius:3px;">Lanjutkan</button>
-                        <button type="button" @click="discardProgress()" style="background:transparent;color:#1a4a46;border:1px solid #a3d4cc;padding:6px 14px;font-size:12px;cursor:pointer;border-radius:3px;">Hapus</button>
-                    </div>
-                </div>
+                </x-ui.alert>
 
                 {{-- ═══ STEP 1: Identitas Diri ═══ --}}
                 <div class="step-panel" :class="{ active: step === 1 }">
@@ -830,7 +847,7 @@
                 <div class="step-panel" :class="{ active: step === 5 }">
                     <h2 class="form-section-h">V. Pengalaman Kerja</h2>
                     <div class="field" style="margin-bottom:20px;">
-                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;font-family:'IBM Plex Sans',system-ui,sans-serif;">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;font-family:'Inter',system-ui,sans-serif;">
                             <input type="checkbox" name="is_fresh_graduate" value="1" x-model="isFreshGraduate" style="width:16px;height:16px;accent-color:rgb(0,119,116);">
                             Saya adalah Fresh Graduate (belum pernah bekerja)
                         </label>
@@ -970,10 +987,10 @@
                             <label>Pernah menderita sakit/kecelakaan serius? <span class="req">*</span></label>
                             @error('pernah_sakit_serius')<p class="field-error">{{ $message }}</p>@enderror
                             <div style="display:flex;gap:20px;margin-top:6px;">
-                                <label style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
+                                <label style="display:flex;align-items:center;gap:8px;font-family:'Inter',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
                                     <input type="radio" name="pernah_sakit_serius" value="ya" x-model="pernahSakit" style="accent-color:rgb(0,119,116);"> Ya
                                 </label>
-                                <label style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
+                                <label style="display:flex;align-items:center;gap:8px;font-family:'Inter',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
                                     <input type="radio" name="pernah_sakit_serius" value="tidak" x-model="pernahSakit" style="accent-color:rgb(0,119,116);"> Tidak
                                 </label>
                             </div>
@@ -1017,7 +1034,7 @@
                             @error('vaksinasi_covid')<p class="field-error">{{ $message }}</p>@enderror
                             <div style="display:flex;gap:20px;margin-top:6px;flex-wrap:wrap;">
                                 @foreach (['sudah_1' => 'Sudah 1 kali', 'sudah_2' => 'Sudah 2 kali', 'belum' => 'Belum pernah'] as $val => $lbl)
-                                <label style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
+                                <label style="display:flex;align-items:center;gap:8px;font-family:'Inter',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
                                     <input type="radio" name="vaksinasi_covid" value="{{ $val }}" {{ old('vaksinasi_covid') === $val ? 'checked' : '' }} style="accent-color:rgb(0,119,116);"> {{ $lbl }}
                                 </label>
                                 @endforeach
@@ -1072,7 +1089,7 @@
                     {{-- D. Pernyataan --}}
                     <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:28px 0 14px;">D. Pernyataan</h3>
                     <div class="field">
-                        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;line-height:1.6;">
+                        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-family:'Inter',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;line-height:1.6;">
                             <input type="checkbox" name="pernyataan" value="1" {{ old('pernyataan') ? 'checked' : '' }}
                                    style="width:16px;height:16px;flex-shrink:0;margin-top:3px;accent-color:rgb(0,119,116);"
                                    class="{{ $errors->has('pernyataan') ? 'error' : '' }}">
@@ -1090,7 +1107,7 @@
                     </button>
                     <div x-show="step < 1" style="flex:1;"></div>
 
-                    <div class="step-counter" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a948f;text-transform:uppercase;letter-spacing:.06em;">
+                    <div class="step-counter" style="font-family:'Inter',monospace;font-size:11px;color:#8a948f;text-transform:uppercase;letter-spacing:.06em;">
                         Langkah <span x-text="step"></span> dari 8
                     </div>
 
@@ -1174,6 +1191,7 @@ function applyWizard() {
                 }
             }
         @endphp {{ $errorStep }},
+        steps: ['Identitas', 'Keluarga', 'Pendidikan', 'Organisasi', 'Kerja', 'Minat', 'Referensi', 'Lain-Lain'],
         isFreshGraduate: {{ old('is_fresh_graduate', '0') === '1' ? 'true' : 'false' }},
         hasSavedData: false,
         _submitting: false,
@@ -1242,6 +1260,12 @@ function applyWizard() {
         discardProgress() {
             this._clear();
             this.hasSavedData = false;
+            this.step = 1;
+            this.isFreshGraduate = false;
+            document.getElementById('apply-form').reset();
+            Object.values(window.__adjRegistry).forEach(comp => { comp.items = []; });
+            this.clearStepErrors();
+            this.scrollTop();
         },
 
         _save() {
@@ -1261,6 +1285,9 @@ function applyWizard() {
             Object.entries(window.__adjRegistry).forEach(([k, comp]) => {
                 adjItems[k] = comp.items;
             });
+            const hasContent = Object.values(fields).some(v => String(v ?? '').trim() !== '')
+                || Object.values(adjItems).some(items => Array.isArray(items) && items.length > 0);
+            if (!hasContent) { this._clear(); return; }
             const data = { step: this.step, isFreshGraduate: this.isFreshGraduate, fields, adjItems, savedAt: Date.now() };
             try { localStorage.setItem(window.__atsFormKey, JSON.stringify(data)); } catch {}
         },

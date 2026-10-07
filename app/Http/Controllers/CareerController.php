@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\EmploymentType;
 use App\Enums\VacancyStatus;
+use App\Models\SiteSetting;
 use App\Models\Unit;
 use App\Models\Vacancy;
 use Illuminate\View\View;
@@ -47,7 +48,17 @@ class CareerController extends Controller
 
         $employmentTypes = EmploymentType::cases();
 
-        return view('career.index', compact('vacancies', 'totalRoles', 'units', 'typeCounts', 'employmentTypes', 'unitFilter', 'typeFilter'));
+        $heroEyebrow = SiteSetting::get('hero_eyebrow', 'RS Azra · Karier');
+        $heroTitle = SiteSetting::get('hero_title', 'Bergabung dalam karya penyembuhan yang bermakna.');
+        $heroLede = $this->composeLede(
+            SiteSetting::get('hero_lede', ''),
+            $totalRoles,
+            $units->count()
+        );
+        $seoTitle = "Lowongan Kerja RS Azra — {$totalRoles} Posisi Terbuka";
+        $seoDescription = $heroLede;
+
+        return view('career.index', compact('vacancies', 'totalRoles', 'units', 'typeCounts', 'employmentTypes', 'unitFilter', 'typeFilter', 'heroEyebrow', 'heroTitle', 'heroLede', 'seoTitle', 'seoDescription'));
     }
 
     public function show(Vacancy $vacancy): View
@@ -61,5 +72,27 @@ class CareerController extends Controller
         $vacancy->load('unit', 'workflowTemplateSnapshot');
 
         return view('career.show', compact('vacancy'));
+    }
+
+    /**
+     * Susun paragraf hero dari template admin dengan token dinamis:
+     * {jumlah_posisi}, {jumlah_unit}, {lowongan_terbaru}.
+     */
+    private function composeLede(string $template, int $totalRoles, int $unitCount): string
+    {
+        if (trim($template) === '') {
+            $template = 'Jelajahi {jumlah_posisi} posisi terbuka di {jumlah_unit} unit RS Azra, termasuk {lowongan_terbaru}. Pilih lowongan, baca detailnya, dan lamar langsung dari halaman ini.';
+        }
+
+        $latest = Vacancy::published()->whereNotNull('flyer_path')
+            ->orderByDesc('created_at')
+            ->limit(3)
+            ->pluck('judul_posisi');
+
+        return str_replace(
+            ['{jumlah_posisi}', '{jumlah_unit}', '{lowongan_terbaru}'],
+            [(string) $totalRoles, (string) $unitCount, $latest->join(', ', ' dan ')],
+            $template
+        );
     }
 }
