@@ -1,70 +1,70 @@
-<x-layouts.public title="{{ $vacancy->judul_posisi }} - RS Azra" main-class="w-full bg-paper">
+<x-layouts.public
+    :title="$vacancy->judul_posisi.' — '.$vacancy->unit->nama.' | Karier RS Azra'"
+    :metaDescription="$vacancy->seoDescription()"
+    :canonical="route('karier.show', $vacancy)"
+    :ogImage="$vacancy->flyer_path ? url($vacancy->flyerUrl()) : asset('images/logo.png')"
+    ogType="article"
+    main-class="w-full bg-paper"
+>
 
-<div class="container-public py-14">
-    <a href="{{ route('karier.index') }}" class="btn btn-ghost btn-sm inline-flex items-center gap-2 mb-10">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
-        Kembali ke Lowongan
-    </a>
-
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-16 items-start">
-        {{-- Left: job detail --}}
-        <div>
-            <div class="flex items-center gap-2.5 text-brand-teal text-xs font-bold uppercase tracking-wider mb-4">
-                <span class="w-7 h-px bg-brand-teal"></span>
-                {{ $vacancy->unit->nama }}
-            </div>
-            <h1 class="font-jakarta text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">{{ $vacancy->judul_posisi }}</h1>
-            <div class="flex flex-wrap gap-1.5 mt-6 mb-8">
-                <span class="badge badge-primary">{{ $vacancy->unit->nama }}</span>
-                <span class="badge badge-outline">{{ $vacancy->jenis_pekerjaan->label() }}</span>
-                @if ($vacancy->created_at->gte(now()->subDays(3)))
-                    <span class="badge badge-success">Baru</span>
-                @endif
-                @if ($vacancy->tenggat_lamaran->lte(now()->addDays(7)))
-                    <span class="badge badge-danger">Mendesak</span>
-                @endif
-            </div>
-
-            <div class="mb-9">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-t-2 border-slate-900 pt-3.5 mb-3">Deskripsi Pekerjaan</h2>
-                <div class="text-base leading-relaxed text-slate-700 whitespace-pre-line">{{ $vacancy->deskripsi_pekerjaan }}</div>
-            </div>
-
-            <div class="mb-9">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-t-2 border-slate-900 pt-3.5 mb-3">Kualifikasi</h2>
-                <div class="text-base leading-relaxed text-slate-700 whitespace-pre-line">{{ $vacancy->kualifikasi }}</div>
-            </div>
-        </div>
-
-        {{-- Right: sidebar --}}
-        <aside class="lg:sticky lg:top-24">
-            <div class="card overflow-hidden">
-                <div class="px-5 py-4 bg-primary text-white text-xs font-bold uppercase tracking-wider">Detail Posisi</div>
-                <div class="p-5 flex flex-col gap-4">
-                    <div>
-                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Jenis Pekerjaan</div>
-                        <div class="text-[15px] font-medium text-slate-900">{{ $vacancy->jenis_pekerjaan->label() }}</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Jumlah Posisi</div>
-                        <div class="text-[15px] font-medium text-slate-900">{{ $vacancy->jumlah_posisi }}</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Tenggat Lamaran</div>
-                        <div class="text-[15px] font-medium text-slate-900">{{ $vacancy->tenggat_lamaran->format('d M Y') }}</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Ditayangkan</div>
-                        <div class="text-[15px] font-medium text-slate-900">{{ $vacancy->created_at->locale('id')->diffForHumans() }}</div>
-                    </div>
-                </div>
-                <a href="{{ route('karier.lamar', $vacancy) }}" class="btn btn-primary mx-5 mb-5 justify-center">
-                    Lamar Sekarang
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-                </a>
-            </div>
-        </aside>
+<x-ui.page-hero
+    eyebrow="{{ $vacancy->unit->nama }}"
+    title="{{ $vacancy->judul_posisi }}"
+    lede="Tenggat lamaran {{ $vacancy->tenggat_lamaran->format('d M Y') }} · {{ $vacancy->jenis_pekerjaan->label() }}"
+>
+    <div class="mt-4 flex flex-wrap gap-2">
+        <x-ui.badge tone="info">{{ $vacancy->unit->nama }}</x-ui.badge>
+        <x-ui.badge tone="neutral">{{ $vacancy->jenis_pekerjaan->label() }}</x-ui.badge>
+        @if ($vacancy->created_at->gte(now()->subDays(3)))
+            <x-ui.badge tone="success">Baru</x-ui.badge>
+        @endif
+        @if ($vacancy->tenggat_lamaran->lte(now()->addDays(7)))
+            <x-ui.badge tone="warning">Mendesak</x-ui.badge>
+        @endif
     </div>
+</x-ui.page-hero>
+
+<div class="ui-shell grid w-full items-start gap-6 py-6 lg:grid-cols-[1fr_300px]">
+    <div class="min-w-0">
+        <a href="{{ route('home') }}" class="inline-flex items-center gap-2 text-[13px] font-semibold text-primary hover:text-primary-dark">&larr; Kembali ke Lowongan</a>
+
+        <x-ui.card class="mt-4">
+            <h2 class="ui-section-title">Deskripsi Pekerjaan</h2>
+            <div class="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-ink-2">{{ $vacancy->deskripsi_pekerjaan }}</div>
+        </x-ui.card>
+
+        <x-ui.card class="mt-4">
+            <h2 class="ui-section-title">Kualifikasi</h2>
+            <div class="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-ink-2">{{ $vacancy->kualifikasi }}</div>
+        </x-ui.card>
+    </div>
+
+    <aside class="w-full lg:sticky lg:top-20">
+        <x-ui.card class="p-0!">
+            <div class="border-b border-line bg-primary px-5 py-3 text-[12px] font-semibold uppercase tracking-wide text-white">Detail Posisi</div>
+            <dl class="space-y-4 px-5 py-5">
+                <div>
+                    <dt class="ui-label">Jenis Pekerjaan</dt>
+                    <dd class="mt-1 text-[14px] font-medium text-ink">{{ $vacancy->jenis_pekerjaan->label() }}</dd>
+                </div>
+                <div>
+                    <dt class="ui-label">Jumlah Posisi</dt>
+                    <dd class="mt-1 text-[14px] font-medium text-ink">{{ $vacancy->jumlah_posisi }}</dd>
+                </div>
+                <div>
+                    <dt class="ui-label">Tenggat Lamaran</dt>
+                    <dd class="mt-1 text-[14px] font-medium text-ink">{{ $vacancy->tenggat_lamaran->format('d M Y') }}</dd>
+                </div>
+                <div>
+                    <dt class="ui-label">Ditayangkan</dt>
+                    <dd class="mt-1 text-[14px] font-medium text-ink">{{ $vacancy->created_at->locale('id')->diffForHumans() }}</dd>
+                </div>
+            </dl>
+            <div class="px-5 pb-5">
+                <x-ui.button href="{{ route('karier.lamar', $vacancy) }}" class="w-full">Lamar Sekarang &rarr;</x-ui.button>
+            </div>
+        </x-ui.card>
+    </aside>
 </div>
 
 </x-layouts.public>

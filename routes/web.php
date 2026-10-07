@@ -29,6 +29,8 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionBankTemplateController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestReviewController;
 use App\Http\Controllers\UnitController;
@@ -39,9 +41,12 @@ use App\Http\Controllers\VacancyTestController;
 use App\Http\Controllers\ValidateApplicationStepController;
 use App\Http\Controllers\WorkflowTemplateController;
 use App\Http\Middleware\ForcePasswordChange;
+use App\Models\Vacancy;
 use App\Support\Permissions;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', [CareerController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show')->middleware('throttle:token-access');
 Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:public-submit');
 
@@ -52,7 +57,14 @@ Route::get('/tes-mbti/{token}', [MbtiTestController::class, 'show'])->name('tes-
 Route::post('/tes-mbti/{token}', [MbtiTestController::class, 'submit'])->name('tes-mbti.submit')->middleware('throttle:public-submit');
 
 Route::middleware('throttle:public-browse')->group(function () {
-    Route::get('/', [CareerController::class, 'index'])->name('karier.index');
+    Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
+    // URL ID lama (/karier/1) dialihkan permanen ke URL slug demi SEO.
+    Route::get('/karier/{id}', function (int $id) {
+        $vacancy = Vacancy::findOrFail($id);
+        abort_unless($vacancy->slug, 404, 'Slug lowongan belum dibuat. Jalankan migrasi database.');
+
+        return redirect()->route('karier.show', $vacancy, 301);
+    })->whereNumber('id');
     Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
     Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
     Route::post('/karier/{vacancy}/lamar/validate', ValidateApplicationStepController::class)->name('karier.lamar.validate');
@@ -142,6 +154,12 @@ Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::delete('/pengaturan/peran/{peran}', [RoleController::class, 'destroy'])
         ->middleware('permission:'.Permissions::ROLE_DELETE)
         ->name('pengaturan.peran.destroy');
+    Route::get('/pengaturan/tampilan', [SiteSettingController::class, 'edit'])
+        ->middleware('permission:'.Permissions::MENU_TAMPILAN)
+        ->name('pengaturan-tampilan.edit');
+    Route::put('/pengaturan/tampilan', [SiteSettingController::class, 'update'])
+        ->middleware('permission:'.Permissions::MENU_TAMPILAN)
+        ->name('pengaturan-tampilan.update');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
 

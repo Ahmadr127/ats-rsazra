@@ -38,6 +38,8 @@ final class Permissions
 
     public const MENU_ROLES = 'menu.roles';
 
+    public const MENU_TAMPILAN = 'menu.tampilan';
+
     // Dashboard scope
     public const DASHBOARD_VIEW_ORG = 'dashboard.view-org';
 
@@ -213,6 +215,7 @@ final class Permissions
             self::MENU_INTERVIEW_TEMPLATES => ['label' => 'Sidemenu: Template Wawancara', 'group' => 'Menu', 'roles' => [$H]],
             self::MENU_RBAC => ['label' => 'Sidemenu: Hak Akses', 'group' => 'Menu', 'roles' => [$H]],
             self::MENU_ROLES => ['label' => 'Sidemenu: Peran', 'group' => 'Menu', 'roles' => [$H]],
+            self::MENU_TAMPILAN => ['label' => 'Sidemenu: Tampilan Karier', 'group' => 'Menu', 'roles' => [$H]],
 
             self::DASHBOARD_VIEW_ORG => ['label' => 'Dasbor seluruh organisasi', 'group' => 'Dasbor', 'roles' => [$H, $M, $D]],
             self::DASHBOARD_VIEW_UNIT => ['label' => 'Dasbor unit sendiri', 'group' => 'Dasbor', 'roles' => [$H, $U, $E]],

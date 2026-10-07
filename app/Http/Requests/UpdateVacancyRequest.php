@@ -7,6 +7,7 @@ use App\Enums\VacancyStatus;
 use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateVacancyRequest extends FormRequest
@@ -23,6 +24,8 @@ class UpdateVacancyRequest extends FormRequest
     {
         return [
             'judul_posisi' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'alpha_dash', Rule::unique('vacancies', 'slug')->ignore($this->route('lowongan'))],
+            'meta_description' => ['nullable', 'string', 'max:160'],
             'unit_id' => ['required', 'integer', 'exists:units,id'],
             'workflow_template_id' => ['required', 'integer', 'exists:workflow_templates,id'],
             'jenis_pekerjaan' => ['required', new Enum(EmploymentType::class)],
@@ -39,6 +42,9 @@ class UpdateVacancyRequest extends FormRequest
     {
         return [
             'judul_posisi.required' => 'Judul posisi wajib diisi.',
+            'slug.alpha_dash' => 'Slug hanya boleh berisi huruf, angka, strip, dan underscore.',
+            'slug.unique' => 'Slug sudah dipakai lowongan lain.',
+            'meta_description.max' => 'Deskripsi meta maksimal 160 karakter.',
             'unit_id.required' => 'Unit wajib dipilih.',
             'unit_id.exists' => 'Unit tidak valid.',
             'workflow_template_id.required' => 'Template alur kerja wajib dipilih.',
