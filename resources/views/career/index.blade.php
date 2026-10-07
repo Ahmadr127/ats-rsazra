@@ -140,7 +140,6 @@
                             <p class="truncate text-[12px] font-semibold uppercase tracking-wide text-primary">{{ $vacancy->unit->nama }}</p>
                             <h3 class="mt-1 line-clamp-2 min-h-10 text-[14px] font-semibold leading-snug text-ink">{{ $vacancy->judul_posisi }}</h3>
                             <p class="mt-1 text-[12px] text-ink-3">Tenggat {{ $vacancy->tenggat_lamaran->format('d M Y') }}</p>
-                            <span class="mt-2 inline-flex items-center gap-1.5 text-[13px] font-semibold text-primary">Lihat &amp; Lamar <span aria-hidden="true">&rarr;</span></span>
                         </div>
                     </a>
                 @endforeach
