@@ -13,23 +13,23 @@
                 <p class="text-xs text-gray-500 mt-0.5">{{ $lowongan->judul_posisi }} &mdash; {{ $lowongan->unit->nama }}</p>
             </div>
             <div class="flex items-center gap-2">
-                @can('create', \App\Models\VacancyTest::class)
+                @permission('test.manage')
                     <a
                         href="{{ route('lowongan.tes.show', $lowongan) }}"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-primary/30 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors ease-out duration-150"
                     >
                         Tes Kompetensi
                     </a>
-                @endcan
-                @can('manageInterviewTemplates', $lowongan)
+                @endpermission
+                @permission('vacancy.interview-templates')
                     <a
                         href="{{ route('lowongan.template-wawancara.show', $lowongan) }}"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-primary/30 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors ease-out duration-150"
                     >
                         Template Wawancara
                     </a>
-                @endcan
-                @can('export', $lowongan)
+                @endpermission
+                @permission('vacancy.export')
                     <div x-data="{ open: false }" class="relative">
                         <button
                             @click="open = !open"
@@ -63,7 +63,7 @@
                             </a>
                         </div>
                     </div>
-                @endcan
+                @endpermission
                 <span class="text-xs font-medium px-2.5 py-1 rounded-full
                     {{ $lowongan->status->value === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                     {{ $lowongan->status->label() }}

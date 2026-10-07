@@ -152,6 +152,7 @@
                             </td>
                             <td class="px-3 py-1.5">
                                 <div class="flex items-center justify-end gap-0.5">
+                                    @if(auth()->user()->hasPermission('employee.view') || (auth()->user()->hasPermission('employee.view-self') && $employee->user_id === auth()->id()))
                                     <a
                                         href="{{ route('karyawan.show', $employee) }}"
                                         class="p-1.5 rounded text-primary/40 hover:text-primary hover:bg-primary/10 transition-colors ease-out duration-150"
@@ -163,6 +164,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
                                     </a>
+                                    @endif
+                                    @permission('employee.update')
                                     <a
                                         href="{{ route('karyawan.edit', $employee) }}"
                                         class="p-1.5 rounded text-amber-400/60 hover:text-amber-500 hover:bg-amber-50 transition-colors ease-out duration-150"
@@ -173,6 +176,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                         </svg>
                                     </a>
+                                    @endpermission
+                                    @permission('employee.delete')
                                     <form method="POST" action="{{ route('karyawan.destroy', $employee) }}" onsubmit="return confirm('Hapus data karyawan ' + @js($employee->nama_karyawan) + '?')">
                                         @csrf
                                         @method('DELETE')
@@ -187,6 +192,7 @@
                                             </svg>
                                         </button>
                                     </form>
+                                    @endpermission
                                 </div>
                             </td>
                         </tr>

@@ -2,13 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Support\Permissions;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateEmployeeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->route('employee'));
+        return $this->user()->hasPermission(Permissions::EMPLOYEE_UPDATE);
     }
 
     /**

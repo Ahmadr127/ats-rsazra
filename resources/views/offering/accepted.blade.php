@@ -1,32 +1,67 @@
 <x-layouts.public title="Penawaran Diterima - RS Azra" main-class="w-full bg-paper">
 
-<div class="max-w-2xl mx-auto px-6 py-16">
-    <div class="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-        </div>
+<style>
+    .offer-done { width: 100%; padding: 56px 4vw 96px; }
+    .offer-eyebrow {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px; color: #005f5c;
+        text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500;
+        margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    }
+    .offer-eyebrow::before { content: ""; width: 28px; height: 1px; background: rgb(0,119,116); }
+    .offer-h1 {
+        font-family: "IBM Plex Serif", Georgia, serif; font-weight: 500;
+        font-size: clamp(34px, 4.6vw, 58px); line-height: 1.04; letter-spacing: -0.02em;
+        margin: 0 0 14px; color: #0d1614; text-wrap: balance; max-width: 20ch;
+    }
+    .offer-lede { font-size: 17px; line-height: 1.6; color: #2a3835; max-width: 62ch; margin: 0; }
+    .offer-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; margin-top: 48px; align-items: start; }
+    .offer-section-h {
+        font-family: "IBM Plex Mono", monospace; font-size: 12px; text-transform: uppercase;
+        letter-spacing: 0.1em; font-weight: 600; color: #0d1614; margin: 0 0 18px;
+        border-top: 2px solid #0d1614; padding-top: 14px;
+    }
+    .offer-dl { margin: 0; }
+    .offer-dl-row { display: flex; gap: 20px; padding: 14px 0; border-bottom: 1px solid #ebeeea; }
+    .offer-dl-row:last-child { border-bottom: 0; }
+    .offer-dl-label {
+        font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #5a6864;
+        text-transform: uppercase; letter-spacing: 0.08em; width: 150px; flex-shrink: 0; padding-top: 4px;
+    }
+    .offer-dl-value { font-size: 17px; font-weight: 500; color: #0d1614; }
+    .offer-note { background: #f0f7e6; border: 1px solid #c3db9e; padding: 24px 28px; }
+    .offer-note p { font-size: 15px; line-height: 1.6; color: #3a5c14; margin: 0; }
+    @media (max-width: 900px) {
+        .offer-done { padding: 36px 4vw 64px; }
+        .offer-grid { grid-template-columns: 1fr; gap: 32px; }
+    }
+</style>
 
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Penawaran Diterima</h1>
-        <p class="text-gray-600 mb-8">Terima kasih telah menerima penawaran kerja dari RS Azra. Tim HR kami akan segera menghubungi Anda untuk langkah selanjutnya.</p>
+<div class="offer-done">
+    <div class="offer-eyebrow">Surat Penawaran · Diterima</div>
+    <h1 class="offer-h1">Penawaran Diterima</h1>
+    <p class="offer-lede">Terima kasih telah menerima penawaran kerja dari RS Azra. Tim HR kami akan segera menghubungi Anda untuk langkah selanjutnya.</p>
 
-        <div class="bg-gray-50 rounded-xl p-5 text-left">
-            <h2 class="text-sm font-semibold text-gray-800 mb-3">Ringkasan Penawaran</h2>
-            <dl class="space-y-2">
-                <div class="flex justify-between">
-                    <dt class="text-sm text-gray-500">Posisi</dt>
-                    <dd class="text-sm font-medium text-gray-900">{{ $offering->jabatan_ditawarkan }}</dd>
+    <div class="offer-grid">
+        <div>
+            <h2 class="offer-section-h">Ringkasan Penawaran</h2>
+            <dl class="offer-dl">
+                <div class="offer-dl-row">
+                    <dt class="offer-dl-label">Posisi</dt>
+                    <dd class="offer-dl-value">{{ $offering->jabatan_ditawarkan }}</dd>
                 </div>
-                <div class="flex justify-between">
-                    <dt class="text-sm text-gray-500">Gaji</dt>
-                    <dd class="text-sm font-medium text-gray-900">{{ $offering->gaji }}</dd>
+                <div class="offer-dl-row">
+                    <dt class="offer-dl-label">Gaji</dt>
+                    <dd class="offer-dl-value">{{ $offering->gaji }}</dd>
                 </div>
-                <div class="flex justify-between">
-                    <dt class="text-sm text-gray-500">Tanggal Mulai</dt>
-                    <dd class="text-sm font-medium text-gray-900">{{ $offering->tanggal_mulai->format('d M Y') }}</dd>
+                <div class="offer-dl-row">
+                    <dt class="offer-dl-label">Tanggal Mulai</dt>
+                    <dd class="offer-dl-value">{{ $offering->tanggal_mulai->format('d M Y') }}</dd>
                 </div>
             </dl>
+        </div>
+        <div class="offer-note">
+            <p>Simpan surat penawaran yang dikirim ke email Anda sebagai arsip. Sampai jumpa di hari pertama.</p>
         </div>
     </div>
 </div>

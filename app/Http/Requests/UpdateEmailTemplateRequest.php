@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Support\Permissions;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 
 class UpdateEmailTemplateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('update', $this->route('templateEmail'));
+        return $this->user()->hasPermission(Permissions::EMAIL_TEMPLATE_UPDATE);
     }
 
     /** @return array<string, mixed> */

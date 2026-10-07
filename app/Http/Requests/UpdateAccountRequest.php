@@ -2,17 +2,17 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\Role;
+use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
 
 class UpdateAccountRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->route('user'));
+        return $this->user()->hasPermission(Permissions::ACCOUNT_UPDATE)
+            && $this->user()->isNot($this->route('user'));
     }
 
     /**
@@ -28,7 +28,7 @@ class UpdateAccountRequest extends FormRequest
                 Rule::unique('users', 'username')->ignore($this->route('user')),
                 'regex:/^[a-z0-9]+$/',
             ],
-            'role' => ['required', new Enum(Role::class)],
+            'role_id' => ['required', 'integer', Rule::exists('roles', 'id')],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }
@@ -40,7 +40,7 @@ class UpdateAccountRequest extends FormRequest
     {
         return [
             'username' => 'Username',
-            'role' => 'Role',
+            'role_id' => 'Peran',
             'password' => 'Kata Sandi Baru',
         ];
     }

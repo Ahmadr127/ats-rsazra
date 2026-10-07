@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\Role;
+use App\Models\Role as RoleRecord;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -24,17 +24,23 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'username' => fake()->unique()->userName(),
             'password' => static::$password ??= Hash::make('password'),
-            'role' => Role::Employee,
+            'role_id' => RoleRecord::firstOrCreate(
+                ['key' => RoleRecord::Employee],
+                ['label' => RoleRecord::defaultLabel(RoleRecord::Employee)]
+            )->id,
             'must_change_password' => false,
             'is_active' => true,
             'remember_token' => Str::random(10),
         ];
     }
 
-    public function withRole(Role $role): static
+    public function withRole(string $roleKey): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => $role,
+            'role_id' => RoleRecord::firstOrCreate(
+                ['key' => $roleKey],
+                ['label' => RoleRecord::defaultLabel($roleKey)]
+            )->id,
         ]);
     }
 
@@ -47,7 +53,7 @@ class UserFactory extends Factory
 
     public function hrAdmin(): static
     {
-        return $this->withRole(Role::HrAdmin);
+        return $this->withRole(RoleRecord::HrAdmin);
     }
 
     public function inactive(): static

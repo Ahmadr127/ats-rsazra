@@ -5,7 +5,7 @@
             <h1 class="text-xl font-semibold text-gray-900">Template Lowongan</h1>
             <p class="text-xs text-gray-500 mt-0.5">Definisi lowongan yang dapat diterbitkan berulang kali</p>
         </div>
-        @can('create', App\Models\JobTemplate::class)
+        @permission('job-template.create')
         <a
             href="{{ route('template-lowongan.create') }}"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
@@ -15,7 +15,7 @@
             </svg>
             Buat Template
         </a>
-        @endcan
+        @endpermission
     </div>
 
     @if (session('status'))
@@ -143,19 +143,27 @@
                                         </svg>
                                     </button>
                                     <div x-show="open" x-transition x-cloak class="absolute right-0 top-full mt-1 z-10 w-44 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-xs">
-                                        @can('publish', $jobTemplate)
+                                        @permission('job-template.publish')
                                             <a href="{{ route('template-lowongan.terbitkan.form', $jobTemplate) }}" class="block px-3 py-1.5 text-primary font-medium hover:bg-primary/5">Terbitkan Lowongan</a>
                                             <hr class="my-1 border-gray-100">
-                                        @endcan
+                                        @endpermission
+                                        @permission('job-template.test')
                                         <a href="{{ route('template-lowongan.tes.show', $jobTemplate) }}" class="block px-3 py-1.5 text-gray-700 hover:bg-gray-50">Konfigurasi Tes</a>
+                                        @endpermission
+                                        @permission('job-template.interview-templates')
                                         <a href="{{ route('template-lowongan.template-wawancara.show', $jobTemplate) }}" class="block px-3 py-1.5 text-gray-700 hover:bg-gray-50">Template Wawancara</a>
+                                        @endpermission
+                                        @permission('job-template.update')
                                         <a href="{{ route('template-lowongan.edit', $jobTemplate) }}" class="block px-3 py-1.5 text-gray-700 hover:bg-gray-50">Edit</a>
+                                        @endpermission
                                         <hr class="my-1 border-gray-100">
+                                        @permission('job-template.delete')
                                         <form method="POST" action="{{ route('template-lowongan.destroy', $jobTemplate) }}" onsubmit="return confirm('Hapus template ini?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="block w-full text-left px-3 py-1.5 text-red-600 hover:bg-red-50">Hapus</button>
                                         </form>
+                                        @endpermission
                                     </div>
                                 </div>
                             </td>

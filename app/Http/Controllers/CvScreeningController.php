@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Role;
 use App\Http\Requests\CvScreeningDecisionRequest;
 use App\Models\Application;
 use App\Models\Vacancy;
 use App\Services\ApplicationPipelineService;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class CvScreeningController extends Controller
 {
@@ -17,20 +16,26 @@ class CvScreeningController extends Controller
 
     public function decide(CvScreeningDecisionRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('decide', $application);
+        $user = $request->user();
+        $user->requirePermission(Permissions::SCREENING_DECIDE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 
-        $user = $request->user();
-        $stageKey = $this->resolveStageKey($user->role);
-
         $application->load('stages');
-        $screeningStage = $application->stages->firstWhere('key', $stageKey);
+        $screeningStage = $application->stages
+            ->first(fn ($stage) => in_array($stage->key, ['skrining_cv_hr', 'skrining_cv_user'], true)
+                && $stage->status->isAdvanceable());
 
-        abort_if(! $screeningStage, 404);
-
-        if (! $screeningStage->status->isAdvanceable()) {
+        if (! $screeningStage) {
             return back()->withErrors(['screening' => 'Keputusan tidak dapat diberikan untuk tahap ini.']);
+        }
+
+        if ($screeningStage->key === 'skrining_cv_hr') {
+            if (! $user->hasPermission(Permissions::VACANCY_VIEW_ORG)) {
+                return back()->withErrors(['screening' => 'Keputusan tidak dapat diberikan untuk tahap ini.']);
+            }
+        } else {
+            abort_unless($user->isInUnit($lowongan->unit_id) || $user->hasPermission(Permissions::VACANCY_VIEW_ORG), 403);
         }
 
         $catatan = $request->input('catatan');
@@ -59,10 +64,5 @@ class CvScreeningController extends Controller
         return redirect()
             ->route('lowongan.pipeline', $lowongan)
             ->with('success', "Kandidat berhasil {$label}.");
-    }
-
-    private function resolveStageKey(Role $role): string
-    {
-        return in_array($role, [Role::UnitHead, Role::Employee], true) ? 'skrining_cv_user' : 'skrining_cv_hr';
     }
 }

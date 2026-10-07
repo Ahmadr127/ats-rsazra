@@ -5,17 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\InterviewTemplate;
 use App\Models\JobTemplate;
 use App\Models\JobTemplateInterviewTemplate;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class JobTemplateInterviewTemplateController extends Controller
 {
     public function show(JobTemplate $templateLowongan): View
     {
-        Gate::authorize('manageInterviewTemplates', $templateLowongan);
+        auth()->user()->requirePermission(Permissions::JOB_TEMPLATE_INTERVIEW_TEMPLATES);
 
         $templateLowongan->load('unit', 'workflowTemplate.stages');
 
@@ -39,7 +39,7 @@ class JobTemplateInterviewTemplateController extends Controller
 
     public function save(Request $request, JobTemplate $templateLowongan): RedirectResponse
     {
-        Gate::authorize('manageInterviewTemplates', $templateLowongan);
+        $request->user()->requirePermission(Permissions::JOB_TEMPLATE_INTERVIEW_TEMPLATES);
 
         $templateLowongan->load('workflowTemplate.stages');
 

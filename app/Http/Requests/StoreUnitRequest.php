@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Unit;
+use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -10,7 +10,7 @@ class StoreUnitRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', Unit::class);
+        return $this->user()->hasPermission(Permissions::UNIT_CREATE);
     }
 
     /**

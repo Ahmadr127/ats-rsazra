@@ -14,7 +14,7 @@
             <p class="text-xs text-gray-400 mt-1">{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
         </div>
         <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs bg-primary/10 text-primary font-medium whitespace-nowrap mt-1">
-            {{ auth()->user()->role->label() }}
+            {{ auth()->user()->role?->label ?? 'Tanpa Peran' }}
         </span>
     </div>
 
@@ -327,7 +327,7 @@
             </p>
         </div>
         <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs bg-primary/10 text-primary font-medium whitespace-nowrap mt-1">
-            {{ auth()->user()->role->label() }}
+            {{ auth()->user()->role?->label ?? 'Tanpa Peran' }}
         </span>
     </div>
 

@@ -2,8 +2,8 @@
 
 <style>
     .apply-wrap {
-        max-width: 1320px; margin: 0 auto;
-        padding: 56px 28px 80px;
+        width: 100%;
+        padding: 56px 4vw 80px;
         overflow-x: hidden;
     }
     .apply-back {
@@ -32,10 +32,10 @@
     .apply-eyebrow::before { content:""; width:28px; height:1px; background:rgb(0,119,116); }
     .apply-title {
         font-family: "IBM Plex Serif", serif;
-        font-weight: 500; font-size: clamp(24px,3vw,36px);
-        letter-spacing: -0.02em; margin: 0 0 6px; color: #0d1614;
+        font-weight: 500; font-size: clamp(30px,3.6vw,44px);
+        letter-spacing: -0.02em; margin: 0 0 8px; color: #0d1614;
     }
-    .apply-subtitle { font-size: 14px; color: #5a6864; }
+    .apply-subtitle { font-size: 16px; color: #5a6864; }
 
     /* Step progress */
     .step-progress {
@@ -122,8 +122,8 @@
         width: 100%;
         border: 1px solid #d9ddd9;
         background: #fafaf9;
-        padding: 10px 12px;
-        font-size: 14px; color: #0d1614;
+        padding: 12px 14px;
+        font-size: 16px; color: #0d1614;
         font-family: "IBM Plex Sans", system-ui, sans-serif;
         outline: none;
         transition: border-color 0.15s;

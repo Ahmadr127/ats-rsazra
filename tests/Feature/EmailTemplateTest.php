@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Role;
 use App\Models\EmailTemplate;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -37,7 +37,7 @@ class EmailTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_view_template_list(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
 
         $response = $this->actingAs($user)->get(route('template-email.index'));
 
@@ -79,7 +79,7 @@ class EmailTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_view_edit_form(): void
     {
-        $user = User::factory()->create(['role' => Role::UnitHead]);
+        $user = User::factory()->withRole(Role::UnitHead)->create([]);
         $template = $this->makeTemplate();
 
         $response = $this->actingAs($user)->get(route('template-email.edit', $template));
@@ -111,7 +111,7 @@ class EmailTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_update_template(): void
     {
-        $user = User::factory()->create(['role' => Role::Director]);
+        $user = User::factory()->withRole(Role::Director)->create([]);
         $template = $this->makeTemplate();
 
         $response = $this->actingAs($user)->put(route('template-email.update', $template), [

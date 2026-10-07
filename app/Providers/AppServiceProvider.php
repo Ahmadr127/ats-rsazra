@@ -23,16 +23,14 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Models\WorkflowTemplate;
 use App\Observers\ModelActivityObserver;
-use App\Policies\AccountPolicy;
-use App\Policies\ApplicationPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -51,8 +49,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        Gate::policy(User::class, AccountPolicy::class);
-        Gate::policy(Application::class, ApplicationPolicy::class);
+        Blade::if('permission', fn (string $key): bool => auth()->check() && auth()->user()->hasPermission($key));
 
         $this->registerRateLimiters();
         $this->registerObservers();

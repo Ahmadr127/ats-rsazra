@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Role;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -35,7 +35,10 @@ class SimutuOrganisasiSeeder extends Seeder
                 [
                     'name' => $row['nama_lengkap'],
                     'password' => $row['password'],
-                    'role' => $this->mapRole((int) $row['role_id']),
+                    'role_id' => Role::firstOrCreate(
+                        ['key' => $this->mapRoleKey((int) $row['role_id'])],
+                        ['label' => Role::defaultLabel($this->mapRoleKey((int) $row['role_id']))]
+                    )->id,
                     'must_change_password' => false,
                     'is_active' => $row['status_user'] === 'aktif',
                 ]
@@ -98,7 +101,7 @@ class SimutuOrganisasiSeeder extends Seeder
         return $ids;
     }
 
-    private function mapRole(int $simutuRoleId): Role
+    private function mapRoleKey(int $simutuRoleId): string
     {
         return match ($simutuRoleId) {
             1 => Role::HrAdmin,

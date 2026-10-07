@@ -57,12 +57,12 @@
                         </div>
 
                         <x-autocomplete-select
-                            name="role"
-                            label="Role"
-                            :options="collect($roles)->map(fn ($r) => ['id' => $r->value, 'label' => $r->label()])"
-                            :value="old('role')"
+                            name="role_id"
+                            label="Peran"
+                            :options="collect($roles)->map(fn ($r) => ['id' => $r->id, 'label' => $r->label])"
+                            :value="old('role_id')"
                             :required="true"
-                            placeholder="Pilih role..."
+                            placeholder="Pilih peran..."
                         />
                     </div>
 

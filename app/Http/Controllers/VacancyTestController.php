@@ -4,18 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\QuestionBankTemplate;
 use App\Models\Vacancy;
-use App\Models\VacancyTest;
 use App\Models\VacancyTestSnapshot;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class VacancyTestController extends Controller
 {
     public function show(Vacancy $lowongan): View
     {
-        Gate::authorize('create', VacancyTest::class);
+        auth()->user()->requirePermission(Permissions::TEST_MANAGE);
 
         $vacancyTest = $lowongan->vacancyTest()->with('questions.options')->first();
 
@@ -38,7 +37,7 @@ class VacancyTestController extends Controller
 
     public function save(Request $request, Vacancy $lowongan): RedirectResponse
     {
-        Gate::authorize('create', VacancyTest::class);
+        $request->user()->requirePermission(Permissions::TEST_MANAGE);
 
         $validated = $request->validate([
             'batas_waktu_menit' => ['required', 'integer', 'min:5', 'max:480'],

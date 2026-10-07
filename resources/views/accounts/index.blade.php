@@ -17,7 +17,7 @@
     </div>
 
     @php
-        $activeFilters = collect(['role', 'status'])->filter(fn ($k) => request($k))->count();
+        $activeFilters = collect(['role_id', 'status'])->filter(fn ($k) => request($k))->count();
     @endphp
 
     <div class="mb-3" x-data="{ open: {{ $activeFilters > 0 ? 'true' : 'false' }} }">
@@ -77,10 +77,10 @@
                 class="grid grid-cols-2 md:grid-cols-4 gap-2.5"
             >
                 <x-autocomplete-select
-                    name="role"
-                    label="Role"
-                    :options="collect($roles)->map(fn ($r) => ['id' => $r->value, 'label' => $r->label()])"
-                    :value="request('role')"
+                    name="role_id"
+                    label="Peran"
+                    :options="collect($roles)->map(fn ($r) => ['id' => $r->id, 'label' => $r->label])"
+                    :value="request('role_id')"
                     placeholder="Semua Role"
                     label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
                 />
@@ -124,7 +124,7 @@
                             <td class="px-3 py-1.5 font-mono text-xs text-gray-600">{{ $account->username }}</td>
                             <td class="px-3 py-1.5">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary/10 text-primary font-medium">
-                                    {{ $account->role->label() }}
+                                    {{ $account->role?->label ?? 'Tanpa Peran' }}
                                 </span>
                             </td>
                             <td class="px-3 py-1.5">
@@ -141,6 +141,7 @@
                                 @endif
                             </td>
                             <td class="px-3 py-1.5">
+                                @permission('account.update')
                                 <div class="flex items-center justify-end gap-0.5">
                                     <a
                                         href="{{ route('akun.edit', $account) }}"
@@ -173,6 +174,7 @@
                                         </button>
                                     </form>
                                 </div>
+                                @endpermission
                             </td>
                         </tr>
                     @empty
@@ -184,7 +186,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                                         </svg>
                                     </div>
-                                    @if (request()->hasAny(['q', 'role', 'status']))
+                @if (request()->hasAny(['q', 'role_id', 'status']))
                                         <div>
                                             <p class="text-sm font-medium text-gray-700">Tidak ada hasil</p>
                                             <p class="text-xs text-gray-400 mt-0.5">Coba ubah filter atau kata kunci pencarian</p>

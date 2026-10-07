@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\JobTemplate;
 use App\Models\QuestionBankTemplate;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class JobTemplateTestController extends Controller
 {
     public function show(JobTemplate $templateLowongan): View
     {
-        Gate::authorize('manageTest', $templateLowongan);
+        auth()->user()->requirePermission(Permissions::JOB_TEMPLATE_TEST);
 
         $templateLowongan->load('unit');
         $jobTemplateTest = $templateLowongan->jobTemplateTest()->with('questions.options')->first();
@@ -37,7 +37,7 @@ class JobTemplateTestController extends Controller
 
     public function save(Request $request, JobTemplate $templateLowongan): RedirectResponse
     {
-        Gate::authorize('manageTest', $templateLowongan);
+        $request->user()->requirePermission(Permissions::JOB_TEMPLATE_TEST);
 
         $validated = $request->validate([
             'batas_waktu_menit' => ['required', 'integer', 'min:5', 'max:480'],

@@ -57,4 +57,17 @@ html {
     --color-paper: #f7f6f1;
     --color-paper-2: #efede5;
     --color-primary-50: #e5f1f0;
+
+    /* Referensi landingpage karir (brand-teal, font-jakarta, font-playfair) */
+    --color-brand-teal: #005f53;
+    --color-brand-darkteal: #00473e;
+    --color-brand-leaf: #2ca05a;
+    --color-brand-lightgreen: #e8f5ee;
+    --color-brand-emerald: #10b981;
+    --color-brand-dark: #0f172a;
+    --color-brand-muted: #475569;
+    --color-brand-border: #e2e8f0;
+    --color-brand-bgsoft: #f8fafc;
+    --font-jakarta: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-playfair: "Playfair Display", Georgia, serif;
 }

@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EmploymentType;
-use App\Enums\Role;
 use App\Enums\VacancyStatus;
 use App\Http\Requests\UpdateVacancyRequest;
 use App\Models\Unit;
 use App\Models\Vacancy;
 use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -20,11 +19,17 @@ class VacancyController extends Controller
 {
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', Vacancy::class);
-
         $user = auth()->user();
+        $user->requirePermission(Permissions::VACANCY_VIEW);
+
+        // Without org-wide access, a user must belong to a unit (employee row).
+        abort_unless(
+            $user->hasPermission(Permissions::VACANCY_VIEW_ORG) || $user->employee !== null,
+            403
+        );
+
         $query = Vacancy::with(['unit', 'workflowTemplateSnapshot']);
-        $isUnitScoped = $user->hasRole(Role::UnitHead, Role::Employee);
+        $isUnitScoped = ! $user->hasPermission(Permissions::VACANCY_VIEW_ORG);
         $scopedUnit = null;
 
         if ($isUnitScoped) {
@@ -63,7 +68,7 @@ class VacancyController extends Controller
 
     public function edit(Vacancy $lowongan): View
     {
-        Gate::authorize('update', $lowongan);
+        auth()->user()->requirePermission(Permissions::VACANCY_UPDATE);
 
         $employmentTypes = EmploymentType::cases();
         $statuses = VacancyStatus::cases();
@@ -75,7 +80,7 @@ class VacancyController extends Controller
 
     public function update(UpdateVacancyRequest $request, Vacancy $lowongan): RedirectResponse
     {
-        Gate::authorize('update', $lowongan);
+        $request->user()->requirePermission(Permissions::VACANCY_UPDATE);
 
         $data = $request->validated();
         unset($data['flyer']);
@@ -112,7 +117,7 @@ class VacancyController extends Controller
 
     public function destroy(Vacancy $lowongan): RedirectResponse
     {
-        Gate::authorize('delete', $lowongan);
+        auth()->user()->requirePermission(Permissions::VACANCY_DELETE);
 
         if ($lowongan->flyer_path) {
             Storage::disk('public')->delete($lowongan->flyer_path);

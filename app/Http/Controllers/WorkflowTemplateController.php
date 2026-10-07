@@ -6,11 +6,11 @@ use App\Http\Requests\StoreWorkflowTemplateRequest;
 use App\Http\Requests\UpdateWorkflowTemplateRequest;
 use App\Models\Stage;
 use App\Models\WorkflowTemplate;
+use App\Support\Permissions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -18,7 +18,7 @@ class WorkflowTemplateController extends Controller
 {
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', WorkflowTemplate::class);
+        $request->user()->requirePermission(Permissions::WORKFLOW_VIEW);
 
         $templates = WorkflowTemplate::with('stages')
             ->when(
@@ -34,7 +34,7 @@ class WorkflowTemplateController extends Controller
 
     public function search(Request $request): JsonResponse
     {
-        Gate::authorize('viewAny', WorkflowTemplate::class);
+        $request->user()->requirePermission(Permissions::WORKFLOW_VIEW);
 
         $q = strtolower(str_replace(['%', '_'], ['\\%', '\\_'], $request->string('q')));
         $query = WorkflowTemplate::when($q, fn ($query) => $query->whereRaw('LOWER(nama) LIKE ?', ["%{$q}%"]))
@@ -49,7 +49,7 @@ class WorkflowTemplateController extends Controller
 
     public function create(): View
     {
-        Gate::authorize('create', WorkflowTemplate::class);
+        auth()->user()->requirePermission(Permissions::WORKFLOW_CREATE);
 
         $stages = Stage::orderByDesc('is_locked_first')->orderBy('is_locked_last')->orderBy('nama')->get();
 
@@ -76,7 +76,7 @@ class WorkflowTemplateController extends Controller
 
     public function edit(WorkflowTemplate $templateAlur): View
     {
-        Gate::authorize('update', $templateAlur);
+        auth()->user()->requirePermission(Permissions::WORKFLOW_UPDATE);
 
         $stages = Stage::orderByDesc('is_locked_first')->orderBy('is_locked_last')->orderBy('nama')->get();
 
@@ -85,7 +85,7 @@ class WorkflowTemplateController extends Controller
 
     public function update(UpdateWorkflowTemplateRequest $request, WorkflowTemplate $templateAlur): RedirectResponse
     {
-        Gate::authorize('update', $templateAlur);
+        $request->user()->requirePermission(Permissions::WORKFLOW_UPDATE);
 
         $stageIds = $request->validated()['stages'];
 
@@ -101,7 +101,7 @@ class WorkflowTemplateController extends Controller
 
     public function destroy(WorkflowTemplate $templateAlur): RedirectResponse
     {
-        Gate::authorize('delete', $templateAlur);
+        auth()->user()->requirePermission(Permissions::WORKFLOW_DELETE);
 
         $templateAlur->delete();
 

@@ -3,11 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\ApplicationStageStatus;
-use App\Enums\Role;
 use App\Mail\TemplatedMail;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Candidate;
+use App\Models\Role;
 use App\Models\Stage;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -294,7 +294,7 @@ class ApplicationPipelineTest extends TestCase
     public function test_employee_cannot_advance_application(): void
     {
         $this->seedStages();
-        $employee = User::factory()->create(['role' => Role::Employee]);
+        $employee = User::factory()->withRole(Role::Employee)->create([]);
         $vacancy = $this->createVacancyWithStages();
         $application = $this->makeApplication($vacancy);
 
@@ -308,7 +308,7 @@ class ApplicationPipelineTest extends TestCase
     public function test_employee_cannot_fail_application(): void
     {
         $this->seedStages();
-        $employee = User::factory()->create(['role' => Role::Employee]);
+        $employee = User::factory()->withRole(Role::Employee)->create([]);
         $vacancy = $this->createVacancyWithStages();
         $application = $this->makeApplication($vacancy);
 

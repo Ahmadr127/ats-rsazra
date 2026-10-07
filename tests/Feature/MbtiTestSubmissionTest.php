@@ -3,13 +3,13 @@
 namespace Tests\Feature;
 
 use App\Enums\ApplicationStageStatus;
-use App\Enums\Role;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Employee;
 use App\Models\MbtiAnswer;
 use App\Models\MbtiQuestion;
 use App\Models\MbtiSubmission;
+use App\Models\Role;
 use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;

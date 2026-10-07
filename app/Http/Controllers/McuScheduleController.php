@@ -6,8 +6,8 @@ use App\Http\Requests\StoreMcuScheduleRequest;
 use App\Models\Application;
 use App\Models\Vacancy;
 use App\Services\EmailNotificationService;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 
 class McuScheduleController extends Controller
 {
@@ -15,7 +15,7 @@ class McuScheduleController extends Controller
 
     public function store(StoreMcuScheduleRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('manageMcu', $application);
+        $request->user()->requirePermission(Permissions::MCU_SCHEDULE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 

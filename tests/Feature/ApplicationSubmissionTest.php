@@ -3,12 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\ApplicationStageStatus;
-use App\Enums\Role;
 use App\Enums\VacancyStatus;
 use App\Mail\TemplatedMail;
 use App\Models\Application;
 use App\Models\Candidate;
 use App\Models\EmailTemplate;
+use App\Models\Role;
 use App\Models\Stage;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -476,7 +476,7 @@ class ApplicationSubmissionTest extends TestCase
     public function test_non_hr_admin_cannot_view_pipeline(): void
     {
         $this->seedStages();
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $vacancy = $this->createPublishedVacancyWithStages();
 
         $response = $this->actingAs($user)->get(route('lowongan.pipeline', $vacancy));

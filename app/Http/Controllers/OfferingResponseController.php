@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Enums\ApplicationStageStatus;
 use App\Enums\OfferingLetterStatus;
-use App\Enums\Role;
 use App\Models\OfferingLetter;
 use App\Models\User;
 use App\Notifications\PenawaranDirespon;
 use App\Services\ApplicationPipelineService;
+use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -52,7 +52,7 @@ class OfferingResponseController extends Controller
             $this->pipelineService->advance($offering->application);
         });
 
-        $hrAdmins = User::where('role', Role::HrAdmin)->where('is_active', true)->get();
+        $hrAdmins = User::withPermission(Permissions::OFFERING_MANAGE);
         Notification::send($hrAdmins, new PenawaranDirespon($offering));
 
         return view('offering.accepted', [
@@ -99,7 +99,7 @@ class OfferingResponseController extends Controller
             $offeringStage?->update(['status' => ApplicationStageStatus::Gagal]);
         });
 
-        $hrAdmins = User::where('role', Role::HrAdmin)->where('is_active', true)->get();
+        $hrAdmins = User::withPermission(Permissions::OFFERING_MANAGE);
         Notification::send($hrAdmins, new PenawaranDirespon($offering));
 
         return view('offering.rejected', [

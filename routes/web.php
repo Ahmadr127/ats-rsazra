@@ -27,6 +27,8 @@ use App\Http\Controllers\OfferingLetterController;
 use App\Http\Controllers\OfferingResponseController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionBankTemplateController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestReviewController;
 use App\Http\Controllers\UnitController;
@@ -36,6 +38,8 @@ use App\Http\Controllers\VacancyPipelineController;
 use App\Http\Controllers\VacancyTestController;
 use App\Http\Controllers\ValidateApplicationStepController;
 use App\Http\Controllers\WorkflowTemplateController;
+use App\Http\Middleware\ForcePasswordChange;
+use App\Support\Permissions;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show')->middleware('throttle:token-access');
@@ -64,7 +68,7 @@ Route::middleware(['signed', 'throttle:signed-access'])->group(function () {
     Route::post('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'reject'])->name('offering.reject.submit');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::get('/ubah-password', [PasswordChangeController::class, 'show'])->name('password.change');
     Route::post('/ubah-password', [PasswordChangeController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
 
@@ -112,6 +116,32 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengaturan/template-email', [EmailTemplateController::class, 'index'])->name('template-email.index');
     Route::get('/pengaturan/template-email/{templateEmail}/edit', [EmailTemplateController::class, 'edit'])->name('template-email.edit');
     Route::put('/pengaturan/template-email/{templateEmail}', [EmailTemplateController::class, 'update'])->name('template-email.update');
+
+    Route::get('/pengaturan/hak-akses', [RolePermissionController::class, 'index'])
+        ->middleware('permission:'.Permissions::RBAC_MANAGE)
+        ->name('pengaturan.hak-akses.index');
+    Route::put('/pengaturan/hak-akses', [RolePermissionController::class, 'update'])
+        ->middleware('permission:'.Permissions::RBAC_MANAGE)
+        ->name('pengaturan.hak-akses.update');
+
+    Route::get('/pengaturan/peran', [RoleController::class, 'index'])
+        ->middleware('permission:'.Permissions::ROLE_VIEW)
+        ->name('pengaturan.peran.index');
+    Route::get('/pengaturan/peran/tambah', [RoleController::class, 'create'])
+        ->middleware('permission:'.Permissions::ROLE_CREATE)
+        ->name('pengaturan.peran.create');
+    Route::post('/pengaturan/peran', [RoleController::class, 'store'])
+        ->middleware('permission:'.Permissions::ROLE_CREATE)
+        ->name('pengaturan.peran.store');
+    Route::get('/pengaturan/peran/{peran}/edit', [RoleController::class, 'edit'])
+        ->middleware('permission:'.Permissions::ROLE_UPDATE)
+        ->name('pengaturan.peran.edit');
+    Route::put('/pengaturan/peran/{peran}', [RoleController::class, 'update'])
+        ->middleware('permission:'.Permissions::ROLE_UPDATE)
+        ->name('pengaturan.peran.update');
+    Route::delete('/pengaturan/peran/{peran}', [RoleController::class, 'destroy'])
+        ->middleware('permission:'.Permissions::ROLE_DELETE)
+        ->name('pengaturan.peran.destroy');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
 

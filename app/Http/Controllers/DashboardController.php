@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\GetRecruitmentMetrics;
-use App\Enums\Role;
+use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -13,8 +13,8 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        $isUnitScope = $user->hasRole(Role::UnitHead, Role::Employee);
-        $isOrgScope = $user->hasRole(Role::HrAdmin, Role::HrManager, Role::Director);
+        $isOrgScope = $user->hasPermission(Permissions::DASHBOARD_VIEW_ORG);
+        $isUnitScope = ! $isOrgScope && $user->hasPermission(Permissions::DASHBOARD_VIEW_UNIT);
 
         if (! $isUnitScope && ! $isOrgScope) {
             return view('dashboard', ['scope' => 'none', 'hasUnit' => false]);

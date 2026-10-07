@@ -3,11 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Enums\ApplicationStageStatus;
-use App\Enums\Role;
 use App\Enums\VacancyStatus;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Notifications\PengingatKandidatReserved;
+use App\Support\Permissions;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -34,12 +34,12 @@ class KirimPengingatKandidatReserved extends Command
             return Command::SUCCESS;
         }
 
-        $hrAdmins = User::where('role', Role::HrAdmin)
-            ->where('is_active', true)
-            ->get();
+        // Recipients follow granted permissions (not a hardcoded role), so the
+        // admin can reassign who receives this reminder via the access matrix.
+        $recipients = User::withPermission(Permissions::NOTIFICATION_RESERVED_REMINDER);
 
-        if ($hrAdmins->isEmpty()) {
-            $this->warn('Tidak ada HR Admin aktif.');
+        if ($recipients->isEmpty()) {
+            $this->warn('Tidak ada penerima pengingat yang aktif.');
 
             return Command::SUCCESS;
         }
@@ -56,11 +56,11 @@ class KirimPengingatKandidatReserved extends Command
                 continue;
             }
 
-            Notification::send($hrAdmins, new PengingatKandidatReserved($lowongan));
+            Notification::send($recipients, new PengingatKandidatReserved($lowongan));
             $terkirim++;
         }
 
-        $this->info("Notifikasi terkirim: {$terkirim} lowongan ke {$hrAdmins->count()} HR Admin.");
+        $this->info("Notifikasi terkirim: {$terkirim} lowongan ke {$recipients->count()} penerima.");
 
         return Command::SUCCESS;
     }

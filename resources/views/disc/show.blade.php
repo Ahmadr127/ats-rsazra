@@ -1,218 +1,260 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tes DiSC - {{ $submission->application->vacancy->judul_posisi }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50 min-h-screen">
+<x-layouts.public title="Tes DiSC - {{ $submission->application->vacancy->judul_posisi }} - RS Azra" main-class="w-full bg-paper">
 
-    @if ($submission->isSubmitted())
-        {{-- Completed state --}}
-        <div class="min-h-screen flex items-center justify-center" x-data="{ showToast: true }">
-            <div
-                x-show="showToast"
-                x-init="setTimeout(() => showToast = false, 4000)"
-                x-transition:leave="transition ease-in duration-300"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 -translate-y-2"
-                class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-2"
-            >
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                </svg>
-                <span class="text-sm font-medium">Tes DiSC berhasil dikirim!</span>
-            </div>
+<style>
+    .exam-wrap { width: 100%; padding: 56px 4vw 96px; }
+    .exam-eyebrow {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px; color: #005f5c;
+        text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500;
+        margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    }
+    .exam-eyebrow::before { content: ""; width: 28px; height: 1px; background: rgb(0,119,116); }
+    .exam-h1 {
+        font-family: "IBM Plex Serif", Georgia, serif; font-weight: 500;
+        font-size: clamp(34px, 4.6vw, 58px); line-height: 1.04; letter-spacing: -0.02em;
+        margin: 0 0 14px; color: #0d1614; text-wrap: balance;
+    }
+    .exam-lede { font-size: 17px; line-height: 1.6; color: #2a3835; max-width: 72ch; margin: 0; }
+    .exam-lede strong { color: #0d1614; }
+    .exam-bar {
+        position: sticky; top: 80px; z-index: 40;
+        background: #0d1614; color: #fff;
+        margin-top: 40px;
+    }
+    .exam-bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px; }
+    .exam-bar-title { font-size: 15px; font-weight: 600; }
+    .exam-bar-sub { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #b8c0bd; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+    .exam-count { font-family: "IBM Plex Mono", monospace; font-size: 20px; font-weight: 600; }
+    .exam-progress { height: 3px; background: rgba(255,255,255,0.15); }
+    .exam-progress > div { height: 100%; background: rgb(129,189,65); transition: width 0.3s; }
+    .exam-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+    .exam-q { background: #fff; border: 1px solid #d9ddd9; padding: 28px; }
+    .exam-q-head { display: flex; gap: 16px; align-items: baseline; margin-bottom: 6px; }
+    .exam-q-num {
+        font-family: "IBM Plex Serif", serif; font-size: 26px; font-weight: 500;
+        color: rgb(0,119,116); line-height: 1; flex-shrink: 0; min-width: 44px;
+    }
+    .exam-q-hint { font-size: 13px; color: #5a6864; margin: 0 0 18px; }
+    .exam-q-hint .like { color: #4d7e1c; font-weight: 600; }
+    .exam-q-hint .unlike { color: #b54327; font-weight: 600; }
+    .exam-word {
+        display: flex; align-items: center; gap: 16px;
+        border: 1px solid #d9ddd9; padding: 14px 16px; margin-bottom: 10px;
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .exam-word:last-child { margin-bottom: 0; }
+    .exam-word.is-most { border-color: #5e9425; background: #f4f8ec; }
+    .exam-word.is-least { border-color: #b54327; background: #fdf4f2; }
+    .exam-word-text { flex: 1; font-size: 17px; font-weight: 500; color: #0d1614; }
+    .exam-pick { display: flex; align-items: center; gap: 8px; cursor: pointer; flex-shrink: 0; }
+    .exam-pick input { width: 20px; height: 20px; cursor: pointer; }
+    .exam-pick input[value]:checked { accent-color: rgb(0,119,116); }
+    .exam-pick.most input { accent-color: #5e9425; }
+    .exam-pick.least input { accent-color: #b54327; }
+    .exam-pick span { font-size: 12px; font-weight: 600; }
+    .exam-pick.most span { color: #4d7e1c; }
+    .exam-pick.least span { color: #b54327; }
+    .exam-pick input:disabled { cursor: not-allowed; opacity: 0.35; }
+    .exam-pick:has(input:disabled) span { opacity: 0.35; }
+    .exam-foot {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        margin-top: 40px; border-top: 2px solid #0d1614; padding-top: 24px; flex-wrap: wrap;
+    }
+    .exam-hint { font-size: 14px; color: #5a6864; margin: 0; }
+    .exam-submit {
+        background: rgb(0,119,116); color: #fff; border: 0;
+        padding: 16px 40px; font-size: 16px; font-weight: 600; cursor: pointer;
+        font-family: "IBM Plex Sans", system-ui, sans-serif; transition: background 0.15s, opacity 0.15s;
+    }
+    .exam-submit:hover:not(:disabled) { background: rgb(0,88,85); }
+    .exam-submit:disabled { background: #d9ddd9; color: #8a948f; cursor: not-allowed; }
+    .exam-submit small { font-weight: 400; font-size: 13px; margin-left: 8px; }
+    .exam-done { width: 100%; padding: 72px 4vw 96px; }
+    .exam-done-card { background: #fff; border: 1px solid #0d1614; padding: 48px; margin-top: 32px; }
+    .exam-dl { margin: 0; }
+    .exam-dl-row { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid #ebeeea; }
+    .exam-dl-row:last-child { border-bottom: 0; }
+    .exam-dl-label {
+        font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #5a6864;
+        text-transform: uppercase; letter-spacing: 0.08em; width: 160px; flex-shrink: 0; padding-top: 3px;
+    }
+    .exam-dl-value { font-size: 16px; font-weight: 500; color: #0d1614; }
+    @media (max-width: 1100px) {
+        .exam-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+        .exam-wrap { padding: 36px 4vw 64px; }
+        .exam-q { padding: 20px; }
+        .exam-word { flex-wrap: wrap; }
+        .exam-word-text { width: 100%; }
+        .exam-foot { flex-direction: column; align-items: stretch; }
+        .exam-submit { width: 100%; }
+    }
+</style>
 
-            <div class="max-w-md w-full mx-4">
-                <div class="bg-white rounded-2xl border border-gray-100 p-8 text-center shadow-sm">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </div>
-
-                    <h1 class="text-xl font-semibold text-gray-900 mb-2">Tes DiSC Berhasil Dikirim</h1>
-                    <p class="text-sm text-gray-500 mb-6">
-                        Jawaban Anda telah diterima. Tim HR akan meninjau hasil asesmen dan menghubungi Anda melalui email.
-                    </p>
-
-                    <div class="bg-gray-50 rounded-xl p-4 text-left space-y-2 mb-6">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Posisi</span>
-                            <span class="font-medium text-gray-800">{{ $submission->application->vacancy->judul_posisi }}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Waktu Pengiriman</span>
-                            <span class="font-medium text-gray-800">{{ $submission->submitted_at->format('d M Y, H:i') }}</span>
-                        </div>
-                    </div>
-
-                    <p class="text-xs text-gray-400">Halaman ini dapat ditutup.</p>
+@if ($submission->isSubmitted())
+    <div class="exam-done">
+        <div class="exam-eyebrow">Tes DiSC · Terkirim</div>
+        <h1 class="exam-h1">Jawaban Anda sudah kami terima.</h1>
+        <p class="exam-lede">Tim HR akan meninjau hasil asesmen dan menghubungi Anda melalui email.</p>
+        <div class="exam-done-card">
+            <dl class="exam-dl">
+                <div class="exam-dl-row">
+                    <dt class="exam-dl-label">Posisi</dt>
+                    <dd class="exam-dl-value">{{ $submission->application->vacancy->judul_posisi }}</dd>
                 </div>
-            </div>
+                <div class="exam-dl-row">
+                    <dt class="exam-dl-label">Waktu Pengiriman</dt>
+                    <dd class="exam-dl-value">{{ $submission->submitted_at->format('d M Y, H:i') }}</dd>
+                </div>
+            </dl>
         </div>
-    @else
-        {{-- Active test --}}
-        <div x-data="discEngine()" x-init="init()">
-            {{-- Header bar --}}
-            <div class="fixed top-0 inset-x-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-                <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-800">Tes DiSC</p>
-                        <p class="text-xs text-gray-500">{{ $submission->application->vacancy->judul_posisi }}</p>
-                    </div>
-                    <div class="text-xs text-gray-500">
-                        <span x-text="answered"></span> / {{ $questions->count() }} dijawab
-                    </div>
+        <p class="exam-hint" style="margin-top: 20px;">Halaman ini dapat ditutup.</p>
+    </div>
+@else
+    <div class="exam-wrap" x-data="discEngine()" x-init="init()">
+        <div class="exam-eyebrow">Tes DiSC · RS Azra</div>
+        <h1 class="exam-h1">{{ $submission->application->vacancy->judul_posisi }}</h1>
+        <p class="exam-lede">
+            Untuk setiap kelompok kata di bawah ini, pilih kata yang
+            <strong>paling mencerminkan diri Anda</strong> dan kata yang
+            <strong>paling tidak mencerminkan diri Anda</strong>.
+            Setiap kata hanya boleh dipilih untuk satu kolom per soal.
+        </p>
+
+        <div class="exam-bar">
+            <div class="exam-bar-inner">
+                <div>
+                    <div class="exam-bar-title">{{ $questions->count() }} Kelompok Kata</div>
+                    <div class="exam-bar-sub">Tes DiSC</div>
                 </div>
+                <div class="exam-count"><span x-text="answered"></span> / {{ $questions->count() }}</div>
             </div>
-
-            <div class="pt-16 pb-16 max-w-3xl mx-auto px-4 py-8">
-                <div class="mt-4 mb-6">
-                    <p class="text-sm font-medium text-gray-700 mb-1">Petunjuk</p>
-                    <p class="text-xs text-gray-500">
-                        Untuk setiap kelompok kata di bawah ini, pilih kata yang <strong>paling mencerminkan diri Anda</strong> (Paling Mirip)
-                        dan kata yang <strong>paling tidak mencerminkan diri Anda</strong> (Paling Tidak Mirip).
-                        Setiap kata hanya boleh dipilih untuk satu kolom per soal.
-                    </p>
-                </div>
-
-                <form id="disc-form" method="POST" action="{{ route('tes-disc.submit', $submission->token) }}">
-                    @csrf
-
-                    <div class="space-y-6">
-                        @foreach ($questions as $index => $question)
-                            <div class="bg-white rounded-xl border border-gray-100 p-5"
-                                 x-data="discQuestion({{ $question->id }})"
-                                 @answer-change="updateAnswered()">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <span class="flex-shrink-0 w-6 h-6 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center justify-center">
-                                        {{ $index + 1 }}
-                                    </span>
-                                    <p class="text-xs text-gray-500">Pilih satu <span class="font-semibold text-green-600">Paling Mirip</span> dan satu <span class="font-semibold text-red-500">Paling Tidak Mirip</span></p>
-                                </div>
-
-                                <div class="grid grid-cols-1 gap-2">
-                                    @foreach ($question->words as $word)
-                                        <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50"
-                                             :class="{
-                                                'border-green-300 bg-green-50': most === {{ $word->id }},
-                                                'border-red-300 bg-red-50': least === {{ $word->id }}
-                                             }">
-                                            <span class="flex-1 text-sm text-gray-800">{{ $word->teks }}</span>
-                                            <div class="flex items-center gap-2">
-                                                <label class="flex items-center gap-1 cursor-pointer">
-                                                    <input type="radio"
-                                                        name="most[{{ $question->id }}]"
-                                                        value="{{ $word->id }}"
-                                                        x-model.number="most"
-                                                        @change="onMostChange({{ $word->id }})"
-                                                        :disabled="least === {{ $word->id }}"
-                                                        class="w-4 h-4 text-green-600 focus:ring-green-500/40">
-                                                    <span class="text-xs text-green-600 font-medium">Paling Mirip</span>
-                                                </label>
-                                                <label class="flex items-center gap-1 cursor-pointer">
-                                                    <input type="radio"
-                                                        name="least[{{ $question->id }}]"
-                                                        value="{{ $word->id }}"
-                                                        x-model.number="least"
-                                                        @change="onLeastChange({{ $word->id }})"
-                                                        :disabled="most === {{ $word->id }}"
-                                                        class="w-4 h-4 text-red-500 focus:ring-red-400/40">
-                                                    <span class="text-xs text-red-500 font-medium">Paling Tidak Mirip</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <div class="mt-6 flex justify-end">
-                        <button type="submit"
-                            @click="confirmSubmit($event)"
-                            :disabled="answered < {{ $questions->count() }}"
-                            :class="answered < {{ $questions->count() }}
-                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                : 'bg-primary text-white hover:bg-primary/90'"
-                            class="px-6 py-2.5 text-sm font-medium rounded-lg transition-colors">
-                            Kirim Jawaban
-                            <span x-show="answered < {{ $questions->count() }}" class="text-xs">
-                                (<span x-text="{{ $questions->count() }} - answered"></span> soal belum dijawab)
-                            </span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+            <div class="exam-progress"><div x-bind:style="'width: ' + (answered / {{ $questions->count() }} * 100) + '%'"></div></div>
         </div>
 
-        <script>
-            function discQuestion(questionId) {
-                return {
-                    questionId,
-                    most: null,
-                    least: null,
+        <form id="disc-form" method="POST" action="{{ route('tes-disc.submit', $submission->token) }}">
+            @csrf
 
-                    onMostChange(wordId) {
-                        if (this.most === wordId && this.least === wordId) {
-                            this.least = null;
+            <div class="exam-grid">
+                @foreach ($questions as $index => $question)
+                    <div class="exam-q"
+                         x-data="discQuestion({{ $question->id }})"
+                         @answer-change="updateAnswered()">
+                        <div class="exam-q-head">
+                            <span class="exam-q-num">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                        </div>
+                        <p class="exam-q-hint">Pilih satu <span class="like">Paling Mirip</span> dan satu <span class="unlike">Paling Tidak Mirip</span></p>
+
+                        <div>
+                            @foreach ($question->words as $word)
+                                <div class="exam-word"
+                                     :class="{
+                                        'is-most': most === {{ $word->id }},
+                                        'is-least': least === {{ $word->id }}
+                                     }">
+                                    <span class="exam-word-text">{{ $word->teks }}</span>
+                                    <label class="exam-pick most">
+                                        <input type="radio"
+                                            name="most[{{ $question->id }}]"
+                                            value="{{ $word->id }}"
+                                            x-model.number="most"
+                                            @change="onMostChange({{ $word->id }})"
+                                            :disabled="least === {{ $word->id }}">
+                                        <span>Mirip</span>
+                                    </label>
+                                    <label class="exam-pick least">
+                                        <input type="radio"
+                                            name="least[{{ $question->id }}]"
+                                            value="{{ $word->id }}"
+                                            x-model.number="least"
+                                            @change="onLeastChange({{ $word->id }})"
+                                            :disabled="most === {{ $word->id }}">
+                                        <span>Tidak</span>
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="exam-foot">
+                <p class="exam-hint">Semua kelompok kata wajib dijawab sebelum mengirim.</p>
+                <button type="submit"
+                    @click="confirmSubmit($event)"
+                    :disabled="answered < {{ $questions->count() }}"
+                    class="exam-submit">
+                    Kirim Jawaban
+                    <small x-show="answered < {{ $questions->count() }}"><span x-text="{{ $questions->count() }} - answered"></span> belum dijawab</small>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function discQuestion(questionId) {
+            return {
+                questionId,
+                most: null,
+                least: null,
+
+                onMostChange(wordId) {
+                    if (this.most === wordId && this.least === wordId) {
+                        this.least = null;
+                    }
+                    this.$dispatch('answer-change');
+                },
+
+                onLeastChange(wordId) {
+                    if (this.least === wordId && this.most === wordId) {
+                        this.most = null;
+                    }
+                    this.$dispatch('answer-change');
+                },
+            };
+        }
+
+        function discEngine() {
+            return {
+                answered: 0,
+                submitted: false,
+
+                init() {
+                    this.updateAnswered();
+                },
+
+                updateAnswered() {
+                    // Count questions where both most and least are set
+                    let count = 0;
+                    document.querySelectorAll('[x-data*="discQuestion"]').forEach(el => {
+                        const mostSelected = el.querySelector('input[name^="most"]:checked');
+                        const leastSelected = el.querySelector('input[name^="least"]:checked');
+                        if (mostSelected && leastSelected) {
+                            count++;
                         }
-                        this.$dispatch('answer-change');
-                    },
+                    });
+                    this.answered = count;
+                },
 
-                    onLeastChange(wordId) {
-                        if (this.least === wordId && this.most === wordId) {
-                            this.most = null;
-                        }
-                        this.$dispatch('answer-change');
-                    },
-                };
-            }
+                confirmSubmit(event) {
+                    if (this.submitted) {
+                        event.preventDefault();
+                        return;
+                    }
+                    if (this.answered < {{ $questions->count() }}) {
+                        event.preventDefault();
+                        return;
+                    }
+                    if (!confirm('Anda yakin ingin mengirim jawaban sekarang? Tes tidak dapat diulang.')) {
+                        event.preventDefault();
+                        return;
+                    }
+                    this.submitted = true;
+                },
+            };
+        }
+    </script>
+@endif
 
-            function discEngine() {
-                return {
-                    answered: 0,
-                    submitted: false,
-
-                    init() {
-                        this.updateAnswered();
-                    },
-
-                    updateAnswered() {
-                        // Count questions where both most and least are set
-                        let count = 0;
-                        document.querySelectorAll('[x-data*="discQuestion"]').forEach(el => {
-                            const mostSelected = el.querySelector('input[name^="most"]:checked');
-                            const leastSelected = el.querySelector('input[name^="least"]:checked');
-                            if (mostSelected && leastSelected) {
-                                count++;
-                            }
-                        });
-                        this.answered = count;
-                    },
-
-                    confirmSubmit(event) {
-                        if (this.submitted) {
-                            event.preventDefault();
-                            return;
-                        }
-                        if (this.answered < {{ $questions->count() }}) {
-                            event.preventDefault();
-                            return;
-                        }
-                        if (!confirm('Anda yakin ingin mengirim jawaban sekarang? Tes tidak dapat diulang.')) {
-                            event.preventDefault();
-                            return;
-                        }
-                        this.submitted = true;
-                    },
-                };
-            }
-        </script>
-    @endif
-
-</body>
-</html>
+</x-layouts.public>

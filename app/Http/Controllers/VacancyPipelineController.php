@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InterviewTemplateType;
-use App\Enums\Role;
 use App\Logging\LogContext;
 use App\Models\Application;
+use App\Models\Permission;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Support\InterviewStageMap;
+use App\Support\Permissions;
 use Barryvdh\DomPDF\Facade\Pdf;
 use iio\libmergepdf\Merger;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -20,9 +21,18 @@ use Illuminate\View\View;
 
 class VacancyPipelineController extends Controller
 {
+    private static function authorizeCandidateDetail(User $user, Vacancy $lowongan): void
+    {
+        $user->requirePermission(Permissions::VACANCY_CANDIDATE_DETAIL);
+
+        if (! $user->hasPermission(Permissions::VACANCY_VIEW_ORG)) {
+            abort_unless($user->isInUnit($lowongan->unit_id), 403);
+        }
+    }
+
     public function index(Request $request, Vacancy $lowongan): View
     {
-        Gate::authorize('viewCandidateDetail', $lowongan);
+        self::authorizeCandidateDetail($request->user(), $lowongan);
 
         $lowongan->load(['unit', 'workflowTemplateSnapshot.stages']);
 
@@ -62,7 +72,7 @@ class VacancyPipelineController extends Controller
 
     public function showApplication(Request $request, Vacancy $lowongan, Application $application): View
     {
-        Gate::authorize('viewCandidateDetail', $lowongan);
+        self::authorizeCandidateDetail($request->user(), $lowongan);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 
@@ -138,29 +148,30 @@ class VacancyPipelineController extends Controller
 
         if ($currentStage) {
             [$isUserPic, $picLabel] = match (true) {
-                $currentStage->key === 'skrining_cv_hr' => [$user->isHrAdmin(), 'Admin HR'],
+                $currentStage->key === 'skrining_cv_hr' => [$user->hasPermission(Permissions::SCREENING_DECIDE), 'Admin HR'],
                 $currentStage->key === 'skrining_cv_user' => [
-                    $user->hasRole(Role::UnitHead, Role::Employee) && $user->employee?->unit_id === $lowongan->unit_id,
+                    $user->hasPermission(Permissions::SCREENING_DECIDE) && ($user->isInUnit($lowongan->unit_id) || $user->hasPermission(Permissions::VACANCY_VIEW_ORG)),
                     'Tim Unit '.$lowongan->unit->nama,
                 ],
-                $currentStage->key === 'tes_kompetensi' => [$user->isHrAdmin(), 'Admin HR'],
+                $currentStage->key === 'tes_kompetensi' => [$user->hasPermission(Permissions::TEST_DECIDE), 'Admin HR'],
                 $currentStage->key === 'wawancara_user' => [
-                    $user->isHrAdmin() || ($currentStage->interviewer_id !== null && $currentStage->interviewer_id === $user->id),
+                    $user->hasPermission(Permissions::INTERVIEW_SCHEDULE) || ($currentStage->interviewer_id !== null && $currentStage->interviewer_id === $user->id),
                     $currentStage->interviewer_id ? ($currentStage->interviewer?->name ?? 'Pewawancara') : 'Admin HR',
                 ],
-                $currentStage->key === 'wawancara_manajer_hr' => [$user->hasRole(Role::HrManager), 'Manajer HR'],
-                $currentStage->key === 'wawancara_direktur' => [$user->hasRole(Role::Director), 'Direktur'],
-                $currentStage->key === 'surat_penawaran' => [$user->isHrAdmin(), 'Admin HR'],
-                $currentStage->key === 'mcu' => [$user->isHrAdmin(), 'Admin HR'],
-                $currentStage->key === 'onboarding' => [$user->isHrAdmin(), 'Admin HR'],
+                $currentStage->key === InterviewStageMap::MANAGER => [$user->hasPermission(Permissions::INTERVIEW_DECIDE_MANAGER), 'Manajer HR'],
+                $currentStage->key === InterviewStageMap::DIRECTOR => [$user->hasPermission(Permissions::INTERVIEW_DECIDE_DIRECTOR), 'Direktur'],
+                $currentStage->key === 'surat_penawaran' => [$user->hasPermission(Permissions::OFFERING_MANAGE), 'Admin HR'],
+                $currentStage->key === 'mcu' => [$user->hasAnyPermission([Permissions::MCU_SCHEDULE, Permissions::MCU_DECIDE]), 'Admin HR'],
+                $currentStage->key === 'onboarding' => [$user->hasAnyPermission([Permissions::ONBOARDING_INVITE, Permissions::ONBOARDING_COMPLETE]), 'Admin HR'],
                 default => [true, null],
             };
         }
 
         $eligibleInterviewers = collect();
         if ($currentStage?->key === 'wawancara_user') {
+            $deciderRoleIds = Permission::roleIdsWith(Permissions::INTERVIEW_DECIDE_USER);
             $eligibleInterviewers = User::where('is_active', true)
-                ->whereIn('role', [Role::UnitHead->value, Role::Employee->value])
+                ->whereIn('role_id', $deciderRoleIds === [] ? [-1] : $deciderRoleIds)
                 ->whereHas('employee', fn ($q) => $q->where('unit_id', $lowongan->unit_id))
                 ->get();
         }
@@ -182,7 +193,7 @@ class VacancyPipelineController extends Controller
 
     public function exportPdf(Vacancy $lowongan, Application $application): Response
     {
-        Gate::authorize('viewCandidateDetail', $lowongan);
+        self::authorizeCandidateDetail(auth()->user(), $lowongan);
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 
         Log::info('Candidate pipeline PDF exported', array_merge(LogContext::make(), [

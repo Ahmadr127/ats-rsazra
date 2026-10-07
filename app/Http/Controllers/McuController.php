@@ -8,9 +8,9 @@ use App\Models\Application;
 use App\Models\McuResult;
 use App\Models\Vacancy;
 use App\Services\ApplicationPipelineService;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class McuController extends Controller
@@ -19,7 +19,7 @@ class McuController extends Controller
 
     public function store(StoreMcuResultRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('manageMcu', $application);
+        $request->user()->requirePermission(Permissions::MCU_DECIDE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 

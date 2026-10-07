@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Unit;
+use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -11,7 +11,7 @@ class UpdateUnitRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->route('unit'));
+        return $this->user()->hasPermission(Permissions::UNIT_UPDATE);
     }
 
     /**

@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Enums\QuestionType;
 use App\Models\QuestionBankTemplate;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -15,7 +15,7 @@ class QuestionBankTemplateController extends Controller
 {
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', QuestionBankTemplate::class);
+        $request->user()->requirePermission(Permissions::QUESTION_BANK_VIEW);
 
         $query = QuestionBankTemplate::withCount('questions')
             ->latest();
@@ -31,14 +31,14 @@ class QuestionBankTemplateController extends Controller
 
     public function create(): View
     {
-        Gate::authorize('create', QuestionBankTemplate::class);
+        auth()->user()->requirePermission(Permissions::QUESTION_BANK_CREATE);
 
         return view('question-bank-templates.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
-        Gate::authorize('create', QuestionBankTemplate::class);
+        $request->user()->requirePermission(Permissions::QUESTION_BANK_CREATE);
 
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255', 'unique:question_bank_templates,nama'],
@@ -82,7 +82,7 @@ class QuestionBankTemplateController extends Controller
 
     public function edit(QuestionBankTemplate $templateBankSoal): View
     {
-        Gate::authorize('update', $templateBankSoal);
+        auth()->user()->requirePermission(Permissions::QUESTION_BANK_UPDATE);
 
         $templateBankSoal->load('questions.options');
 
@@ -91,7 +91,7 @@ class QuestionBankTemplateController extends Controller
 
     public function update(Request $request, QuestionBankTemplate $templateBankSoal): RedirectResponse
     {
-        Gate::authorize('update', $templateBankSoal);
+        $request->user()->requirePermission(Permissions::QUESTION_BANK_UPDATE);
 
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255', Rule::unique('question_bank_templates', 'nama')->ignore($templateBankSoal->id)],
@@ -147,7 +147,7 @@ class QuestionBankTemplateController extends Controller
 
     public function destroy(QuestionBankTemplate $templateBankSoal): RedirectResponse
     {
-        Gate::authorize('delete', $templateBankSoal);
+        auth()->user()->requirePermission(Permissions::QUESTION_BANK_DELETE);
 
         $templateBankSoal->delete();
 

@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\InterviewTemplateType;
-use App\Enums\Role;
+use App\Support\InterviewStageMap;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\FormRequest;
@@ -81,12 +81,7 @@ class StoreInterviewResultRequest extends FormRequest
 
     private function resolveStageKey(): string
     {
-        return match ($this->user()->role) {
-            Role::UnitHead, Role::Employee => 'wawancara_user',
-            Role::HrManager => 'wawancara_manajer_hr',
-            Role::Director => 'wawancara_direktur',
-            default => 'wawancara_user',
-        };
+        return InterviewStageMap::stageKeyForDecider($this->user()) ?? InterviewStageMap::USER;
     }
 
     private function resolveAssignedTemplates(): Collection

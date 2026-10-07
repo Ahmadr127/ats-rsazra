@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Role;
+use App\Models\Role;
 use App\Models\Stage;
 use App\Models\User;
 use App\Models\WorkflowTemplate;
@@ -111,7 +111,7 @@ class WorkflowTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_search_templates(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $response = $this->actingAs($user)->get(route('template-alur.cari'));
 
@@ -130,7 +130,7 @@ class WorkflowTemplateTest extends TestCase
     public function test_non_hr_admin_cannot_view_template_list(): void
     {
         foreach ([Role::HrManager, Role::UnitHead, Role::Director, Role::Employee] as $role) {
-            $user = User::factory()->create(['role' => $role]);
+            $user = User::factory()->withRole($role)->create([]);
             $response = $this->actingAs($user)->get(route('template-alur.index'));
             $response->assertStatus(403);
         }
@@ -157,7 +157,7 @@ class WorkflowTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_view_create_form(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
         $this->seedStages();
 
         $response = $this->actingAs($user)->get(route('template-alur.create'));
@@ -269,7 +269,7 @@ class WorkflowTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_create_template(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
         $this->seedStages();
         $ids = $this->allStageIds();
 
@@ -338,7 +338,7 @@ class WorkflowTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_update_template(): void
     {
-        $user = User::factory()->create(['role' => Role::UnitHead]);
+        $user = User::factory()->withRole(Role::UnitHead)->create([]);
         $this->seedStages();
         $template = WorkflowTemplate::factory()->create();
         $ids = $this->allStageIds();
@@ -367,7 +367,7 @@ class WorkflowTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_delete_template(): void
     {
-        $user = User::factory()->create(['role' => Role::Director]);
+        $user = User::factory()->withRole(Role::Director)->create([]);
         $this->seedStages();
         $template = WorkflowTemplate::factory()->create();
 

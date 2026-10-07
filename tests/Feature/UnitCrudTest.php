@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Role;
+use App\Models\Role;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -28,7 +28,7 @@ class UnitCrudTest extends TestCase
 
     public function test_employee_role_cannot_view_unit_list(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $response = $this->actingAs($user)->get(route('unit.index'));
 
@@ -97,7 +97,7 @@ class UnitCrudTest extends TestCase
 
     public function test_non_hr_admin_cannot_search_units(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $response = $this->actingAs($user)->get(route('unit.cari'));
 
@@ -125,7 +125,7 @@ class UnitCrudTest extends TestCase
 
     public function test_employee_role_cannot_view_create_form(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $response = $this->actingAs($user)->get(route('unit.create'));
 
@@ -165,7 +165,7 @@ class UnitCrudTest extends TestCase
 
     public function test_employee_role_cannot_create_unit(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $response = $this->actingAs($user)->post(route('unit.store'), ['nama' => 'ICU']);
 
@@ -187,7 +187,7 @@ class UnitCrudTest extends TestCase
 
     public function test_employee_role_cannot_view_edit_form(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $unit = Unit::factory()->create();
 
         $response = $this->actingAs($user)->get(route('unit.edit', $unit));
@@ -235,7 +235,7 @@ class UnitCrudTest extends TestCase
 
     public function test_employee_role_cannot_update_unit(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $unit = Unit::factory()->create();
 
         $response = $this->actingAs($user)->put(route('unit.update', $unit), ['nama' => 'Hack']);
@@ -270,7 +270,7 @@ class UnitCrudTest extends TestCase
 
     public function test_employee_role_cannot_delete_unit(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $unit = Unit::factory()->create();
 
         $response = $this->actingAs($user)->delete(route('unit.destroy', $unit));

@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Role;
 use App\Http\Controllers\AccountController;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -31,7 +31,7 @@ class AccountManagementTest extends TestCase
     public function test_non_hr_admin_cannot_view_account_list(): void
     {
         foreach ([Role::HrManager, Role::UnitHead, Role::Director, Role::Employee] as $role) {
-            $user = User::factory()->create(['role' => $role]);
+            $user = User::factory()->withRole($role)->create([]);
             $response = $this->actingAs($user)->get(route('akun.index'));
             $response->assertStatus(403);
         }
@@ -78,10 +78,10 @@ class AccountManagementTest extends TestCase
     public function test_account_list_is_filterable_by_role(): void
     {
         $admin = User::factory()->hrAdmin()->create();
-        User::factory()->create(['role' => Role::Employee, 'username' => 'empuser']);
-        User::factory()->create(['role' => Role::Director, 'username' => 'directoruser']);
+        User::factory()->withRole(Role::Employee)->create(['username' => 'empuser']);
+        User::factory()->withRole(Role::Director)->create(['username' => 'directoruser']);
 
-        $response = $this->actingAs($admin)->get(route('akun.index', ['role' => Role::Employee->value]));
+        $response = $this->actingAs($admin)->get(route('akun.index', ['role_id' => Role::where('key', Role::Employee)->value('id')]));
 
         $response->assertStatus(200);
         $response->assertSee('empuser');
@@ -129,13 +129,13 @@ class AccountManagementTest extends TestCase
             'username' => 'budisantoso',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => Role::Employee->value,
+            'role_id' => Role::where('key', Role::Employee)->value('id'),
         ]);
 
         $response->assertRedirect(route('akun.index'));
         $this->assertDatabaseHas('users', [
             'username' => 'budisantoso',
-            'role' => Role::Employee->value,
+            'role_id' => Role::where('key', Role::Employee)->value('id'),
             'must_change_password' => true,
             'is_active' => true,
         ]);
@@ -154,7 +154,7 @@ class AccountManagementTest extends TestCase
             'username' => 'existinguser',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => Role::Employee->value,
+            'role_id' => Role::where('key', Role::Employee)->value('id'),
         ]);
 
         $response->assertSessionHasErrors('username');
@@ -172,7 +172,7 @@ class AccountManagementTest extends TestCase
             'username' => 'newusername',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => Role::Employee->value,
+            'role_id' => Role::where('key', Role::Employee)->value('id'),
         ]);
 
         $response->assertSessionHasErrors('employee_id');
@@ -188,10 +188,10 @@ class AccountManagementTest extends TestCase
             'username' => 'validuser',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => 'invalid_role',
+            'role_id' => 999999,
         ]);
 
-        $response->assertSessionHasErrors('role');
+        $response->assertSessionHasErrors('role_id');
     }
 
     public function test_username_must_contain_only_lowercase_alphanumeric(): void
@@ -204,7 +204,7 @@ class AccountManagementTest extends TestCase
             'username' => 'Invalid User!',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => Role::Employee->value,
+            'role_id' => Role::where('key', Role::Employee)->value('id'),
         ]);
 
         $response->assertSessionHasErrors('username');
@@ -215,7 +215,7 @@ class AccountManagementTest extends TestCase
     public function test_hr_admin_can_edit_account(): void
     {
         $admin = User::factory()->hrAdmin()->create();
-        $account = User::factory()->create(['role' => Role::Employee, 'username' => 'testedit']);
+        $account = User::factory()->withRole(Role::Employee)->create(['username' => 'testedit']);
 
         $response = $this->actingAs($admin)->get(route('akun.edit', $account));
 
@@ -226,17 +226,17 @@ class AccountManagementTest extends TestCase
     public function test_hr_admin_can_change_role(): void
     {
         $admin = User::factory()->hrAdmin()->create();
-        $account = User::factory()->create(['role' => Role::Employee, 'username' => 'testchange']);
+        $account = User::factory()->withRole(Role::Employee)->create(['username' => 'testchange']);
 
         $response = $this->actingAs($admin)->patch(route('akun.update', $account), [
             'username' => 'testchange',
-            'role' => Role::UnitHead->value,
+            'role_id' => Role::where('key', Role::UnitHead)->value('id'),
         ]);
 
         $response->assertRedirect(route('akun.index'));
         $this->assertDatabaseHas('users', [
             'id' => $account->id,
-            'role' => Role::UnitHead->value,
+            'role_id' => Role::where('key', Role::UnitHead)->value('id'),
         ]);
     }
 
@@ -247,7 +247,7 @@ class AccountManagementTest extends TestCase
 
         $this->actingAs($admin)->patch(route('akun.update', $account), [
             'username' => 'testreset',
-            'role' => $account->role->value,
+            'role_id' => $account->role_id,
             'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123',
         ]);
@@ -264,7 +264,7 @@ class AccountManagementTest extends TestCase
 
         $this->actingAs($admin)->patch(route('akun.update', $account), [
             'username' => 'testnopwd',
-            'role' => $account->role->value,
+            'role_id' => $account->role_id,
         ]);
 
         $account->refresh();
@@ -312,7 +312,7 @@ class AccountManagementTest extends TestCase
 
         $response = $this->actingAs($admin)->patch(route('akun.update', $admin), [
             'username' => 'newusername',
-            'role' => Role::Employee->value,
+            'role_id' => Role::where('key', Role::Employee)->value('id'),
         ]);
 
         $response->assertStatus(403);

@@ -2,18 +2,16 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\Role;
-use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
 
 class StoreAccountRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', User::class);
+        return $this->user()->hasPermission(Permissions::ACCOUNT_CREATE);
     }
 
     /**
@@ -28,7 +26,7 @@ class StoreAccountRequest extends FormRequest
             ],
             'username' => ['required', 'string', 'max:50', 'unique:users,username', 'regex:/^[a-z0-9]+$/'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', new Enum(Role::class)],
+            'role_id' => ['required', 'integer', Rule::exists('roles', 'id')],
         ];
     }
 
@@ -41,7 +39,7 @@ class StoreAccountRequest extends FormRequest
             'employee_id' => 'Karyawan',
             'username' => 'Username',
             'password' => 'Kata Sandi',
-            'role' => 'Role',
+            'role_id' => 'Peran',
         ];
     }
 

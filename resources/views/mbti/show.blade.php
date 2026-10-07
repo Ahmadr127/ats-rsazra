@@ -1,191 +1,229 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tes MBTI - {{ $submission->application->vacancy->judul_posisi }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50 min-h-screen">
+<x-layouts.public title="Tes MBTI - {{ $submission->application->vacancy->judul_posisi }} - RS Azra" main-class="w-full bg-paper">
 
-    @if ($submission->isSubmitted())
-        {{-- Completed state --}}
-        <div class="min-h-screen flex items-center justify-center" x-data="{ showToast: true }">
-            <div
-                x-show="showToast"
-                x-init="setTimeout(() => showToast = false, 4000)"
-                x-transition:leave="transition ease-in duration-300"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 -translate-y-2"
-                class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-2"
-            >
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                </svg>
-                <span class="text-sm font-medium">Tes MBTI berhasil dikirim!</span>
-            </div>
+<style>
+    .exam-wrap { width: 100%; padding: 56px 4vw 96px; }
+    .exam-eyebrow {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px; color: #005f5c;
+        text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500;
+        margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    }
+    .exam-eyebrow::before { content: ""; width: 28px; height: 1px; background: rgb(0,119,116); }
+    .exam-h1 {
+        font-family: "IBM Plex Serif", Georgia, serif; font-weight: 500;
+        font-size: clamp(34px, 4.6vw, 58px); line-height: 1.04; letter-spacing: -0.02em;
+        margin: 0 0 14px; color: #0d1614; text-wrap: balance;
+    }
+    .exam-lede { font-size: 17px; line-height: 1.6; color: #2a3835; max-width: 72ch; margin: 0; }
+    .exam-lede strong { color: #0d1614; }
+    .exam-bar {
+        position: sticky; top: 80px; z-index: 40;
+        background: #0d1614; color: #fff;
+        margin-top: 40px;
+    }
+    .exam-bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px; }
+    .exam-bar-title { font-size: 15px; font-weight: 600; }
+    .exam-bar-sub { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #b8c0bd; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+    .exam-count { font-family: "IBM Plex Mono", monospace; font-size: 20px; font-weight: 600; }
+    .exam-progress { height: 3px; background: rgba(255,255,255,0.15); }
+    .exam-progress > div { height: 100%; background: rgb(129,189,65); transition: width 0.3s; }
+    .exam-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+    .exam-q { background: #fff; border: 1px solid #d9ddd9; padding: 28px; }
+    .exam-q-head { display: flex; gap: 16px; align-items: baseline; margin-bottom: 18px; }
+    .exam-q-num {
+        font-family: "IBM Plex Serif", serif; font-size: 26px; font-weight: 500;
+        color: rgb(0,119,116); line-height: 1; flex-shrink: 0; min-width: 44px;
+    }
+    .exam-q-hint { font-size: 13px; color: #5a6864; margin: 0; }
+    .exam-choice {
+        display: flex; align-items: flex-start; gap: 14px;
+        border: 1px solid #d9ddd9; padding: 16px; cursor: pointer;
+        transition: border-color 0.15s, background 0.15s; margin-bottom: 10px;
+    }
+    .exam-choice:last-child { margin-bottom: 0; }
+    .exam-choice:hover { border-color: rgb(0,119,116); }
+    .exam-choice.is-selected { border-color: rgb(0,119,116); background: #f4faf9; }
+    .exam-choice input { width: 20px; height: 20px; margin-top: 2px; accent-color: rgb(0,119,116); flex-shrink: 0; cursor: pointer; }
+    .exam-choice .choice-key {
+        font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600;
+        color: rgb(0,119,116); border: 1px solid rgb(0,119,116);
+        width: 28px; height: 28px; display: grid; place-items: center; flex-shrink: 0;
+    }
+    .exam-choice span:last-child { font-size: 16px; line-height: 1.55; color: #0d1614; }
+    .exam-foot {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        margin-top: 40px; border-top: 2px solid #0d1614; padding-top: 24px; flex-wrap: wrap;
+    }
+    .exam-hint { font-size: 14px; color: #5a6864; margin: 0; }
+    .exam-submit {
+        background: rgb(0,119,116); color: #fff; border: 0;
+        padding: 16px 40px; font-size: 16px; font-weight: 600; cursor: pointer;
+        font-family: "IBM Plex Sans", system-ui, sans-serif; transition: background 0.15s, opacity 0.15s;
+    }
+    .exam-submit:hover:not(:disabled) { background: rgb(0,88,85); }
+    .exam-submit:disabled { background: #d9ddd9; color: #8a948f; cursor: not-allowed; }
+    .exam-submit small { font-weight: 400; font-size: 13px; margin-left: 8px; }
+    .exam-done { width: 100%; padding: 72px 4vw 96px; }
+    .exam-done-card { background: #fff; border: 1px solid #0d1614; padding: 48px; margin-top: 32px; }
+    .exam-dl { margin: 0; }
+    .exam-dl-row { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid #ebeeea; }
+    .exam-dl-row:last-child { border-bottom: 0; }
+    .exam-dl-label {
+        font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #5a6864;
+        text-transform: uppercase; letter-spacing: 0.08em; width: 160px; flex-shrink: 0; padding-top: 3px;
+    }
+    .exam-dl-value { font-size: 16px; font-weight: 500; color: #0d1614; }
+    @media (max-width: 1100px) {
+        .exam-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+        .exam-wrap { padding: 36px 4vw 64px; }
+        .exam-q { padding: 20px; }
+        .exam-foot { flex-direction: column; align-items: stretch; }
+        .exam-submit { width: 100%; }
+    }
+</style>
 
-            <div class="max-w-md w-full mx-4">
-                <div class="bg-white rounded-2xl border border-gray-100 p-8 text-center shadow-sm">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </div>
-
-                    <h1 class="text-xl font-semibold text-gray-900 mb-2">Tes MBTI Berhasil Dikirim</h1>
-                    <p class="text-sm text-gray-500 mb-6">
-                        Jawaban Anda telah diterima. Tim HR akan meninjau hasil asesmen dan menghubungi Anda melalui email.
-                    </p>
-
-                    <div class="bg-gray-50 rounded-xl p-4 text-left space-y-2 mb-6">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Posisi</span>
-                            <span class="font-medium text-gray-800">{{ $submission->application->vacancy->judul_posisi }}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Waktu Pengiriman</span>
-                            <span class="font-medium text-gray-800">{{ $submission->submitted_at->format('d M Y, H:i') }}</span>
-                        </div>
-                    </div>
-
-                    <p class="text-xs text-gray-400">Halaman ini dapat ditutup.</p>
+@if ($submission->isSubmitted())
+    <div class="exam-done">
+        <div class="exam-eyebrow">Tes MBTI · Terkirim</div>
+        <h1 class="exam-h1">Jawaban Anda sudah kami terima.</h1>
+        <p class="exam-lede">Tim HR akan meninjau hasil asesmen dan menghubungi Anda melalui email.</p>
+        <div class="exam-done-card">
+            <dl class="exam-dl">
+                <div class="exam-dl-row">
+                    <dt class="exam-dl-label">Posisi</dt>
+                    <dd class="exam-dl-value">{{ $submission->application->vacancy->judul_posisi }}</dd>
                 </div>
-            </div>
+                <div class="exam-dl-row">
+                    <dt class="exam-dl-label">Waktu Pengiriman</dt>
+                    <dd class="exam-dl-value">{{ $submission->submitted_at->format('d M Y, H:i') }}</dd>
+                </div>
+            </dl>
         </div>
-    @else
-        {{-- Active test --}}
-        <div x-data="mbtiEngine()">
-            {{-- Header bar --}}
-            <div class="fixed top-0 inset-x-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-                <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-800">Tes MBTI</p>
-                        <p class="text-xs text-gray-500">{{ $submission->application->vacancy->judul_posisi }}</p>
-                    </div>
-                    <div class="text-xs text-gray-500">
-                        <span x-text="answered"></span> / {{ $questions->count() }} dijawab
-                    </div>
+        <p class="exam-hint" style="margin-top: 20px;">Halaman ini dapat ditutup.</p>
+    </div>
+@else
+    <div class="exam-wrap" x-data="mbtiEngine()">
+        <div class="exam-eyebrow">Tes MBTI · RS Azra</div>
+        <h1 class="exam-h1">{{ $submission->application->vacancy->judul_posisi }}</h1>
+        <p class="exam-lede">
+            Untuk setiap pasangan pernyataan di bawah ini, pilih yang
+            <strong>paling mencerminkan diri Anda</strong>.
+            Tidak ada jawaban benar atau salah — jawablah dengan jujur sesuai kepribadian Anda.
+        </p>
+
+        <div class="exam-bar">
+            <div class="exam-bar-inner">
+                <div>
+                    <div class="exam-bar-title">{{ $questions->count() }} Pasangan Pernyataan</div>
+                    <div class="exam-bar-sub">Tes MBTI</div>
                 </div>
+                <div class="exam-count"><span x-text="answered"></span> / {{ $questions->count() }}</div>
             </div>
-
-            <div class="pt-16 pb-16 max-w-3xl mx-auto px-4 py-8">
-                <div class="mt-4 mb-6">
-                    <p class="text-sm font-medium text-gray-700 mb-1">Petunjuk</p>
-                    <p class="text-xs text-gray-500">
-                        Untuk setiap pernyataan di bawah ini, pilih pernyataan yang <strong>paling mencerminkan diri Anda</strong>.
-                        Tidak ada jawaban benar atau salah. Jawablah dengan jujur sesuai kepribadian Anda.
-                    </p>
-                </div>
-
-                <form id="mbti-form" method="POST" action="{{ route('tes-mbti.submit', $submission->token) }}">
-                    @csrf
-
-                    <div class="space-y-4">
-                        @foreach ($questions as $index => $question)
-                            <div class="bg-white rounded-xl border border-gray-100 p-5"
-                                 x-data="mbtiQuestion({{ $question->id }})"
-                                 @answer-change="$dispatch('mbti-answered', { id: {{ $question->id }}, answered: selected !== null })">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <span class="flex-shrink-0 w-6 h-6 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center justify-center">
-                                        {{ $index + 1 }}
-                                    </span>
-                                    <p class="text-xs text-gray-400">Pilih salah satu pernyataan yang lebih mencerminkan diri Anda</p>
-                                </div>
-
-                                <div class="grid grid-cols-1 gap-3">
-                                    <label class="flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors"
-                                           :class="selected === 'A' ? 'border-primary bg-primary/5' : 'border-gray-100 bg-gray-50 hover:border-gray-200'">
-                                        <input type="radio"
-                                               name="jawaban[{{ $question->id }}]"
-                                               value="A"
-                                               x-model="selected"
-                                               @change="$dispatch('answer-change')"
-                                               class="mt-0.5 w-4 h-4 text-primary focus:ring-primary/40 shrink-0">
-                                        <span class="text-sm text-gray-800">{{ $question->pernyataan_a }}</span>
-                                    </label>
-
-                                    <label class="flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors"
-                                           :class="selected === 'B' ? 'border-primary bg-primary/5' : 'border-gray-100 bg-gray-50 hover:border-gray-200'">
-                                        <input type="radio"
-                                               name="jawaban[{{ $question->id }}]"
-                                               value="B"
-                                               x-model="selected"
-                                               @change="$dispatch('answer-change')"
-                                               class="mt-0.5 w-4 h-4 text-primary focus:ring-primary/40 shrink-0">
-                                        <span class="text-sm text-gray-800">{{ $question->pernyataan_b }}</span>
-                                    </label>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <div class="mt-6 flex justify-end">
-                        <button type="submit"
-                            @click="confirmSubmit($event)"
-                            :disabled="answered < {{ $questions->count() }}"
-                            :class="answered < {{ $questions->count() }}
-                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                : 'bg-primary text-white hover:bg-primary/90'"
-                            class="px-6 py-2.5 text-sm font-medium rounded-lg transition-colors">
-                            Kirim Jawaban
-                            <span x-show="answered < {{ $questions->count() }}" class="text-xs">
-                                (<span x-text="{{ $questions->count() }} - answered"></span> soal belum dijawab)
-                            </span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+            <div class="exam-progress"><div x-bind:style="'width: ' + (answered / {{ $questions->count() }} * 100) + '%'"></div></div>
         </div>
 
-        <script>
-            function mbtiQuestion(questionId) {
-                return {
-                    questionId,
-                    selected: null,
-                };
-            }
+        <form id="mbti-form" method="POST" action="{{ route('tes-mbti.submit', $submission->token) }}">
+            @csrf
 
-            function mbtiEngine() {
-                return {
-                    answered: 0,
-                    submitted: false,
+            <div class="exam-grid">
+                @foreach ($questions as $index => $question)
+                    <div class="exam-q"
+                         x-data="mbtiQuestion({{ $question->id }})"
+                         @answer-change="$dispatch('mbti-answered', { id: {{ $question->id }}, answered: selected !== null })">
+                        <div class="exam-q-head">
+                            <span class="exam-q-num">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <p class="exam-q-hint">Pilih salah satu pernyataan yang lebih mencerminkan diri Anda</p>
+                        </div>
 
-                    init() {
-                        this.$el.addEventListener('mbti-answered', (e) => {
-                            this.recountAnswered();
-                        });
-                    },
+                        <div>
+                            <label class="exam-choice"
+                                   :class="selected === 'A' ? 'is-selected' : ''">
+                                <input type="radio"
+                                       name="jawaban[{{ $question->id }}]"
+                                       value="A"
+                                       x-model="selected"
+                                       @change="$dispatch('answer-change')">
+                                <span class="choice-key">A</span>
+                                <span>{{ $question->pernyataan_a }}</span>
+                            </label>
 
-                    recountAnswered() {
-                        let count = 0;
-                        document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
-                            if (input.name.startsWith('jawaban[')) {
-                                count++;
-                            }
-                        });
-                        this.answered = count;
-                    },
+                            <label class="exam-choice"
+                                   :class="selected === 'B' ? 'is-selected' : ''">
+                                <input type="radio"
+                                       name="jawaban[{{ $question->id }}]"
+                                       value="B"
+                                       x-model="selected"
+                                       @change="$dispatch('answer-change')">
+                                <span class="choice-key">B</span>
+                                <span>{{ $question->pernyataan_b }}</span>
+                            </label>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
 
-                    confirmSubmit(event) {
-                        if (this.submitted) {
-                            event.preventDefault();
-                            return;
+            <div class="exam-foot">
+                <p class="exam-hint">Semua pasangan pernyataan wajib dijawab sebelum mengirim.</p>
+                <button type="submit"
+                    @click="confirmSubmit($event)"
+                    :disabled="answered < {{ $questions->count() }}"
+                    class="exam-submit">
+                    Kirim Jawaban
+                    <small x-show="answered < {{ $questions->count() }}"><span x-text="{{ $questions->count() }} - answered"></span> belum dijawab</small>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function mbtiQuestion(questionId) {
+            return {
+                questionId,
+                selected: null,
+            };
+        }
+
+        function mbtiEngine() {
+            return {
+                answered: 0,
+                submitted: false,
+
+                init() {
+                    this.$el.addEventListener('mbti-answered', (e) => {
+                        this.recountAnswered();
+                    });
+                },
+
+                recountAnswered() {
+                    let count = 0;
+                    document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                        if (input.name.startsWith('jawaban[')) {
+                            count++;
                         }
-                        if (this.answered < {{ $questions->count() }}) {
-                            event.preventDefault();
-                            return;
-                        }
-                        if (!confirm('Anda yakin ingin mengirim jawaban sekarang? Tes tidak dapat diulang.')) {
-                            event.preventDefault();
-                            return;
-                        }
-                        this.submitted = true;
-                    },
-                };
-            }
-        </script>
-    @endif
+                    });
+                    this.answered = count;
+                },
 
-</body>
-</html>
+                confirmSubmit(event) {
+                    if (this.submitted) {
+                        event.preventDefault();
+                        return;
+                    }
+                    if (this.answered < {{ $questions->count() }}) {
+                        event.preventDefault();
+                        return;
+                    }
+                    if (!confirm('Anda yakin ingin mengirim jawaban sekarang? Tes tidak dapat diulang.')) {
+                        event.preventDefault();
+                        return;
+                    }
+                    this.submitted = true;
+                },
+            };
+        }
+    </script>
+@endif
+
+</x-layouts.public>

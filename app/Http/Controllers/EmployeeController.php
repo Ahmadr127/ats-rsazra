@@ -6,17 +6,17 @@ use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use App\Models\Unit;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class EmployeeController extends Controller
 {
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', Employee::class);
+        $request->user()->requirePermission(Permissions::EMPLOYEE_VIEW);
 
         $employees = Employee::query()
             ->with('unit')
@@ -63,7 +63,7 @@ class EmployeeController extends Controller
 
     public function create(): View
     {
-        Gate::authorize('create', Employee::class);
+        auth()->user()->requirePermission(Permissions::EMPLOYEE_CREATE);
 
         return view('employees.create');
     }
@@ -83,7 +83,12 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee): View
     {
-        Gate::authorize('view', $employee);
+        $user = auth()->user();
+
+        if (! $user->hasPermission(Permissions::EMPLOYEE_VIEW)) {
+            $user->requirePermission(Permissions::EMPLOYEE_VIEW_SELF);
+            abort_unless($employee->user_id === $user->id, 403);
+        }
 
         $employee->load('unit');
 
@@ -92,7 +97,7 @@ class EmployeeController extends Controller
 
     public function edit(Employee $employee): View
     {
-        Gate::authorize('update', $employee);
+        auth()->user()->requirePermission(Permissions::EMPLOYEE_UPDATE);
 
         $employee->load('unit');
 
@@ -112,7 +117,7 @@ class EmployeeController extends Controller
 
     public function destroy(Employee $employee): RedirectResponse
     {
-        Gate::authorize('delete', $employee);
+        auth()->user()->requirePermission(Permissions::EMPLOYEE_DELETE);
 
         $employee->delete();
 

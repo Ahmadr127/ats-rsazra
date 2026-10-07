@@ -69,7 +69,7 @@
                 <span>Beranda</span>
             </a>
 
-            @can('viewAny', App\Models\Employee::class)
+            @permission('menu.employees')
             <a
                 href="{{ route('karyawan.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -80,9 +80,9 @@
                 </svg>
                 <span>Karyawan</span>
             </a>
-            @endcan
+            @endpermission
 
-            @can('viewAny', App\Models\Unit::class)
+            @permission('menu.units')
             <a
                 href="{{ route('unit.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -93,9 +93,9 @@
                 </svg>
                 <span>Unit</span>
             </a>
-            @endcan
+            @endpermission
 
-            @can('viewAny', App\Models\User::class)
+            @permission('menu.accounts')
             <a
                 href="{{ route('akun.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -106,9 +106,22 @@
                 </svg>
                 <span>Akun Pengguna</span>
             </a>
-            @endcan
+            @endpermission
 
-            @can('viewAny', App\Models\WorkflowTemplate::class)
+            @permission('menu.roles')
+            <a
+                href="{{ route('pengaturan.peran.index') }}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
+                    {{ request()->routeIs('pengaturan.peran.*') ? 'bg-secondary text-white font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white' }}"
+            >
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                <span>Peran</span>
+            </a>
+            @endpermission
+
+            @permission('menu.workflow-templates')
             <a
                 href="{{ route('template-alur.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -119,9 +132,9 @@
                 </svg>
                 <span>Template Alur Kerja</span>
             </a>
-            @endcan
+            @endpermission
 
-            @can('viewAny', App\Models\JobTemplate::class)
+            @permission('menu.job-templates')
             <a
                 href="{{ route('template-lowongan.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -132,9 +145,9 @@
                 </svg>
                 <span>Template Lowongan</span>
             </a>
-            @endcan
+            @endpermission
 
-            @can('viewAny', App\Models\Vacancy::class)
+            @permission('menu.vacancies')
             <a
                 href="{{ route('lowongan.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -145,9 +158,9 @@
                 </svg>
                 <span>Lowongan Kerja</span>
             </a>
-            @endcan
+            @endpermission
 
-            @can('viewAny', App\Models\QuestionBankTemplate::class)
+            @permission('menu.question-bank')
             <a
                 href="{{ route('template-bank-soal.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -158,9 +171,9 @@
                 </svg>
                 <span>Template Bank Soal</span>
             </a>
-            @endcan
+            @endpermission
 
-            @can('viewAny', App\Models\EmailTemplate::class)
+            @permission('menu.email-templates')
             <a
                 href="{{ route('template-email.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -171,9 +184,9 @@
                 </svg>
                 <span>Template Email</span>
             </a>
-            @endcan
+            @endpermission
 
-            @can('viewAny', App\Models\InterviewTemplate::class)
+            @permission('menu.interview-templates')
             <a
                 href="{{ route('template-wawancara.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
@@ -184,7 +197,20 @@
                 </svg>
                 <span>Template Wawancara</span>
             </a>
-            @endcan
+            @endpermission
+
+            @permission('menu.rbac')
+            <a
+                href="{{ route('pengaturan.hak-akses.index') }}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
+                    {{ request()->routeIs('pengaturan.hak-akses.*') ? 'bg-secondary text-white font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white' }}"
+            >
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span>Hak Akses</span>
+            </a>
+            @endpermission
         </nav>
     </aside>
 
@@ -232,7 +258,7 @@
             >
                 <span class="text-sm font-medium text-gray-800 hidden sm:block">{{ auth()->user()->name }}</span>
                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-primary/10 text-primary whitespace-nowrap">
-                    {{ auth()->user()->role->label() }}
+                    {{ auth()->user()->role?->label ?? 'Tanpa Peran' }}
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform ease-out duration-150" :class="menuOpen && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -247,7 +273,7 @@
                 style="box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);"
                 x-cloak
             >
-                @if(auth()->user()->employee && auth()->user()->can('view', auth()->user()->employee))
+                @if(auth()->user()->employee && auth()->user()->hasPermission('employee.view-self'))
                 <a href="{{ route('karyawan.show', auth()->user()->employee) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />

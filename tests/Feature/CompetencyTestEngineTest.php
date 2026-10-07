@@ -4,12 +4,12 @@ namespace Tests\Feature;
 
 use App\Enums\ApplicationStageStatus;
 use App\Enums\QuestionType;
-use App\Enums\Role;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Question;
 use App\Models\QuestionBankTemplate;
 use App\Models\QuestionOption;
+use App\Models\Role;
 use App\Models\Stage;
 use App\Models\TestSubmission;
 use App\Models\Unit;

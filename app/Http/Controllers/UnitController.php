@@ -5,18 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUnitRequest;
 use App\Http\Requests\UpdateUnitRequest;
 use App\Models\Unit;
+use App\Support\Permissions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class UnitController extends Controller
 {
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', Unit::class);
+        $request->user()->requirePermission(Permissions::UNIT_VIEW);
 
         $units = Unit::query()
             ->when(
@@ -32,7 +32,7 @@ class UnitController extends Controller
 
     public function search(Request $request): JsonResponse
     {
-        Gate::authorize('viewAny', Unit::class);
+        $request->user()->requirePermission(Permissions::UNIT_VIEW);
 
         $q = strtolower(str_replace(['%', '_'], ['\\%', '\\_'], $request->string('q')));
         $query = Unit::when($q, fn ($query) => $query->whereRaw('LOWER(nama) LIKE ?', ["%{$q}%"]))
@@ -47,7 +47,7 @@ class UnitController extends Controller
 
     public function create(): View
     {
-        Gate::authorize('create', Unit::class);
+        auth()->user()->requirePermission(Permissions::UNIT_CREATE);
 
         return view('units.create');
     }
@@ -67,7 +67,7 @@ class UnitController extends Controller
 
     public function edit(Unit $unit): View
     {
-        Gate::authorize('update', $unit);
+        auth()->user()->requirePermission(Permissions::UNIT_UPDATE);
 
         return view('units.edit', compact('unit'));
     }
@@ -83,7 +83,9 @@ class UnitController extends Controller
 
     public function destroy(Unit $unit): RedirectResponse
     {
-        Gate::authorize('delete', $unit);
+        auth()->user()->requirePermission(Permissions::UNIT_DELETE);
+
+        abort_if($unit->vacancies()->exists(), 403);
 
         $unit->delete();
 

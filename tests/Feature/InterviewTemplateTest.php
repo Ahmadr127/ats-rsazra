@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Enums\InterviewTemplateType;
-use App\Enums\Role;
 use App\Models\InterviewTemplate;
 use App\Models\InterviewTemplateItem;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -56,7 +56,7 @@ class InterviewTemplateTest extends TestCase
     public function test_non_hr_admin_cannot_view_template_list(): void
     {
         foreach ([Role::HrManager, Role::UnitHead, Role::Director, Role::Employee] as $role) {
-            $user = User::factory()->create(['role' => $role]);
+            $user = User::factory()->withRole($role)->create([]);
             $response = $this->actingAs($user)->get(route('template-wawancara.index'));
             $response->assertStatus(403);
         }
@@ -82,7 +82,7 @@ class InterviewTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_view_create_form(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
 
         $response = $this->actingAs($user)->get(route('template-wawancara.create'));
 
@@ -205,7 +205,7 @@ class InterviewTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_create_template(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
 
         $response = $this->actingAs($user)->post(route('template-wawancara.store'), [
             'nama' => 'Template',
@@ -231,7 +231,7 @@ class InterviewTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_view_edit_form(): void
     {
-        $user = User::factory()->create(['role' => Role::UnitHead]);
+        $user = User::factory()->withRole(Role::UnitHead)->create([]);
         $template = InterviewTemplate::factory()->create();
 
         $response = $this->actingAs($user)->get(route('template-wawancara.edit', $template));
@@ -330,7 +330,7 @@ class InterviewTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_update_template(): void
     {
-        $user = User::factory()->create(['role' => Role::Director]);
+        $user = User::factory()->withRole(Role::Director)->create([]);
         $template = InterviewTemplate::factory()->create();
 
         $response = $this->actingAs($user)->put(route('template-wawancara.update', $template), [
@@ -368,7 +368,7 @@ class InterviewTemplateTest extends TestCase
 
     public function test_non_hr_admin_cannot_delete_template(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $template = InterviewTemplate::factory()->create();
 
         $response = $this->actingAs($user)->delete(route('template-wawancara.destroy', $template));

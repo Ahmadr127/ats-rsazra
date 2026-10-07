@@ -3,12 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\ApplicationStageStatus;
-use App\Enums\Role;
 use App\Mail\TemplatedMail;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Candidate;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;
@@ -85,7 +85,7 @@ class InterviewScheduleTest extends TestCase
 
     private function makeUnitHead(Unit $unit): User
     {
-        $user = User::factory()->create(['role' => Role::UnitHead, 'is_active' => true]);
+        $user = User::factory()->withRole(Role::UnitHead)->create(['is_active' => true]);
         Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unit->id]);
 
         return $user;
@@ -93,7 +93,7 @@ class InterviewScheduleTest extends TestCase
 
     private function makeEmployee(Unit $unit): User
     {
-        $user = User::factory()->create(['role' => Role::Employee, 'is_active' => true]);
+        $user = User::factory()->withRole(Role::Employee)->create(['is_active' => true]);
         Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unit->id]);
 
         return $user;
@@ -169,7 +169,7 @@ class InterviewScheduleTest extends TestCase
         $this->seedEmailTemplates();
 
         $unit = Unit::factory()->create();
-        $manager = User::factory()->create(['role' => Role::HrManager]);
+        $manager = User::factory()->withRole(Role::HrManager)->create([]);
         $interviewer = $this->makeUnitHead($unit);
 
         $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'wawancara_user', 'onboarding'], $unit);
@@ -262,7 +262,7 @@ class InterviewScheduleTest extends TestCase
 
         $unit = Unit::factory()->create();
         $admin = User::factory()->hrAdmin()->create();
-        $inactiveUser = User::factory()->create(['role' => Role::UnitHead, 'is_active' => false]);
+        $inactiveUser = User::factory()->withRole(Role::UnitHead)->create(['is_active' => false]);
         Employee::factory()->create(['user_id' => $inactiveUser->id, 'unit_id' => $unit->id]);
 
         $vacancy = $this->createVacancyWithStages(['lamaran', 'wawancara_user', 'onboarding'], $unit);

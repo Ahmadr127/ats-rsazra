@@ -1,502 +1,401 @@
-<x-layouts.public title="Lowongan Kerja - RS Azra" main-class="w-full bg-paper">
-
-<style>
-    /* ── Hero ────────────────────────────────────────────── */
-    .career-hero {
-        background: #ffffff;
-        border-bottom: 1px solid #d9ddd9;
-        position: relative;
-    }
-    .hero-inner {
-        max-width: 1320px; margin: 0 auto;
-        padding: 56px 28px 40px;
-        display: grid;
-        grid-template-columns: 1.4fr 1fr;
-        gap: 64px;
-        align-items: end;
-        position: relative; z-index: 2;
-    }
-    .hero-eyebrow {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; color: #005f5c;
-        text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500;
-        margin-bottom: 20px;
-        display: flex; align-items: center; gap: 10px;
-    }
-    .hero-eyebrow::before {
-        content: ""; width: 28px; height: 1px; background: rgb(0,119,116);
-    }
-    .career-h1 {
-        font-family: "IBM Plex Serif", Georgia, serif;
-        font-weight: 500;
-        font-size: clamp(36px, 5.2vw, 64px);
-        line-height: 1.02; letter-spacing: -0.025em;
-        margin: 0 0 22px; color: #0d1614;
-        text-wrap: balance;
-    }
-    .career-h1 em { font-style: italic; color: rgb(0,119,116); font-weight: 500; }
-    .career-h1 .accent {
-        background: linear-gradient(transparent 62%, rgba(129,189,65,0.25) 62%);
-        padding: 0 4px;
-    }
-    .hero-lede {
-        font-size: 16px; line-height: 1.55; color: #2a3835;
-        max-width: 56ch; margin: 0 0 36px;
-    }
-    .hero-meta {
-        display: flex; gap: 32px;
-        border-top: 1px solid #d9ddd9;
-        padding-top: 18px; margin-top: 32px;
-    }
-    .hero-stat {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; color: #5a6864;
-        text-transform: uppercase; letter-spacing: 0.06em;
-    }
-    .hero-stat strong {
-        display: block;
-        font-family: "IBM Plex Serif", serif;
-        font-size: 26px; font-weight: 500; color: #0d1614;
-        text-transform: none; letter-spacing: -0.01em; margin-bottom: 2px;
-    }
-    .hero-illo { position: relative; height: 360px; overflow: hidden; }
-    .hero-illo svg { width: 100%; height: 100%; }
-
-    /* ── Search panel ────────────────────────────────────── */
-    .search-panel {
-        max-width: 1320px; margin: 0 auto;
-        padding: 0 28px;
-        position: relative; z-index: 3;
-        transform: translateY(50%);
-    }
-    .search-card {
-        background: #ffffff;
-        border: 1px solid #0d1614;
-        box-shadow: 0 24px 48px -24px rgba(13,22,20,0.18);
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: stretch;
-    }
-    .search-field {
-        padding: 18px 22px;
-        border-right: 1px solid #d9ddd9;
-        display: flex; flex-direction: column; gap: 4px;
-    }
-    .search-field label {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 10px; text-transform: uppercase;
-        letter-spacing: 0.1em; color: #5a6864; font-weight: 500;
-    }
-    .search-field input {
-        border: 0; padding: 4px 0; outline: none;
-        background: transparent;
-        font-size: 15px; font-weight: 500; color: #0d1614; width: 100%;
-        font-family: "IBM Plex Sans", system-ui, sans-serif;
-    }
-    .search-field input::placeholder { color: #8a948f; font-weight: 400; }
-    .search-submit {
-        background: rgb(0,119,116); color: white;
-        border: 0; padding: 0 30px;
-        font-size: 14px; font-weight: 600;
-        display: flex; align-items: center; gap: 10px;
-        cursor: pointer; transition: background 0.15s;
-        font-family: "IBM Plex Sans", system-ui, sans-serif;
-        white-space: nowrap;
-    }
-    .search-submit:hover { background: rgb(0,88,85); }
-
-    /* ── Listings ────────────────────────────────────────── */
-    .listings-wrap {
-        max-width: 1320px; margin: 0 auto;
-        padding: 100px 28px 80px;
-        display: grid;
-        grid-template-columns: 260px 1fr;
-        gap: 40px;
-        align-items: start;
-    }
-    .career-sidebar {
-        position: sticky; top: 100px;
-        border-top: 2px solid #0d1614;
-        padding-top: 16px;
-    }
-    .filter-h3 {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; text-transform: uppercase;
-        letter-spacing: 0.1em; margin: 0 0 14px;
-        color: #0d1614; font-weight: 600;
-    }
-    .filter-group { border-bottom: 1px solid #d9ddd9; padding-bottom: 18px; margin-bottom: 18px; }
-    .filter-group-h4 {
-        font-size: 12px; font-weight: 600; margin: 0 0 10px; color: #0d1614;
-        display: flex; justify-content: space-between;
-    }
-    .filter-chk {
-        display: flex; align-items: center; gap: 10px;
-        padding: 4px 0; font-size: 13px; color: #2a3835;
-        cursor: pointer; user-select: none;
-    }
-    .filter-chk input { accent-color: rgb(0,119,116); margin: 0; }
-    .filter-chk .count {
-        margin-left: auto;
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; color: #8a948f;
-    }
-    .filter-chk:hover { color: #0d1614; }
-    .filter-chk:hover .count { color: #5a6864; }
-
-    /* ── Results ─────────────────────────────────────────── */
-    .results-head {
-        display: flex; align-items: baseline; justify-content: space-between;
-        border-top: 2px solid #0d1614;
-        border-bottom: 1px solid #d9ddd9;
-        padding-top: 16px; padding-bottom: 14px;
-    }
-    .results-count {
-        font-family: "IBM Plex Serif", serif;
-        font-size: 24px; font-weight: 500; letter-spacing: -0.01em;
-    }
-    .results-count em { font-style: normal; color: #005f5c; }
-
-    /* ── Poster grid ─────────────────────────────────────── */
-    .poster-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 22px;
-        margin-top: 28px;
-    }
-    .poster-card {
-        position: relative;
-        display: block;
-        text-decoration: none;
-        background: #ffffff;
-        border: 1px solid #0d1614;
-        overflow: hidden;
-        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-    }
-    .poster-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 22px 40px -22px rgba(13,22,20,0.45);
-    }
-    .poster-figure {
-        position: relative;
-        aspect-ratio: 3 / 4;
-        background: #efede5;
-        overflow: hidden;
-    }
-    .poster-figure img {
-        width: 100%; height: 100%;
-        object-fit: cover; display: block;
-        transition: transform 0.4s ease-out;
-    }
-    .poster-card:hover .poster-figure img { transform: scale(1.04); }
-    /* Hover scrim reveals the title for sighted users on the image-only card */
-    .poster-overlay {
-        position: absolute; inset: 0;
-        display: flex; flex-direction: column; justify-content: flex-end;
-        padding: 16px;
-        background: linear-gradient(to top, rgba(13,22,20,0.88) 0%, rgba(13,22,20,0.35) 42%, transparent 72%);
-        opacity: 0; transition: opacity 0.25s ease-out;
-    }
-    .poster-card:hover .poster-overlay,
-    .poster-card:focus-visible .poster-overlay { opacity: 1; }
-    .poster-card:focus-visible { outline: 3px solid rgb(0,119,116); outline-offset: 2px; }
-    .poster-title {
-        font-family: "IBM Plex Serif", serif;
-        font-size: 17px; font-weight: 500; line-height: 1.2;
-        color: #ffffff; letter-spacing: -0.01em; margin: 0 0 8px;
-    }
-    .poster-cta {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
-        color: #b6e3a0; font-weight: 500;
-        display: inline-flex; align-items: center; gap: 6px;
-    }
-    /* Corner badges */
-    .poster-badges {
-        position: absolute; top: 10px; left: 10px;
-        display: flex; gap: 6px; z-index: 2;
-    }
-    .poster-badge {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
-        padding: 3px 8px; border-radius: 2px; font-weight: 600;
-        box-shadow: 0 2px 6px rgba(13,22,20,0.18);
-    }
-    .poster-badge.new { background: #f0f7e6; color: #4d7e1c; }
-    .poster-badge.urgent { background: #f8e6e1; color: #b54327; }
-
-    /* ── Pagination ──────────────────────────────────────── */
-    .pagination-wrap {
-        display: flex; align-items: center;
-        justify-content: space-between;
-        gap: 16px; padding: 28px 0 0; flex-wrap: wrap;
-    }
-    .pagination-info {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; color: #5a6864;
-        text-transform: uppercase; letter-spacing: 0.08em;
-    }
-    .pagination-info strong {
-        color: #0d1614;
-        font-family: "IBM Plex Serif", serif;
-        font-size: 14px; font-weight: 500;
-        letter-spacing: 0; text-transform: none; margin: 0 2px;
-    }
-    .pagination-wrap nav a[rel="next"],
-    .pagination-wrap nav span[aria-disabled="true"] > span { padding-right: 12px; }
-
-    /* ── Responsive ──────────────────────────────────────── */
-    @media (max-width: 1100px) {
-        .hero-inner { grid-template-columns: 1fr; gap: 24px; padding: 36px 20px 32px; }
-        .career-h1 { font-size: clamp(32px, 7vw, 44px); }
-        .hero-illo { height: 200px; order: -1; }
-        .hero-meta { gap: 18px; }
-        .hero-stat strong { font-size: 20px; }
-        .search-panel { padding: 0 16px; }
-        .search-card { grid-template-columns: 1fr; }
-        .search-field { border-right: 0; border-bottom: 1px solid #d9ddd9; padding: 14px 18px; }
-        .search-submit { padding: 16px; justify-content: center; }
-        .listings-wrap { grid-template-columns: 1fr; padding: 90px 16px 50px; gap: 24px; }
-        .career-sidebar { position: static; }
-        .results-count { font-size: 20px; }
-        .poster-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        .pagination-wrap { justify-content: center; }
-        .pagination-info { width: 100%; text-align: center; }
-    }
-    @media (max-width: 520px) {
-        .hero-meta { flex-wrap: wrap; gap: 16px 22px; }
-        .poster-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .poster-title { font-size: 15px; }
-    }
-    /* Touch devices have no hover — keep the title overlay always visible */
-    @media (hover: none) {
-        .poster-overlay { opacity: 1; background: linear-gradient(to top, rgba(13,22,20,0.9) 0%, rgba(13,22,20,0.25) 50%, transparent 80%); }
-    }
-    [x-cloak] { display: none !important; }
-</style>
-
-{{-- Hidden filter form --}}
-<form id="career-search" method="GET" action="{{ route('karier.index') }}"></form>
-
-{{-- ─── HERO ────────────────────────────────────────────────── --}}
-<section class="career-hero">
-    <div class="hero-inner">
-        {{-- Left: copy + stats --}}
-        <div>
-            <div class="hero-eyebrow">RS AZRA · Karir '26</div>
-            <h1 class="career-h1">
-                Bergabunglah dalam karya <em>penyembuhan</em> yang <span class="accent">bermakna</span>.
-            </h1>
-            <p class="hero-lede">
-                Dua puluh delapan tahun. Tiga kampus. Lebih dari seribu staf yang hadir sebelum fajar
-                agar seseorang bisa pulang dengan sehat. Kami mencari orang-orang yang berdiri di sisi mereka.
-            </p>
-            <div class="hero-meta">
-                <div class="hero-stat"><strong>{{ $totalRoles }}</strong>Posisi terbuka</div>
-                <div class="hero-stat"><strong>1.140+</strong>Staf profesional</div>
-                <div class="hero-stat"><strong>3</strong>Kampus RS</div>
-                <div class="hero-stat"><strong>96%</strong>Tingkat retensi</div>
+<!doctype html>
+<html class="scroll-smooth" lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Karir RS Azra - Bergabung dalam Karya Penyembuhan yang Bermakna</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-tab.png') }}">
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,500;1,600&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    @vite(['resources/css/app.css'])
+</head>
+<body class="bg-white text-brand-dark font-jakarta antialiased selection:bg-brand-teal selection:text-white min-h-screen flex flex-col">
+    <!-- BEGIN: MainNavbar -->
+    <header class="w-full sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all">
+        <nav class="w-full px-6 lg:px-12 xl:px-16 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-10">
+                <a class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-teal rounded-lg p-1" href="{{ route('karier.index') }}">
+                    <div class="relative flex items-center justify-center">
+                        <span class="text-3xl font-extrabold tracking-tight text-brand-dark font-jakarta lowercase">azra</span>
+                        <div class="ml-1 relative flex items-center justify-center w-8 h-8">
+                            <span class="absolute w-7 h-2.5 bg-brand-teal rounded-full transition-transform group-hover:scale-105"></span>
+                            <span class="absolute h-7 w-2.5 bg-[#8AC249] rounded-full transition-transform group-hover:scale-105"></span>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex flex-col border-l border-slate-300 pl-3">
+                        <span class="text-xs font-bold tracking-widest uppercase text-brand-teal">CAREER HUB</span>
+                        <span class="text-[11px] text-slate-500 font-medium">Karier Medis &amp; Non-Medis</span>
+                    </div>
+                </a>
+                <div class="hidden xl:flex items-center gap-7 text-[14.5px] font-semibold text-slate-700">
+                    <a class="hover:text-brand-teal transition-colors" href="#lowongan">Lowongan Kerja</a>
+                    <a class="hover:text-brand-teal transition-colors" href="#proses">FAQ</a>
+                </div>
             </div>
-        </div>
-
-        {{-- Right: abstract illustration --}}
-        <div class="hero-illo">
-            <svg viewBox="0 0 480 360" preserveAspectRatio="xMidYMid meet" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <pattern id="hero-dots" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
-                        <circle cx="1" cy="1" r="1" fill="rgb(0,119,116)" opacity="0.18"/>
-                    </pattern>
-                    <pattern id="hero-lines" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                        <line x1="0" y1="0" x2="0" y2="8" stroke="rgb(129,189,65)" stroke-width="1" opacity="0.35"/>
-                    </pattern>
-                </defs>
-                <rect x="20" y="20" width="440" height="320" fill="url(#hero-dots)"/>
-                <circle cx="170" cy="180" r="120" fill="rgb(0,119,116)"/>
-                <circle cx="310" cy="200" r="90" fill="rgb(129,189,65)" opacity="0.92"/>
-                <rect x="320" y="60" width="120" height="80" fill="url(#hero-lines)"/>
-                <rect x="320" y="60" width="120" height="80" fill="none" stroke="rgb(0,119,116)" stroke-width="1.2"/>
-                <rect x="60" y="290" width="40" height="40" fill="#0d1614"/>
-                <g transform="translate(170 180)">
-                    <rect x="-10" y="-44" width="20" height="88" fill="white" opacity="0.95" rx="1.5"/>
-                    <rect x="-44" y="-10" width="88" height="20" fill="white" opacity="0.95" rx="1.5"/>
-                </g>
-                <circle cx="400" cy="270" r="34" fill="none" stroke="#0d1614" stroke-width="1.4"/>
-                <circle cx="400" cy="270" r="3" fill="#0d1614"/>
-                <line x1="20"  y1="345" x2="20"  y2="335" stroke="#5a6864" stroke-width="1"/>
-                <line x1="48"  y1="345" x2="48"  y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="76"  y1="345" x2="76"  y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="104" y1="345" x2="104" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="132" y1="345" x2="132" y2="335" stroke="#5a6864" stroke-width="1"/>
-                <line x1="160" y1="345" x2="160" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="188" y1="345" x2="188" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="216" y1="345" x2="216" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="244" y1="345" x2="244" y2="335" stroke="#5a6864" stroke-width="1"/>
-                <line x1="272" y1="345" x2="272" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="300" y1="345" x2="300" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="328" y1="345" x2="328" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="356" y1="345" x2="356" y2="335" stroke="#5a6864" stroke-width="1"/>
-                <line x1="384" y1="345" x2="384" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="412" y1="345" x2="412" y2="340" stroke="#5a6864" stroke-width="1"/>
-                <line x1="440" y1="345" x2="440" y2="340" stroke="#5a6864" stroke-width="1"/>
-            </svg>
-        </div>
-    </div>
-
-    {{-- Straddling search panel --}}
-    <div class="search-panel">
-        <div class="search-card">
-            <div class="search-field">
-                <label for="q-input">Posisi atau kata kunci</label>
-                <input
-                    form="career-search"
-                    type="text"
-                    id="q-input"
-                    name="q"
-                    value="{{ request('q') }}"
-                    placeholder="mis. perawat ICU, radiolog, apoteker..."
-                >
+            <div class="flex items-center gap-3">
+                <a class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-slate-700 hover:text-brand-teal transition-colors" href="{{ route('login') }}">Masuk Pelamar</a>
+                <a class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-brand-teal rounded-lg hover:bg-brand-darkteal shadow-sm transition-colors" href="#lowongan">Kirim CV</a>
             </div>
-            <button form="career-search" type="submit" class="search-submit">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-                Temukan Posisi
-            </button>
-        </div>
-    </div>
-</section>
+        </nav>
+    </header>
+    <!-- END: MainNavbar -->
+    <!-- BEGIN: HeroSection -->
+    <main class="flex-grow w-full">
+        <section class="w-full bg-slate-50 pt-6 pb-16 px-6 lg:px-12 xl:px-16 border-b border-slate-200" data-purpose="career-hero-section">
+            <div class="w-full max-w-[1600px] mx-auto">
+                <div class="relative w-full rounded-3xl overflow-hidden shadow-2xl bg-slate-900 group h-80" id="hero-carousel">
+                    @forelse ($slides as $slide)
+                        <div class="hero-slide absolute inset-0 transition-opacity duration-1000 ease-in-out {{ $loop->first ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none' }}">
+                            <img alt="Flyer lowongan {{ $slide->judul_posisi }} di {{ $slide->unit->nama }}"
+                                class="w-full h-full object-cover object-center scale-100 transform transition-transform duration-[7000ms] ease-out"
+                                src="{{ $slide->flyerUrl() }}" />
+                            <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(2,12,10,0.88) 0%, rgba(2,12,10,0.35) 55%, transparent 85%);"></div>
+                            <div class="absolute inset-x-0 bottom-0 p-6 sm:p-10 z-20">
+                                <p class="font-playfair italic text-emerald-300 text-sm mb-1">{{ $slide->unit->nama }}</p>
+                                <div class="flex items-end justify-between gap-4 flex-wrap">
+                                    <h2 class="font-playfair text-white font-semibold text-2xl sm:text-4xl leading-tight max-w-2xl">{{ $slide->judul_posisi }}</h2>
+                                    <a href="{{ route('karier.show', $slide) }}"
+                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-brand-dark text-sm font-bold rounded-lg hover:bg-brand-teal hover:text-white transition-colors">
+                                        Lamar Sekarang
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true" class="lucide lucide-arrow-right w-4 h-4"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="hero-slide absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100 pointer-events-auto" style="background: linear-gradient(120deg, #005F53 0%, #0F172A 100%);">
+                            <div class="absolute inset-0 flex flex-col justify-center p-6 sm:p-10 z-20">
+                                <p class="font-playfair italic text-emerald-300 text-sm mb-1">RS Azra Bogor</p>
+                                <h2 class="font-playfair text-white font-semibold text-2xl sm:text-4xl leading-tight max-w-2xl">Bergabung dalam karya penyembuhan yang bermakna.</h2>
+                            </div>
+                        </div>
+                    @endforelse
+                    <button aria-label="Slide sebelumnya"
+                        class="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-black/30 hover:bg-black/60 text-white backdrop-blur-md border border-white/20 opacity-80 group-hover:opacity-100 transition-all focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        id="carousel-prev">
+                        <svg class="w-5 h-5" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m15 18-6-6 6-6"></path></svg>
+                    </button>
+                    <button aria-label="Slide selanjutnya"
+                        class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-black/30 hover:bg-black/60 text-white backdrop-blur-md border border-white/20 opacity-80 group-hover:opacity-100 transition-all focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        id="carousel-next">
+                        <svg class="w-5 h-5" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m9 18 6-6-6-6"></path></svg>
+                    </button>
+                    <div class="absolute bottom-5 sm:bottom-6 right-6 sm:right-10 z-30 flex items-center gap-2.5" id="carousel-dots">
+                        @foreach ($slides as $slide)
+                            <button aria-label="Ke slide {{ $loop->iteration }}" data-index="{{ $loop->index }}"
+                                class="carousel-dot h-2.5 rounded-full transition-all duration-300 {{ $loop->first ? 'w-8 bg-brand-teal' : 'w-2.5 bg-white/50 hover:bg-white/80' }}"></button>
+                        @endforeach
+                    </div>
+                </div>
 
-{{-- ─── LISTINGS + SIDEBAR ─────────────────────────────────── --}}
-<div class="listings-wrap">
+                {{-- Search terintegrasi (fungsionalitas portal: q + unit) --}}
+                <form method="GET" action="{{ route('karier.index') }}#lowongan"
+                    class="relative z-10 max-w-4xl mx-auto -mt-0 mt-6 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 flex flex-col md:flex-row gap-3">
+                    <div class="flex items-center gap-3 flex-1 px-4 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="search" aria-hidden="true" class="lucide lucide-search w-5 h-5 text-slate-400 shrink-0"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                        <input type="text" name="q" value="{{ request('q') }}" placeholder="Posisi atau kata kunci — mis. perawat ICU…"
+                            class="w-full outline-none bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400" />
+                    </div>
+                    <div class="flex items-center gap-3 md:w-64 px-4 py-2 md:border-l border-slate-200">
+                        <select name="unit[]" onchange="this.form.submit()" class="w-full outline-none bg-transparent text-[15px] text-slate-900 cursor-pointer">
+                            <option value="">Semua Unit</option>
+                            @foreach ($units as $unit)
+                                <option value="{{ $unit->id }}" {{ in_array($unit->id, $unitFilter ?? []) ? 'selected' : '' }}>{{ $unit->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @foreach ((array) request('type', []) as $t)
+                        <input type="hidden" name="type[]" value="{{ $t }}" />
+                    @endforeach
+                    <button type="submit" class="px-8 py-3.5 bg-brand-teal text-white text-sm font-semibold rounded-xl hover:bg-brand-darkteal transition-colors whitespace-nowrap">
+                        Cari Posisi
+                    </button>
+                </form>
+            </div>
+        </section>
+        <!-- END: HeroSection -->
+        <!-- BEGIN: FeaturedJobsSection -->
+        <section class="w-full py-16 px-6 lg:px-12 xl:px-16 bg-brand-bgsoft border-b border-slate-200" data-purpose="featured-job-listings" id="lowongan">
+            <div class="w-full max-w-[1600px] mx-auto">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 text-brand-teal text-xs font-bold uppercase tracking-wider">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="radio" aria-hidden="true" class="lucide lucide-radio w-3.5 h-3.5 text-emerald-500 animate-pulse"><path d="M16.247 7.761a6 6 0 0 1 0 8.478"></path><path d="M19.075 4.933a10 10 0 0 1 0 14.134"></path><path d="M4.925 19.067a10 10 0 0 1 0-14.134"></path><path d="M7.753 16.239a6 6 0 0 1 0-8.478"></path><circle cx="12" cy="12" r="2"></circle></svg>
+                            Kebutuhan Mendesak &amp; Terbuka
+                        </div>
+                        <h2 class="font-playfair text-2xl sm:text-3xl font-semibold text-slate-900 mt-1">
+                            {{ $vacancies->total() }} Lowongan Karir Terpilih
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Daftar secara daring dengan verifikasi berkas terstandarisasi.
+                        </p>
+                    </div>
+                </div>
 
-    {{-- ── Sidebar ─────────────────────────────────────────── --}}
-    <aside class="career-sidebar">
-        <h3 class="filter-h3">Saring</h3>
+                @php
+                    $baseParams = array_filter(['q' => request('q'), 'type' => request('type')]);
+                @endphp
+                <div class="flex items-center gap-2 flex-wrap mb-3">
+                    <span class="text-xs text-slate-500 font-medium">Filter Unit:</span>
+                    <div class="inline-flex rounded-lg p-1 bg-white border border-slate-200 text-xs font-semibold flex-wrap">
+                        <a href="{{ route('karier.index', $baseParams) }}#lowongan"
+                            class="px-3 py-1.5 rounded-md {{ empty($unitFilter) ? 'bg-brand-teal text-white' : 'text-slate-600 hover:text-brand-teal' }}">
+                            Semua ({{ $totalRoles }})
+                        </a>
+                        @foreach ($units as $unit)
+                            @php
+                                $active = in_array($unit->id, $unitFilter ?? []);
+                                $ids = $active ? array_values(array_diff($unitFilter, [$unit->id])) : array_merge($unitFilter ?? [], [$unit->id]);
+                                $params = $baseParams;
+                                if (! empty($ids)) { $params['unit'] = $ids; }
+                            @endphp
+                            <a href="{{ route('karier.index', $params) }}#lowongan"
+                                class="px-3 py-1.5 rounded-md {{ $active ? 'bg-brand-teal text-white' : 'text-slate-600 hover:text-brand-teal' }}">
+                                {{ $unit->nama }} ({{ $unit->published_count }})
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap mb-10">
+                    <span class="text-xs text-slate-500 font-medium">Jenis:</span>
+                    <div class="inline-flex rounded-lg p-1 bg-white border border-slate-200 text-xs font-semibold flex-wrap">
+                        @php $typeBase = array_filter(['q' => request('q'), 'unit' => request('unit')]); @endphp
+                        <a href="{{ route('karier.index', $typeBase) }}#lowongan"
+                            class="px-3 py-1.5 rounded-md {{ empty($typeFilter) ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-brand-teal' }}">
+                            Semua Jenis
+                        </a>
+                        @foreach ($employmentTypes as $type)
+                            @php
+                                $tActive = in_array($type->value, $typeFilter ?? []);
+                                $tIds = $tActive ? array_values(array_diff($typeFilter, [$type->value])) : array_merge($typeFilter ?? [], [$type->value]);
+                                $tParams = $typeBase;
+                                if (! empty($tIds)) { $tParams['type'] = $tIds; }
+                            @endphp
+                            <a href="{{ route('karier.index', $tParams) }}#lowongan"
+                                class="px-3 py-1.5 rounded-md {{ $tActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-brand-teal' }}">
+                                {{ $type->label() }} ({{ $typeCounts[$type->value] ?? 0 }})
+                            </a>
+                        @endforeach
+                    </div>
+                    @if (request()->hasAny(['q', 'unit', 'type']))
+                        <a href="{{ route('karier.index') }}#lowongan" class="text-xs text-brand-teal underline underline-offset-4 font-medium">Reset semua filter</a>
+                    @endif
+                </div>
 
-        {{-- Department filter --}}
-        <div class="filter-group">
-            <div class="filter-group-h4">Departemen</div>
-            @forelse ($units as $unit)
-                <label class="filter-chk">
-                    <input
-                        form="career-search"
-                        type="checkbox"
-                        name="unit[]"
-                        value="{{ $unit->id }}"
-                        {{ in_array($unit->id, $unitFilter ?? []) ? 'checked' : '' }}
-                        x-on:change="document.getElementById('career-search').submit()"
-                    >
-                    <span>{{ $unit->nama }}</span>
-                    <span class="count">{{ $unit->published_count }}</span>
-                </label>
-            @empty
-                <p style="font-size: 12px; color: #8a948f;">Tidak ada departemen.</p>
-            @endforelse
-        </div>
+                @if ($vacancies->isEmpty())
+                    <div class="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                        <h3 class="font-playfair text-2xl text-slate-900">Tidak ada lowongan yang cocok.</h3>
+                        <p class="text-sm text-slate-500 mt-2">Coba kata kunci atau filter yang berbeda.</p>
+                        <a href="{{ route('karier.index') }}#lowongan"
+                            class="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-brand-teal text-white text-sm font-semibold rounded-lg hover:bg-brand-darkteal transition-colors">
+                            Lihat semua lowongan
+                        </a>
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        @foreach ($vacancies as $vacancy)
+                            @php
+                                $isNew = $vacancy->created_at->gte(now()->subDays(3));
+                                $isUrgent = $vacancy->tenggat_lamaran->lte(now()->addDays(7));
+                            @endphp
+                            <article class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-lg hover:border-brand-teal/50 transition-all duration-200 group">
+                                <a href="{{ route('karier.show', $vacancy) }}" class="block relative bg-slate-100" aria-label="Lihat lowongan {{ $vacancy->judul_posisi }} — {{ $vacancy->unit->nama }}">
+                                    <img src="{{ $vacancy->flyerUrl() }}" alt="Flyer lowongan {{ $vacancy->judul_posisi }} di {{ $vacancy->unit->nama }}"
+                                        loading="lazy" class="w-full h-44 object-cover object-top" />
+                                    @if ($isNew || $isUrgent)
+                                        <div class="absolute top-3 left-3 flex gap-1.5">
+                                            @if ($isNew)
+                                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-brand-teal">Baru</span>
+                                            @endif
+                                            @if ($isUrgent)
+                                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700">Mendesak</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </a>
+                                <div class="p-6 flex flex-col flex-1">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-brand-teal">{{ $vacancy->unit->nama }}</span>
+                                        <span class="text-xs text-slate-400 font-medium">{{ $vacancy->jenis_pekerjaan->label() }}</span>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-slate-900 group-hover:text-brand-teal transition-colors leading-snug">
+                                        <a href="{{ route('karier.show', $vacancy) }}">{{ $vacancy->judul_posisi }}</a>
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="map-pin" aria-hidden="true" class="lucide lucide-map-pin w-3.5 h-3.5 text-slate-400"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                        {{ $vacancy->unit->nama }}, Bogor
+                                    </p>
+                                    <ul class="mt-4 space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3">
+                                        <li class="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" aria-hidden="true" class="lucide lucide-check w-3.5 h-3.5 text-brand-teal"><path d="M20 6 9 17l-5-5"></path></svg>
+                                            {{ $vacancy->jumlah_posisi }} posisi tersedia
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" aria-hidden="true" class="lucide lucide-check w-3.5 h-3.5 text-brand-teal"><path d="M20 6 9 17l-5-5"></path></svg>
+                                            {{ $vacancy->jenis_pekerjaan->label() }}
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" aria-hidden="true" class="lucide lucide-check w-3.5 h-3.5 text-brand-teal"><path d="M20 6 9 17l-5-5"></path></svg>
+                                            Batas {{ $vacancy->tenggat_lamaran->format('d M Y') }}
+                                        </li>
+                                    </ul>
+                                    <div class="pt-6 mt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
+                                        <span class="text-[11px] text-slate-400">{{ $vacancy->created_at->locale('id')->diffForHumans() }}</span>
+                                        <a class="text-xs font-bold text-brand-teal hover:text-brand-darkteal group-hover:translate-x-0.5 transition-all inline-flex items-center gap-1"
+                                            href="{{ route('karier.show', $vacancy) }}">
+                                            Rincian &amp; Lamar
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true" class="lucide lucide-arrow-right w-3.5 h-3.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
 
-        {{-- Employment type filter --}}
-        <div class="filter-group">
-            <div class="filter-group-h4">Jenis Pekerjaan</div>
-            @foreach ($employmentTypes as $type)
-                <label class="filter-chk">
-                    <input
-                        form="career-search"
-                        type="checkbox"
-                        name="type[]"
-                        value="{{ $type->value }}"
-                        {{ in_array($type->value, $typeFilter ?? []) ? 'checked' : '' }}
-                        x-on:change="document.getElementById('career-search').submit()"
-                    >
-                    <span>{{ $type->label() }}</span>
-                    <span class="count">{{ $typeCounts[$type->value] ?? 0 }}</span>
-                </label>
-            @endforeach
-        </div>
-
-        @if (request()->hasAny(['q', 'unit', 'type']))
-            <a href="{{ route('karier.index') }}" style="font-size: 12px; color: rgb(0,119,116); text-decoration: underline; text-underline-offset: 3px;">
-                ← Reset semua filter
-            </a>
-        @endif
-    </aside>
-
-    {{-- ── Job listings ────────────────────────────────────── --}}
-    <div>
-        {{-- Results header --}}
-        <div class="results-head">
-            <div class="results-count">
-                <em>{{ $vacancies->total() }}</em> posisi terbuka
-                @if(request('q'))
-                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8a948f; margin-left: 14px; text-transform: uppercase; letter-spacing: 0.06em;">
-                        cocok "{{ request('q') }}"
-                    </span>
+                    <div class="mt-10 flex items-center justify-between gap-4 flex-wrap">
+                        <p class="text-xs text-slate-500">
+                            Menampilkan <strong class="text-slate-900">{{ $vacancies->firstItem() }}–{{ $vacancies->lastItem() }}</strong>
+                            dari <strong class="text-slate-900">{{ $vacancies->total() }}</strong> posisi
+                        </p>
+                        <div>{{ $vacancies->links() }}</div>
+                    </div>
                 @endif
             </div>
+        </section>
+        <!-- END: FeaturedJobsSection -->
+        <!-- BEGIN: BantuanBanner -->
+        <section class="w-full px-6 lg:px-12 xl:px-16 bg-brand-bgsoft border-b border-slate-200">
+            <div class="w-full max-w-[1600px] mx-auto py-8">
+                <div class="bg-white rounded-xl p-5 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2.5 bg-emerald-50 text-brand-teal rounded-lg shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-text" aria-hidden="true" class="lucide lucide-file-text w-5 h-5"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                        </span>
+                        <div>
+                            <p class="text-sm font-bold text-slate-800">Tidak menemukan posisi yang sesuai bidang Anda?</p>
+                            <p class="text-xs text-slate-500">Pantau halaman ini berkala — lowongan baru terbit setiap periode rekrutmen.</p>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/6281219801997" target="_blank" rel="noopener"
+                        class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shrink-0 transition-colors">
+                        Hubungi HR RS Azra
+                    </a>
+                </div>
+            </div>
+        </section>
+        <!-- END: BantuanBanner -->
+        <!-- BEGIN: RecruitmentProcessSection -->
+        <section class="w-full py-16 px-6 lg:px-12 xl:px-16 bg-white" data-purpose="hiring-process" id="proses">
+            <div class="w-full max-w-[1600px] mx-auto">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <span class="text-brand-teal text-xs font-bold uppercase tracking-wider">Transparan &amp; Terukur</span>
+                    <h2 class="font-playfair text-2xl sm:text-3xl font-semibold text-slate-900 mt-1">Tahapan Seleksi Rekrutmen</h2>
+                    <p class="text-sm text-slate-500 mt-2">Seluruh proses seleksi dilakukan secara objektif dengan orientasi kompetensi klinis serta etika pelayanan.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+                    <div class="bg-brand-bgsoft rounded-xl p-6 border border-slate-200 relative">
+                        <span class="w-8 h-8 rounded-full bg-brand-teal text-white font-bold text-xs flex items-center justify-center mb-4">1</span>
+                        <h3 class="text-base font-bold text-slate-900">Registrasi &amp; Seleksi Berkas</h3>
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">Pengisian portal kandidat, verifikasi keabsahan STR, ijazah terakreditasi, sertifikasi kompetensi medis.</p>
+                        <span class="inline-block mt-4 text-[11px] font-semibold text-brand-teal">Estimasi: 3 - 5 Hari Kerja</span>
+                    </div>
+                    <div class="bg-brand-bgsoft rounded-xl p-6 border border-slate-200 relative">
+                        <span class="w-8 h-8 rounded-full bg-brand-teal text-white font-bold text-xs flex items-center justify-center mb-4">2</span>
+                        <h3 class="text-base font-bold text-slate-900">Asesmen Kompetensi &amp; Kredensial</h3>
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">Tes tertulis kompetensi bidang, psikotes komprehensif, dan verifikasi komite medik / komite keperawatan.</p>
+                        <span class="inline-block mt-4 text-[11px] font-semibold text-brand-teal">Estimasi: 2 - 4 Hari Kerja</span>
+                    </div>
+                    <div class="bg-brand-bgsoft rounded-xl p-6 border border-slate-200 relative">
+                        <span class="w-8 h-8 rounded-full bg-brand-teal text-white font-bold text-xs flex items-center justify-center mb-4">3</span>
+                        <h3 class="text-base font-bold text-slate-900">Wawancara User &amp; Direksi</h3>
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">Sesi tatap muka dengan Kepala Instalasi, Direktur Medis, dan Tim HR terkait studi kasus dan keselarasan kultur.</p>
+                        <span class="inline-block mt-4 text-[11px] font-semibold text-brand-teal">Estimasi: 1 Minggu</span>
+                    </div>
+                    <div class="bg-brand-bgsoft rounded-xl p-6 border border-slate-200 relative">
+                        <span class="w-8 h-8 rounded-full bg-brand-teal text-white font-bold text-xs flex items-center justify-center mb-4">4</span>
+                        <h3 class="text-base font-bold text-slate-900">Medical Check-Up (MCU) &amp; Onboarding</h3>
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">Pemeriksaan kesehatan kerja menyeluruh, penandatanganan kontrak kerja, dan orientasi tata laksana RS.</p>
+                        <span class="inline-block mt-4 text-[11px] font-semibold text-brand-teal">Selamat Bergabung!</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- END: RecruitmentProcessSection -->
+    </main>
+    <!-- BEGIN: MainFooter -->
+    <footer class="w-full bg-slate-950 text-slate-300 pt-14 pb-8 px-6 lg:px-12 xl:px-16 border-t border-slate-800" data-purpose="career-portal-footer">
+        <div class="w-full max-w-[1600px] mx-auto">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-slate-800">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-white lowercase tracking-tight font-jakarta">azra</span>
+                        <div class="relative flex items-center justify-center w-6 h-6">
+                            <span class="absolute w-5 h-2 bg-emerald-500 rounded-full"></span>
+                            <span class="absolute h-5 w-2 bg-[#8AC249] rounded-full"></span>
+                        </div>
+                        <span class="text-xs font-semibold tracking-wider uppercase text-emerald-400 pl-2 border-l border-slate-700">Karir &amp; Rekrutmen</span>
+                    </div>
+                    <p class="text-xs text-slate-400 max-w-md leading-relaxed">Melayani kesehatan masyarakat sejak 1994 dengan profesionalisme, empati, dan standar pelayanan medis paripurna.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 text-xs text-slate-400">
+                    <div><span class="text-slate-500 block mb-0.5">Alamat</span>Jl. Raya Pajajaran No.219, Bogor</div>
+                    <div><span class="text-slate-500 block mb-0.5">Kontak HR</span>rekrutmen@rsazra.co.id • (0251) 8318456</div>
+                </div>
+            </div>
+            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>© {{ date('Y') }} RS Azra Bogor. Hak Cipta Dilindungi.</p>
+                <div class="flex items-center gap-6">
+                    <a class="hover:text-slate-300 transition-colors" href="#">Kebijakan Privasi</a>
+                    <a class="hover:text-slate-300 transition-colors" href="#">Syarat &amp; Ketentuan</a>
+                    <a class="hover:text-slate-300 transition-colors" href="https://rsazra.co.id">rsazra.co.id</a>
+                </div>
+            </div>
         </div>
-
-        @if ($vacancies->isEmpty())
-            {{-- Empty state --}}
-            <div style="padding: 60px 0; text-align: center; color: #5a6864;">
-                <div style="width: 56px; height: 56px; border-radius: 50%; background: #e5f1f0; color: rgb(0,119,116); display: grid; place-items: center; margin: 0 auto 20px;">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z"/></svg>
-                </div>
-                <h3 style="font-family: 'IBM Plex Serif', serif; font-size: 22px; color: #0d1614; margin: 12px 0 6px; font-weight: 500;">Tidak ada lowongan yang cocok.</h3>
-                <p style="font-size: 13.5px; max-width: 44ch; margin: 0 auto;">Coba kata kunci atau filter yang berbeda, atau reset filter untuk melihat semua posisi.</p>
-                @if (request()->hasAny(['q', 'unit', 'type']))
-                    <a href="{{ route('karier.index') }}" style="margin-top: 18px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgb(0,119,116); color: white; font-size: 13px; font-weight: 600; border-radius: 2px; text-decoration: none;">
-                        Lihat semua lowongan
-                    </a>
-                @endif
-            </div>
-        @else
-            {{-- Poster grid --}}
-            <div class="poster-grid">
-                @foreach ($vacancies as $vacancy)
-                    @php
-                        $isNew    = $vacancy->created_at->gte(now()->subDays(3));
-                        $isUrgent = $vacancy->tenggat_lamaran->lte(now()->addDays(7));
-                    @endphp
-                    <a href="{{ route('karier.show', $vacancy) }}" class="poster-card" aria-label="Lihat lowongan {{ $vacancy->judul_posisi }} — {{ $vacancy->unit->nama }}">
-                        @if ($isNew || $isUrgent)
-                            <div class="poster-badges">
-                                @if ($isNew)
-                                    <span class="poster-badge new">Baru</span>
-                                @endif
-                                @if ($isUrgent)
-                                    <span class="poster-badge urgent">Mendesak</span>
-                                @endif
-                            </div>
-                        @endif
-                        <figure class="poster-figure">
-                            <img
-                                src="{{ $vacancy->flyerUrl() }}"
-                                alt="Flyer lowongan {{ $vacancy->judul_posisi }} di {{ $vacancy->unit->nama }}"
-                                loading="lazy"
-                                width="600" height="800"
-                            >
-                            <div class="poster-overlay">
-                                <h3 class="poster-title">{{ $vacancy->judul_posisi }}</h3>
-                                <span class="poster-cta">
-                                    Lihat &amp; Lamar
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-                                </span>
-                            </div>
-                        </figure>
-                    </a>
-                @endforeach
-            </div>
-
-            {{-- Pagination --}}
-            <div class="pagination-wrap">
-                <div class="pagination-info">
-                    Menampilkan <strong>{{ $vacancies->firstItem() }}–{{ $vacancies->lastItem() }}</strong>
-                    dari <strong>{{ $vacancies->total() }}</strong> posisi
-                </div>
-                <div>
-                    {{ $vacancies->links() }}
-                </div>
-            </div>
-        @endif
-    </div>
-
-</div>
-
-</x-layouts.public>
+    </footer>
+    <!-- END: MainFooter -->
+    <!-- BEGIN: Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script data-purpose="hero-carousel-and-lucide-initializer">
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) { lucide.createIcons(); }
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            const prevBtn = document.getElementById('carousel-prev');
+            const nextBtn = document.getElementById('carousel-next');
+            const carouselContainer = document.getElementById('hero-carousel');
+            if (!slides.length) return;
+            let currentIndex = 0;
+            let slideInterval = null;
+            function updateSlide(index) {
+                slides.forEach((slide, idx) => {
+                    const on = idx === index;
+                    slide.classList.toggle('opacity-100', on);
+                    slide.classList.toggle('pointer-events-auto', on);
+                    slide.classList.toggle('opacity-0', !on);
+                    slide.classList.toggle('pointer-events-none', !on);
+                });
+                dots.forEach((dot, idx) => {
+                    dot.className = 'carousel-dot h-2.5 rounded-full transition-all duration-300 '
+                        + (idx === index ? 'w-8 bg-brand-teal' : 'w-2.5 bg-white/50 hover:bg-white/80');
+                });
+                currentIndex = index;
+            }
+            function nextSlide() { updateSlide((currentIndex + 1) % slides.length); }
+            function prevSlide() { updateSlide((currentIndex - 1 + slides.length) % slides.length); }
+            function startAutoSlide() { stopAutoSlide(); slideInterval = setInterval(nextSlide, 4500); }
+            function stopAutoSlide() { if (slideInterval) { clearInterval(slideInterval); } }
+            if (nextBtn) { nextBtn.addEventListener('click', () => { nextSlide(); startAutoSlide(); }); }
+            if (prevBtn) { prevBtn.addEventListener('click', () => { prevSlide(); startAutoSlide(); }); }
+            dots.forEach((dot) => { dot.addEventListener('click', (e) => { updateSlide(parseInt(e.currentTarget.getAttribute('data-index'), 10)); startAutoSlide(); }); });
+            if (carouselContainer) {
+                carouselContainer.addEventListener('mouseenter', stopAutoSlide);
+                carouselContainer.addEventListener('mouseleave', startAutoSlide);
+            }
+            startAutoSlide();
+        });
+    </script>
+    <!-- END: Scripts -->
+</body>
+</html>

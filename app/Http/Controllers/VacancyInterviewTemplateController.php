@@ -5,17 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\InterviewTemplate;
 use App\Models\Vacancy;
 use App\Models\VacancyInterviewTemplate;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class VacancyInterviewTemplateController extends Controller
 {
     public function show(Vacancy $lowongan): View
     {
-        Gate::authorize('manageInterviewTemplates', $lowongan);
+        auth()->user()->requirePermission(Permissions::VACANCY_INTERVIEW_TEMPLATES);
 
         $lowongan->load('workflowTemplateSnapshot.stages');
 
@@ -39,7 +39,7 @@ class VacancyInterviewTemplateController extends Controller
 
     public function save(Request $request, Vacancy $lowongan): RedirectResponse
     {
-        Gate::authorize('manageInterviewTemplates', $lowongan);
+        $request->user()->requirePermission(Permissions::VACANCY_INTERVIEW_TEMPLATES);
 
         $lowongan->load('workflowTemplateSnapshot.stages');
 

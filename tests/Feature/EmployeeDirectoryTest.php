@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Role;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -28,7 +28,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_role_cannot_view_employee_list(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $response = $this->actingAs($user)->get(route('karyawan.index'));
 
@@ -101,7 +101,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_role_cannot_view_create_form(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $response = $this->actingAs($user)->get(route('karyawan.create'));
 
@@ -158,7 +158,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_role_cannot_create_employee(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $unit = Unit::factory()->create();
         $response = $this->actingAs($user)->post(route('karyawan.store'), [
@@ -189,7 +189,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_can_view_own_profile(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $employee = Employee::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->get(route('karyawan.show', $employee));
@@ -200,7 +200,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_cannot_view_other_employee_profile(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $otherEmployee = Employee::factory()->create();
 
         $response = $this->actingAs($user)->get(route('karyawan.show', $otherEmployee));
@@ -223,7 +223,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_role_cannot_view_edit_form(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $employee = Employee::factory()->create();
 
         $response = $this->actingAs($user)->get(route('karyawan.edit', $employee));
@@ -271,7 +271,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_role_cannot_update_employee(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $employee = Employee::factory()->create(['nip' => '30000001']);
 
         $unit = Unit::factory()->create();
@@ -289,7 +289,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_cannot_edit_own_linked_record(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $employee = Employee::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->get(route('karyawan.edit', $employee));
@@ -299,7 +299,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_cannot_update_own_linked_record(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $employee = Employee::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->put(route('karyawan.update', $employee), [
@@ -329,7 +329,7 @@ class EmployeeDirectoryTest extends TestCase
 
     public function test_employee_role_cannot_delete_employee(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         $employee = Employee::factory()->create();
 
         $response = $this->actingAs($user)->delete(route('karyawan.destroy', $employee));

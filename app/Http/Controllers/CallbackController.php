@@ -7,10 +7,10 @@ use App\Models\Candidate;
 use App\Models\Vacancy;
 use App\Services\CallbackCandidateFinder;
 use App\Services\EmailNotificationService;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class CallbackController extends Controller
@@ -22,7 +22,7 @@ class CallbackController extends Controller
 
     public function index(Request $request, Vacancy $lowongan): View|RedirectResponse
     {
-        Gate::authorize('callback', $lowongan);
+        $request->user()->requirePermission(Permissions::VACANCY_CALLBACK);
 
         if (! $lowongan->isOpenForApplications()) {
             return $this->routeToOpenPeriod($lowongan);
@@ -40,7 +40,7 @@ class CallbackController extends Controller
 
     public function invite(Request $request, Vacancy $lowongan): RedirectResponse
     {
-        Gate::authorize('callback', $lowongan);
+        $request->user()->requirePermission(Permissions::VACANCY_CALLBACK);
 
         if (! $lowongan->isOpenForApplications()) {
             return back()->withErrors([

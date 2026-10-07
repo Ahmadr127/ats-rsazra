@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Employee;
+use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -10,7 +10,7 @@ class StoreEmployeeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', Employee::class);
+        return $this->user()->hasPermission(Permissions::EMPLOYEE_CREATE);
     }
 
     /**

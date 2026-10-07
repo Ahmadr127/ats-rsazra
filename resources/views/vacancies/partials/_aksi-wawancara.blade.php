@@ -116,7 +116,7 @@
                             <option value="">Pilih pewawancara...</option>
                             @foreach ($eligibleInterviewers as $interviewer)
                                 <option value="{{ $interviewer->id }}" @if (old('interviewer_id') == $interviewer->id) selected @endif>
-                                    {{ $interviewer->name }} ({{ $interviewer->role->label() }})
+                                    {{ $interviewer->name }} ({{ $interviewer->role?->label ?? 'Tanpa Peran' }})
                                 </option>
                             @endforeach
                         </select>
@@ -158,8 +158,9 @@
         </dl>
     </div>
 
-    {{-- Reschedule / Reassign form (HR Admin only) --}}
-    @if (auth()->user()->isHrAdmin() && $isWawancaraUser)
+    {{-- Reschedule / Reassign form (interview.reschedule permission) --}}
+    @permission('interview.reschedule')
+    @if ($isWawancaraUser)
         <div class="bg-white rounded-xl border border-gray-100 p-5 mb-4" x-data="{ open: false }">
             <button type="button" @click="open = !open"
                 class="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
@@ -191,7 +192,7 @@
                                 <option value="">Tetap sama</option>
                                 @foreach ($eligibleInterviewers as $interviewer)
                                     <option value="{{ $interviewer->id }}" @if ($currentStage->interviewer_id == $interviewer->id) selected @endif>
-                                        {{ $interviewer->name }} ({{ $interviewer->role->label() }})
+                                        {{ $interviewer->name }} ({{ $interviewer->role?->label ?? 'Tanpa Peran' }})
                                     </option>
                                 @endforeach
                             </select>
@@ -205,6 +206,7 @@
             </div>
         </div>
     @endif
+    @endpermission
 
     <div class="bg-white rounded-xl border border-gray-100 p-5">
         <h2 class="text-sm font-semibold text-gray-800 mb-4">Penilaian Wawancara</h2>

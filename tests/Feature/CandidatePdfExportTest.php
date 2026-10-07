@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Actions\BuildCandidateProfileData;
 use App\Enums\ApplicationStageStatus;
-use App\Enums\Role;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Candidate;
@@ -13,6 +12,7 @@ use App\Models\DiscSubmission;
 use App\Models\MbtiResult;
 use App\Models\MbtiSubmission;
 use App\Models\McuResult;
+use App\Models\Role;
 use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;
@@ -80,7 +80,7 @@ class CandidatePdfExportTest extends TestCase
 
     private function hrAdmin(): User
     {
-        return User::factory()->create(['role' => Role::HrAdmin]);
+        return User::factory()->withRole(Role::HrAdmin)->create([]);
     }
 
     private function renderProfileView(Application $application, Vacancy $lowongan): string
@@ -238,7 +238,7 @@ class CandidatePdfExportTest extends TestCase
         $application = $this->makeApplication($vacancy);
 
         foreach ([Role::HrManager, Role::UnitHead, Role::Director, Role::Employee] as $role) {
-            $user = User::factory()->create(['role' => $role]);
+            $user = User::factory()->withRole($role)->create([]);
 
             $this->actingAs($user)
                 ->get(route('lowongan.kandidat.pdf', ['lowongan' => $vacancy, 'application' => $application]))

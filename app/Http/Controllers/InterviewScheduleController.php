@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ApplicationStageStatus;
-use App\Enums\Role;
 use App\Http\Requests\StoreInterviewScheduleRequest;
 use App\Http\Requests\UpdateInterviewScheduleRequest;
 use App\Logging\LogContext;
@@ -13,9 +12,10 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Notifications\WawancaraDijadwalkan;
 use App\Services\EmailNotificationService;
+use App\Support\InterviewStageMap;
+use App\Support\Permissions;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
@@ -25,7 +25,7 @@ class InterviewScheduleController extends Controller
 
     public function store(StoreInterviewScheduleRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('scheduleInterview', $application);
+        $request->user()->requirePermission(Permissions::INTERVIEW_SCHEDULE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 
@@ -77,17 +77,8 @@ class InterviewScheduleController extends Controller
 
         if ($stage->key === 'wawancara_user') {
             Notification::send([$interviewer], new WawancaraDijadwalkan($application, $stage));
-        } else {
-            $interviewerRole = match ($stage->key) {
-                'wawancara_manajer_hr' => Role::HrManager,
-                'wawancara_direktur' => Role::Director,
-                default => null,
-            };
-
-            if ($interviewerRole) {
-                $interviewers = User::where('role', $interviewerRole)->where('is_active', true)->get();
-                Notification::send($interviewers, new WawancaraDijadwalkan($application, $stage));
-            }
+        } elseif ($decidePermission = InterviewStageMap::decidePermissionForStage($stage->key)) {
+            Notification::send(User::withPermission($decidePermission), new WawancaraDijadwalkan($application, $stage));
         }
 
         return redirect()
@@ -97,7 +88,7 @@ class InterviewScheduleController extends Controller
 
     public function update(UpdateInterviewScheduleRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('scheduleInterview', $application);
+        $request->user()->requirePermission(Permissions::INTERVIEW_RESCHEDULE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 

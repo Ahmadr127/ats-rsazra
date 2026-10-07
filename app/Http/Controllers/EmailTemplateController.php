@@ -4,15 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateEmailTemplateRequest;
 use App\Models\EmailTemplate;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class EmailTemplateController extends Controller
 {
     public function index(): View
     {
-        Gate::authorize('viewAny', EmailTemplate::class);
+        auth()->user()->requirePermission(Permissions::EMAIL_TEMPLATE_VIEW);
 
         $templates = EmailTemplate::orderBy('key')->get();
 
@@ -21,7 +21,7 @@ class EmailTemplateController extends Controller
 
     public function edit(EmailTemplate $templateEmail): View
     {
-        Gate::authorize('update', $templateEmail);
+        auth()->user()->requirePermission(Permissions::EMAIL_TEMPLATE_UPDATE);
 
         return view('email-templates.edit', compact('templateEmail'));
     }

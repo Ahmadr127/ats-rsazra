@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Role;
 use App\Http\Requests\StoreInterviewResultRequest;
 use App\Logging\LogContext;
 use App\Models\Application;
 use App\Models\InterviewResult;
 use App\Models\Vacancy;
 use App\Services\ApplicationPipelineService;
+use App\Support\InterviewStageMap;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class InterviewController extends Controller
@@ -20,12 +20,12 @@ class InterviewController extends Controller
 
     public function decide(StoreInterviewResultRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('decideInterview', $application);
+        $user = $request->user();
+
+        $stageKey = InterviewStageMap::stageKeyForDecider($user);
+        abort_if(! $stageKey, 403);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
-
-        $user = $request->user();
-        $stageKey = $this->resolveStageKey($user->role);
 
         $application->load('stages');
         $interviewStage = $application->stages->firstWhere('key', $stageKey);
@@ -43,6 +43,13 @@ class InterviewController extends Controller
         if ($interviewStage->key === 'wawancara_user' && $interviewStage->interviewer_id !== $user->id) {
             abort(403);
         }
+
+        abort_unless(
+            $interviewStage->key !== InterviewStageMap::USER
+                || $user->isInUnit($lowongan->unit_id)
+                || $user->hasPermission(Permissions::VACANCY_VIEW_ORG),
+            403
+        );
 
         $keputusan = $request->input('keputusan');
         $catatan = $request->input('catatan');
@@ -101,15 +108,5 @@ class InterviewController extends Controller
         return redirect()
             ->route('lowongan.pipeline', $lowongan)
             ->with('success', "Kandidat berhasil {$label}.");
-    }
-
-    private function resolveStageKey(Role $role): string
-    {
-        return match ($role) {
-            Role::UnitHead, Role::Employee => 'wawancara_user',
-            Role::HrManager => 'wawancara_manajer_hr',
-            Role::Director => 'wawancara_direktur',
-            default => 'wawancara_user',
-        };
     }
 }

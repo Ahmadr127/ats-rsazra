@@ -7,9 +7,9 @@ use App\Models\Application;
 use App\Models\Vacancy;
 use App\Services\ApplicationPipelineService;
 use App\Services\EmailNotificationService;
+use App\Support\Permissions;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 
 class OnboardingController extends Controller
 {
@@ -20,7 +20,7 @@ class OnboardingController extends Controller
 
     public function sendInvitation(SendOnboardingInvitationRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('manageOnboarding', $application);
+        $request->user()->requirePermission(Permissions::ONBOARDING_INVITE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 
@@ -60,7 +60,7 @@ class OnboardingController extends Controller
 
     public function complete(Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('manageOnboarding', $application);
+        auth()->user()->requirePermission(Permissions::ONBOARDING_COMPLETE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 

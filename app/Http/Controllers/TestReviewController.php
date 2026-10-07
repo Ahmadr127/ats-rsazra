@@ -8,10 +8,10 @@ use App\Models\TestAnswer;
 use App\Models\TestSubmission;
 use App\Models\Vacancy;
 use App\Services\ApplicationPipelineService;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class TestReviewController extends Controller
 {
@@ -20,7 +20,7 @@ class TestReviewController extends Controller
     public function scoreEssay(Request $request, Vacancy $lowongan, TestAnswer $answer): RedirectResponse
     {
         $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
-        Gate::authorize('reviewEssay', $vacancyTest);
+        $request->user()->requirePermission(Permissions::TEST_REVIEW_ESSAY);
 
         abort_if($answer->question->tipe !== QuestionType::Essay, 422);
         abort_if($answer->submission->snapshot->vacancy_test_id !== $vacancyTest->id, 404);
@@ -47,7 +47,7 @@ class TestReviewController extends Controller
     public function decide(CompetencyTestDecisionRequest $request, Vacancy $lowongan, TestSubmission $submission): RedirectResponse
     {
         $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
-        Gate::authorize('decide', $vacancyTest);
+        $request->user()->requirePermission(Permissions::TEST_DECIDE);
 
         abort_if($submission->snapshot->vacancy_test_id !== $vacancyTest->id, 404);
 

@@ -6,9 +6,9 @@ use App\Http\Requests\SendOfferingLetterRequest;
 use App\Models\Application;
 use App\Models\Vacancy;
 use App\Services\EmailNotificationService;
+use App\Support\Permissions;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 
 class OfferingLetterController extends Controller
@@ -19,7 +19,7 @@ class OfferingLetterController extends Controller
 
     public function send(SendOfferingLetterRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('manageOffering', $application);
+        $request->user()->requirePermission(Permissions::OFFERING_MANAGE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 

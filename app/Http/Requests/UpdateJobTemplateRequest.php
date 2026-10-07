@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\EmploymentType;
 use App\Enums\JobTemplateStatus;
+use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
@@ -12,7 +13,7 @@ class UpdateJobTemplateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->isHrAdmin();
+        return $this->user()->hasPermission(Permissions::JOB_TEMPLATE_UPDATE);
     }
 
     /**

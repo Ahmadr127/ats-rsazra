@@ -4,12 +4,12 @@ namespace Tests\Feature;
 
 use App\Enums\EmploymentType;
 use App\Enums\JobTemplateStatus;
-use App\Enums\Role;
 use App\Enums\VacancyStatus;
 use App\Models\InterviewTemplate;
 use App\Models\JobTemplate;
 use App\Models\JobTemplateTest;
 use App\Models\Question;
+use App\Models\Role;
 use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;
@@ -94,7 +94,7 @@ class JobTemplateManagementTest extends TestCase
 
     public function test_non_hr_admin_cannot_view_index(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
 
         $this->actingAs($user)->get(route('template-lowongan.index'))->assertForbidden();
     }
@@ -122,7 +122,7 @@ class JobTemplateManagementTest extends TestCase
 
     public function test_non_hr_admin_cannot_create_template(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
 
         $this->actingAs($user)->post(route('template-lowongan.store'), $this->templatePayload())
             ->assertForbidden();
@@ -246,7 +246,7 @@ class JobTemplateManagementTest extends TestCase
 
     public function test_non_hr_admin_cannot_publish(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
         $template = JobTemplate::factory()->create([
             'workflow_template_id' => $this->workflowWithStages()->id,
         ]);

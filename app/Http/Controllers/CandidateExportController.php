@@ -7,10 +7,10 @@ use App\Exports\CandidateListExport;
 use App\Logging\LogContext;
 use App\Models\Application;
 use App\Models\Vacancy;
+use App\Support\Permissions;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -21,7 +21,7 @@ class CandidateExportController extends Controller
 
     public function list(Request $request, Vacancy $lowongan): BinaryFileResponse
     {
-        Gate::authorize('export', $lowongan);
+        $request->user()->requirePermission(Permissions::VACANCY_EXPORT);
 
         $filters = [
             'stage' => $request->query('stage'),
@@ -51,7 +51,7 @@ class CandidateExportController extends Controller
 
     public function profile(Vacancy $lowongan, Application $application): Response
     {
-        Gate::authorize('export', $lowongan);
+        auth()->user()->requirePermission(Permissions::VACANCY_EXPORT);
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 
         $application = $this->buildProfileData->execute($application);

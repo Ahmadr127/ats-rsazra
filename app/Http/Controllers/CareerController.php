@@ -47,7 +47,12 @@ class CareerController extends Controller
 
         $employmentTypes = EmploymentType::cases();
 
-        return view('career.index', compact('vacancies', 'totalRoles', 'units', 'typeCounts', 'employmentTypes', 'unitFilter', 'typeFilter'));
+        $slides = Vacancy::with('unit')->published()->whereNotNull('flyer_path')
+            ->orderByDesc('created_at')
+            ->take(3)
+            ->get();
+
+        return view('career.index', compact('vacancies', 'totalRoles', 'units', 'typeCounts', 'employmentTypes', 'unitFilter', 'typeFilter', 'slides'));
     }
 
     public function show(Vacancy $vacancy): View

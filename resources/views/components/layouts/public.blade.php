@@ -61,7 +61,7 @@
 
     {{-- Utility bar --}}
     <div style="background: rgb(0,119,116);" class="text-white text-sm">
-        <div class="max-w-[1320px] mx-auto px-6 py-3 flex items-center justify-between gap-4">
+        <div class="w-full px-[4vw] py-3 flex items-center justify-between gap-4">
             <span class="italic text-white hidden sm:block">"Cepat, Ramah, Berkualitas"</span>
             <div class="flex items-center gap-5 ml-auto">
                 <span class="text-white/80">(0251) 8382417</span>
@@ -93,7 +93,7 @@
         x-data="{ menuOpen: false }"
         class="sticky top-0 z-50 bg-white border-b border-line shadow-sm"
     >
-        <div class="max-w-[1320px] mx-auto px-6 flex h-20 items-center gap-2">
+        <div class="w-full px-[4vw] flex h-20 items-center gap-2">
             {{-- Logo --}}
             <a href="https://rsazra.co.id" class="shrink-0 flex items-center mr-4">
                 <img
@@ -190,7 +190,7 @@
             x-transition:leave-end="opacity-0 -translate-y-2"
             class="lg:hidden border-t border-line bg-white"
         >
-            <nav class="max-w-[1320px] mx-auto px-6 py-2 pb-4">
+            <nav class="w-full px-[4vw] py-2 pb-4">
                 <a href="https://rsazra.co.id" class="mobile-nav-link">Beranda</a>
                 <a href="https://rsazra.co.id/tentang-kami" class="mobile-nav-link">Tentang Kami</a>
                 <a href="https://rsazra.co.id/layanan/rawat-inap" class="mobile-nav-link">Rawat Inap</a>
@@ -221,7 +221,7 @@
         <div class="footer-overlay"></div>
 
         {{-- Main columns --}}
-        <div class="max-w-[1320px] mx-auto px-7 relative z-10" style="padding-top: 56px; padding-bottom: 28px;">
+        <div class="w-full px-[4vw] relative z-10" style="padding-top: 56px; padding-bottom: 28px;">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 footer-grid" style="gap: 48px;">
 
                 {{-- Brand + contact --}}
@@ -315,7 +315,7 @@
 
         {{-- Footer bottom bar --}}
         <div style="border-top: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 10;">
-            <div class="max-w-[1320px] mx-auto px-7 py-5 flex justify-between flex-wrap gap-3" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6c7773; letter-spacing:0.04em;">
+            <div class="w-full px-[4vw] py-5 flex justify-between flex-wrap gap-3" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6c7773; letter-spacing:0.04em;">
                 <span>Copyright © {{ date('Y') }} RS Azra Group. All Rights Reserved.</span>
                 <span>KARIR · RS AZRA BOGOR</span>
             </div>

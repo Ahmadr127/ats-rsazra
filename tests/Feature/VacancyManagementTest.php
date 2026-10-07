@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Enums\EmploymentType;
-use App\Enums\Role;
 use App\Enums\VacancyStatus;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -108,7 +108,7 @@ class VacancyManagementTest extends TestCase
 
     public function test_hr_manager_can_view_vacancy_list(): void
     {
-        $user = User::factory()->create(['role' => Role::HrManager]);
+        $user = User::factory()->withRole(Role::HrManager)->create([]);
         $this->seedStages();
         Vacancy::factory()->create(['judul_posisi' => 'Dokter Umum']);
 
@@ -120,7 +120,7 @@ class VacancyManagementTest extends TestCase
 
     public function test_director_can_view_vacancy_list(): void
     {
-        $user = User::factory()->create(['role' => Role::Director]);
+        $user = User::factory()->withRole(Role::Director)->create([]);
         $this->seedStages();
         Vacancy::factory()->create(['judul_posisi' => 'Dokter Umum']);
 
@@ -136,7 +136,7 @@ class VacancyManagementTest extends TestCase
         $ownUnit = Unit::factory()->create(['nama' => 'ICU']);
         $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
 
-        $user = User::factory()->create(['role' => Role::UnitHead]);
+        $user = User::factory()->withRole(Role::UnitHead)->create([]);
         Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $ownUnit->id]);
 
         Vacancy::factory()->create(['judul_posisi' => 'Perawat ICU', 'unit_id' => $ownUnit->id]);
@@ -151,7 +151,7 @@ class VacancyManagementTest extends TestCase
 
     public function test_unit_head_without_employee_cannot_view_vacancy_list(): void
     {
-        $user = User::factory()->create(['role' => Role::UnitHead]);
+        $user = User::factory()->withRole(Role::UnitHead)->create([]);
 
         $response = $this->actingAs($user)->get(route('lowongan.index'));
 
@@ -162,7 +162,7 @@ class VacancyManagementTest extends TestCase
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
-        $user = User::factory()->create(['role' => Role::UnitHead]);
+        $user = User::factory()->withRole(Role::UnitHead)->create([]);
         Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unit->id]);
 
         $response = $this->actingAs($user)->get(route('lowongan.index'));
@@ -177,7 +177,7 @@ class VacancyManagementTest extends TestCase
         $ownUnit = Unit::factory()->create(['nama' => 'ICU']);
         $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
 
-        $user = User::factory()->create(['role' => Role::UnitHead]);
+        $user = User::factory()->withRole(Role::UnitHead)->create([]);
         Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $ownUnit->id]);
 
         Vacancy::factory()->create(['judul_posisi' => 'Perawat IGD', 'unit_id' => $otherUnit->id]);
@@ -190,7 +190,7 @@ class VacancyManagementTest extends TestCase
 
     public function test_employee_without_employee_cannot_view_vacancy_list(): void
     {
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
 
         $response = $this->actingAs($user)->get(route('lowongan.index'));
 
@@ -203,7 +203,7 @@ class VacancyManagementTest extends TestCase
         $ownUnit = Unit::factory()->create(['nama' => 'ICU']);
         $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
 
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $ownUnit->id]);
 
         Vacancy::factory()->create(['judul_posisi' => 'Perawat ICU', 'unit_id' => $ownUnit->id]);
@@ -222,7 +222,7 @@ class VacancyManagementTest extends TestCase
         $ownUnit = Unit::factory()->create(['nama' => 'ICU']);
         $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
 
-        $user = User::factory()->create(['role' => Role::Employee]);
+        $user = User::factory()->withRole(Role::Employee)->create([]);
         Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $ownUnit->id]);
 
         Vacancy::factory()->create(['judul_posisi' => 'Perawat IGD', 'unit_id' => $otherUnit->id]);
@@ -336,7 +336,7 @@ class VacancyManagementTest extends TestCase
 
     public function test_non_hr_admin_cannot_update_vacancy(): void
     {
-        $user = User::factory()->create(['role' => Role::UnitHead]);
+        $user = User::factory()->withRole(Role::UnitHead)->create([]);
         $this->seedStages();
         $vacancy = Vacancy::factory()->create();
         $payload = $this->validPayload();
@@ -376,7 +376,7 @@ class VacancyManagementTest extends TestCase
 
     public function test_non_hr_admin_cannot_delete_vacancy(): void
     {
-        $user = User::factory()->create(['role' => Role::Director]);
+        $user = User::factory()->withRole(Role::Director)->create([]);
         $this->seedStages();
         $vacancy = Vacancy::factory()->create();
 

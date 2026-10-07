@@ -7,8 +7,8 @@
         border-bottom: 1px solid #d9ddd9;
     }
     .status-hero-inner {
-        max-width: 900px; margin: 0 auto;
-        padding: 48px 28px 36px;
+        width: 100%;
+        padding: 48px 4vw 36px;
     }
     .status-eyebrow {
         font-family: "IBM Plex Mono", monospace;
@@ -23,19 +23,19 @@
     .status-h1 {
         font-family: "IBM Plex Serif", Georgia, serif;
         font-weight: 500;
-        font-size: clamp(28px, 4vw, 40px);
-        line-height: 1.1; letter-spacing: -0.02em;
-        margin: 0 0 10px; color: #0d1614;
+        font-size: clamp(34px, 4.6vw, 56px);
+        line-height: 1.06; letter-spacing: -0.02em;
+        margin: 0 0 12px; color: #0d1614;
     }
     .status-lede {
-        font-size: 15px; line-height: 1.55; color: #2a3835;
-        max-width: 56ch; margin: 0;
+        font-size: 17px; line-height: 1.6; color: #2a3835;
+        max-width: 62ch; margin: 0;
     }
 
     /* ── Content area ───────────────────────────────────── */
     .status-content {
-        max-width: 900px; margin: 0 auto;
-        padding: 32px 28px 60px;
+        width: 100%;
+        padding: 32px 4vw 60px;
     }
     .status-section {
         border-top: 2px solid #0d1614;
@@ -44,7 +44,7 @@
     }
     .status-section-h2 {
         font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; text-transform: uppercase;
+        font-size: 12px; text-transform: uppercase;
         letter-spacing: 0.1em; margin: 0 0 18px;
         color: #0d1614; font-weight: 600;
     }
@@ -64,7 +64,7 @@
         width: 120px; flex-shrink: 0; padding-top: 2px;
     }
     .status-dl-value {
-        font-size: 15px; color: #0d1614; font-weight: 500;
+        font-size: 16px; color: #0d1614; font-weight: 500;
         min-width: 0;
     }
 
@@ -106,7 +106,7 @@
     .status-stage:last-child .status-stage-body { padding-bottom: 0; }
     .status-stage-name {
         font-family: "IBM Plex Sans", system-ui, sans-serif;
-        font-size: 15px; font-weight: 500; color: #0d1614;
+        font-size: 16px; font-weight: 500; color: #0d1614;
         margin: 0 0 2px; line-height: 1.3;
     }
     .status-stage-name.done-text { color: #2a3835; }
@@ -127,8 +127,8 @@
 
     /* ── Footer actions ─────────────────────────────────── */
     .status-actions {
-        max-width: 900px; margin: 0 auto;
-        padding: 0 28px 48px;
+        width: 100%;
+        padding: 0 4vw 48px;
         border-top: 1px solid #d9ddd9;
         padding-top: 20px;
     }
@@ -143,10 +143,10 @@
 
     /* ── Responsive ──────────────────────────────────────── */
     @media (max-width: 1100px) {
-        .status-hero-inner { padding: 36px 20px 28px; }
+        .status-hero-inner { padding: 36px 4vw 28px; }
         .status-h1 { font-size: clamp(24px, 5vw, 32px); }
-        .status-content { padding: 24px 16px 48px; }
-        .status-actions { padding: 0 16px 40px; padding-top: 18px; }
+        .status-content { padding: 24px 4vw 48px; }
+        .status-actions { padding: 0 4vw 40px; padding-top: 18px; }
     }
     @media (max-width: 520px) {
         .status-dl-row { flex-direction: column; gap: 2px; }

@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\Vacancy;
 use App\Services\ApplicationPipelineService;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 
 class ApplicationPipelineController extends Controller
 {
@@ -14,7 +14,7 @@ class ApplicationPipelineController extends Controller
 
     public function advance(Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('advance', $application);
+        auth()->user()->requirePermission(Permissions::APPLICATION_ADVANCE);
 
         try {
             $this->pipelineService->advance($application);
@@ -27,7 +27,7 @@ class ApplicationPipelineController extends Controller
 
     public function fail(Vacancy $lowongan, Application $application): RedirectResponse
     {
-        Gate::authorize('fail', $application);
+        auth()->user()->requirePermission(Permissions::APPLICATION_FAIL);
 
         try {
             $this->pipelineService->fail($application);

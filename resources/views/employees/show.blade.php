@@ -1,14 +1,14 @@
 <x-layouts.app title="{{ $employee->nama_karyawan }} - ATS RS Azra">
 
     <div class="mb-4">
-        @can('viewAny', App\Models\Employee::class)
+        @permission('employee.view')
             <a href="{{ route('karyawan.index') }}" class="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors ease-out duration-150 mb-1.5">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
                 Kembali ke Data Karyawan
             </a>
-        @endcan
+        @endpermission
     </div>
 
     <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
@@ -27,7 +27,7 @@
                     </span>
                 </div>
             </div>
-            @can('update', $employee)
+            @permission('employee.update')
                 <a
                     href="{{ route('karyawan.edit', $employee) }}"
                     class="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-300 text-gray-600 text-xs font-medium rounded bg-white hover:bg-gray-50 transition-colors ease-out duration-150 shrink-0"
@@ -37,7 +37,7 @@
                     </svg>
                     Edit
                 </a>
-            @endcan
+            @endpermission
         </div>
 
         {{-- Body --}}

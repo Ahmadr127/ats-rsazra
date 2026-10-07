@@ -66,6 +66,7 @@
                             <td class="px-3 py-2 font-medium text-gray-800 text-xs">{{ $unit->nama }}</td>
                             <td class="px-3 py-2">
                                 <div class="flex items-center justify-end gap-0.5">
+                                    @permission('unit.update')
                                     <a
                                         href="{{ route('unit.edit', $unit) }}"
                                         class="p-1.5 rounded text-amber-400/60 hover:text-amber-500 hover:bg-amber-50 transition-colors ease-out duration-150"
@@ -76,6 +77,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                         </svg>
                                     </a>
+                                    @endpermission
+                                    @permission('unit.delete')
                                     <form method="POST" action="{{ route('unit.destroy', $unit) }}" onsubmit="return confirm('Hapus unit ' + @js($unit->nama) + '?')">
                                         @csrf
                                         @method('DELETE')
@@ -90,6 +93,7 @@
                                             </svg>
                                         </button>
                                     </form>
+                                    @endpermission
                                 </div>
                             </td>
                         </tr>

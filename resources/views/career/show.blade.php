@@ -2,8 +2,8 @@
 
 <style>
     .detail-wrap {
-        max-width: 1320px; margin: 0 auto;
-        padding: 56px 28px 80px;
+        width: 100%;
+        padding: 56px 4vw 80px;
     }
     .detail-back {
         font-family: "IBM Plex Mono", monospace;
@@ -17,8 +17,8 @@
     .detail-back:hover { color: rgb(0,119,116); }
     .detail-grid {
         display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 48px;
+        grid-template-columns: 1fr 360px;
+        gap: 64px;
         align-items: start;
     }
     /* Left column */
@@ -35,8 +35,8 @@
     .detail-title {
         font-family: "IBM Plex Serif", Georgia, serif;
         font-weight: 500;
-        font-size: clamp(28px, 4vw, 48px);
-        line-height: 1.08; letter-spacing: -0.02em;
+        font-size: clamp(32px, 4.4vw, 54px);
+        line-height: 1.06; letter-spacing: -0.02em;
         margin: 0 0 24px; color: #0d1614;
     }
     .detail-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 32px; }
@@ -57,8 +57,8 @@
         padding-top: 14px;
     }
     .detail-body {
-        font-size: 15px; line-height: 1.65; color: #2a3835;
-        white-space: pre-line;
+        font-size: 16px; line-height: 1.65; color: #2a3835;
+        white-space: pre-line; max-width: 100ch;
     }
 
     /* Right sidebar */
@@ -85,13 +85,13 @@
         margin-bottom: 4px;
     }
     .sidebar-row-val {
-        font-size: 14px; font-weight: 500; color: #0d1614;
+        font-size: 15px; font-weight: 500; color: #0d1614;
     }
     .apply-cta {
         display: block; text-align: center;
         /*background: rgb(0,119,116); color: white;*/
-        padding: 14px 20px;
-        font-size: 14px; font-weight: 600;
+        padding: 16px 20px;
+        font-size: 15px; font-weight: 600;
         text-decoration: none;
         font-family: "IBM Plex Sans", system-ui, sans-serif;
         display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -101,7 +101,7 @@
     /*.apply-cta:hover { background: rgb(0,88,85); }*/
 
     @media (max-width: 900px) {
-        .detail-wrap { padding: 32px 16px 60px; }
+        .detail-wrap { padding: 32px 4vw 60px; }
         .detail-grid { grid-template-columns: 1fr; gap: 32px; }
         .detail-sidebar { position: static; }
     }

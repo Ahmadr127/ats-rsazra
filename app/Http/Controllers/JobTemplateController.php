@@ -10,10 +10,10 @@ use App\Http\Requests\UpdateJobTemplateRequest;
 use App\Models\JobTemplate;
 use App\Models\Unit;
 use App\Services\VacancyPublisher;
+use App\Support\Permissions;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -21,7 +21,7 @@ class JobTemplateController extends Controller
 {
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', JobTemplate::class);
+        $request->user()->requirePermission(Permissions::JOB_TEMPLATE_VIEW);
 
         $jobTemplates = JobTemplate::with('unit')
             ->withCount('vacancies')
@@ -48,14 +48,14 @@ class JobTemplateController extends Controller
 
     public function create(): View
     {
-        Gate::authorize('create', JobTemplate::class);
+        auth()->user()->requirePermission(Permissions::JOB_TEMPLATE_CREATE);
 
         return view('job-templates.create');
     }
 
     public function store(StoreJobTemplateRequest $request): RedirectResponse
     {
-        Gate::authorize('create', JobTemplate::class);
+        $request->user()->requirePermission(Permissions::JOB_TEMPLATE_CREATE);
 
         $data = $request->validated();
         $data['status'] = JobTemplateStatus::Active->value;
@@ -68,7 +68,7 @@ class JobTemplateController extends Controller
 
     public function edit(JobTemplate $templateLowongan): View
     {
-        Gate::authorize('update', $templateLowongan);
+        auth()->user()->requirePermission(Permissions::JOB_TEMPLATE_UPDATE);
 
         $templateLowongan->load('unit', 'workflowTemplate');
         $statuses = JobTemplateStatus::cases();
@@ -81,7 +81,7 @@ class JobTemplateController extends Controller
 
     public function update(UpdateJobTemplateRequest $request, JobTemplate $templateLowongan): RedirectResponse
     {
-        Gate::authorize('update', $templateLowongan);
+        $request->user()->requirePermission(Permissions::JOB_TEMPLATE_UPDATE);
 
         $templateLowongan->update($request->validated());
 
@@ -91,7 +91,7 @@ class JobTemplateController extends Controller
 
     public function destroy(JobTemplate $templateLowongan): RedirectResponse
     {
-        Gate::authorize('delete', $templateLowongan);
+        auth()->user()->requirePermission(Permissions::JOB_TEMPLATE_DELETE);
 
         try {
             $templateLowongan->delete();
@@ -105,7 +105,8 @@ class JobTemplateController extends Controller
 
     public function publishForm(JobTemplate $templateLowongan): View
     {
-        Gate::authorize('publish', $templateLowongan);
+        auth()->user()->requirePermission(Permissions::JOB_TEMPLATE_PUBLISH);
+        abort_unless($templateLowongan->status === JobTemplateStatus::Active, 403);
 
         $templateLowongan->load('unit', 'workflowTemplate.stages', 'jobTemplateTest');
         $statuses = [VacancyStatus::Draft, VacancyStatus::Published];
@@ -121,7 +122,8 @@ class JobTemplateController extends Controller
 
     public function publish(PublishVacancyRequest $request, JobTemplate $templateLowongan, VacancyPublisher $publisher): RedirectResponse
     {
-        Gate::authorize('publish', $templateLowongan);
+        $request->user()->requirePermission(Permissions::JOB_TEMPLATE_PUBLISH);
+        abort_unless($templateLowongan->status === JobTemplateStatus::Active, 403);
 
         $templateLowongan->load('workflowTemplate.stages', 'jobTemplateTest');
 

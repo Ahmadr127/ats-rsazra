@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Enums\InterviewTemplateType;
 use App\Models\InterviewTemplate;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -15,7 +15,7 @@ class InterviewTemplateController extends Controller
 {
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', InterviewTemplate::class);
+        $request->user()->requirePermission(Permissions::INTERVIEW_TEMPLATE_VIEW);
 
         $query = InterviewTemplate::withCount('items')->latest();
 
@@ -30,14 +30,14 @@ class InterviewTemplateController extends Controller
 
     public function create(): View
     {
-        Gate::authorize('create', InterviewTemplate::class);
+        auth()->user()->requirePermission(Permissions::INTERVIEW_TEMPLATE_CREATE);
 
         return view('interview-templates.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
-        Gate::authorize('create', InterviewTemplate::class);
+        $request->user()->requirePermission(Permissions::INTERVIEW_TEMPLATE_CREATE);
 
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255', 'unique:interview_templates,nama'],
@@ -66,7 +66,7 @@ class InterviewTemplateController extends Controller
 
     public function edit(InterviewTemplate $templateWawancara): View
     {
-        Gate::authorize('update', $templateWawancara);
+        auth()->user()->requirePermission(Permissions::INTERVIEW_TEMPLATE_UPDATE);
 
         $templateWawancara->load('items');
 
@@ -75,7 +75,7 @@ class InterviewTemplateController extends Controller
 
     public function update(Request $request, InterviewTemplate $templateWawancara): RedirectResponse
     {
-        Gate::authorize('update', $templateWawancara);
+        $request->user()->requirePermission(Permissions::INTERVIEW_TEMPLATE_UPDATE);
 
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255', Rule::unique('interview_templates', 'nama')->ignore($templateWawancara->id)],
@@ -112,7 +112,7 @@ class InterviewTemplateController extends Controller
 
     public function destroy(InterviewTemplate $templateWawancara): RedirectResponse
     {
-        Gate::authorize('delete', $templateWawancara);
+        auth()->user()->requirePermission(Permissions::INTERVIEW_TEMPLATE_DELETE);
 
         $templateWawancara->delete();
 

@@ -4,11 +4,11 @@ namespace Database\Seeders;
 
 use App\Enums\ApplicationStageStatus;
 use App\Enums\EmploymentType;
-use App\Enums\Role;
 use App\Enums\VacancyStatus;
 use App\Models\Application;
 use App\Models\Candidate;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -28,7 +28,7 @@ class DummyCandidateSeeder extends Seeder
                 'name' => 'Kepala Unit Demo',
                 'username' => 'kepala_unit',
                 'password' => Hash::make('password'),
-                'role' => Role::UnitHead,
+                'role_id' => Role::where('key', Role::UnitHead)->firstOrFail()->id,
                 'must_change_password' => false,
                 'is_active' => true,
             ]

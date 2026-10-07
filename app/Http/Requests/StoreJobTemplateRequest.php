@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\EmploymentType;
+use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
@@ -11,7 +12,7 @@ class StoreJobTemplateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->isHrAdmin();
+        return $this->user()->hasPermission(Permissions::JOB_TEMPLATE_CREATE);
     }
 
     /**
