@@ -133,7 +133,7 @@
                                 loading="lazy"
                                 width="600"
                                 height="800"
-                                class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                                class="h-full w-full object-contain"
                             >
                         </div>
                         <div class="p-3">
