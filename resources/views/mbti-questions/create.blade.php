@@ -26,7 +26,7 @@
             @csrf
 
             <div class="bg-white/80 border border-gray-200 rounded-md">
-                @include('mbti-questions._form')
+                @include('mbti-questions._form', ['question' => null])
 
                 <div class="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-gray-200/90 rounded-b-md">
                     <button type="submit"

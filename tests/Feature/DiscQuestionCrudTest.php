@@ -47,6 +47,14 @@ class DiscQuestionCrudTest extends TestCase
         $this->actingAs(User::factory()->hrAdmin()->create())->get(route('soal-disc.index'))->assertOk();
     }
 
+    public function test_create_page_renders(): void
+    {
+        $response = $this->actingAs(User::factory()->hrAdmin()->create())->get(route('soal-disc.create'));
+
+        $response->assertOk();
+        $response->assertSee('Buat Soal DiSC', false);
+    }
+
     public function test_store_rejects_incomplete_dimension_set(): void
     {
         $admin = User::factory()->hrAdmin()->create();

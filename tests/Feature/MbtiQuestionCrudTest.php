@@ -32,6 +32,14 @@ class MbtiQuestionCrudTest extends TestCase
         $this->actingAs(User::factory()->hrAdmin()->create())->get(route('soal-mbti.index'))->assertOk();
     }
 
+    public function test_create_page_renders(): void
+    {
+        $response = $this->actingAs(User::factory()->hrAdmin()->create())->get(route('soal-mbti.create'));
+
+        $response->assertOk();
+        $response->assertSee('Buat Soal MBTI', false);
+    }
+
     public function test_store_rejects_kutub_outside_dikotomi(): void
     {
         $admin = User::factory()->hrAdmin()->create();
