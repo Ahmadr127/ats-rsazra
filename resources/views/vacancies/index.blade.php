@@ -5,7 +5,7 @@
             <h1 class="text-xl font-semibold text-gray-900">Lowongan Kerja</h1>
             <p class="text-xs text-gray-500 mt-0.5">Kelola lowongan kerja RS Azra</p>
         </div>
-                                        @permission('job-template.view')
+       @permission('job-template.view')
         <a
             href="{{ route('template-lowongan.index') }}"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
@@ -113,6 +113,7 @@
                         <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider">Posisi</th>
                         <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider w-32">Unit</th>
                         <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider w-28">Jenis</th>
+                        <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider w-24">Pelamar</th>
                         <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider w-28">Tenggat</th>
                         <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider w-28">Status</th>
                         <th class="w-20 px-3 py-2.5"></th>
@@ -128,6 +129,12 @@
                             </td>
                             <td class="px-3 py-1.5 text-xs text-gray-600">{{ $vacancy->unit->nama }}</td>
                             <td class="px-3 py-1.5 text-xs text-gray-600">{{ $vacancy->jenis_pekerjaan->label() }}</td>
+                            <td class="px-3 py-1.5 text-xs tabular-nums">
+                                <a href="{{ route('lowongan.pipeline', $vacancy) }}" class="text-gray-600 hover:text-primary transition-colors ease-out duration-150" title="Lihat pipeline kandidat">
+                                    <span class="font-semibold text-gray-900">{{ $vacancy->applications_count }}</span>
+                                    <span class="text-gray-400">pelamar</span>
+                                </a>
+                            </td>
                             <td class="px-3 py-1.5 text-xs text-gray-600 tabular-nums">
                                 {{ $vacancy->tenggat_lamaran->format('d M Y') }}
                                 @if ($vacancy->tenggat_lamaran->isPast())
@@ -203,7 +210,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-14 text-center">
+                            <td colspan="8" class="px-4 py-14 text-center">
                                 <div class="flex flex-col items-center gap-2.5 max-w-xs mx-auto">
                                     <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">

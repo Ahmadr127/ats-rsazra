@@ -194,20 +194,35 @@ class AccountManagementTest extends TestCase
         $response->assertSessionHasErrors('role_id');
     }
 
-    public function test_username_must_contain_only_lowercase_alphanumeric(): void
+    public function test_username_may_contain_dots_like_existing_accounts(): void
     {
         $admin = User::factory()->hrAdmin()->create();
         $employee = Employee::factory()->create();
 
         $response = $this->actingAs($admin)->post(route('akun.store'), [
             'employee_id' => $employee->id,
-            'username' => 'Invalid User!',
+            'username' => 'budi.santoso',
             'password' => 'password123',
             'password_confirmation' => 'password123',
             'role_id' => Role::where('key', Role::Employee)->value('id'),
         ]);
 
-        $response->assertSessionHasErrors('username');
+        $response->assertRedirect(route('akun.index'));
+        $this->assertDatabaseHas('users', ['username' => 'budi.santoso']);
+    }
+
+    public function test_account_with_dotted_username_can_be_updated(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $account = User::factory()->withRole(Role::Employee)->create(['username' => 'umar.baidhowi']);
+
+        $response = $this->actingAs($admin)->patch(route('akun.update', $account), [
+            'username' => 'umar.baidhowi',
+            'role_id' => $account->role_id,
+        ]);
+
+        $response->assertRedirect(route('akun.index'));
+        $this->assertDatabaseHas('users', ['id' => $account->id, 'username' => 'umar.baidhowi']);
     }
 
     // ── Update ─────────────────────────────────────────────────────────────────

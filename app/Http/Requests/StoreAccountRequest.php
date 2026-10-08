@@ -24,7 +24,7 @@ class StoreAccountRequest extends FormRequest
                 'required',
                 Rule::exists('employees', 'id')->whereNull('user_id'),
             ],
-            'username' => ['required', 'string', 'max:50', 'unique:users,username', 'regex:/^[a-z0-9]+$/'],
+            'username' => ['required', 'string', 'max:50', 'unique:users,username'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role_id' => ['required', 'integer', Rule::exists('roles', 'id')],
         ];
@@ -50,7 +50,6 @@ class StoreAccountRequest extends FormRequest
     {
         return [
             'employee_id.exists' => 'Karyawan tidak ditemukan atau sudah memiliki akun.',
-            'username.regex' => 'Username hanya boleh berisi huruf kecil dan angka.',
         ];
     }
 }

@@ -27,7 +27,9 @@ class MbtiTestController extends Controller
         ])->where('token', $token)->firstOrFail();
 
         if ($submission->isSubmitted()) {
-            return view('mbti.show', compact('submission'));
+            $questions = MbtiQuestion::orderBy('urutan')->get();
+
+            return view('mbti.show', compact('submission', 'questions'));
         }
 
         if ($submission->started_at === null) {

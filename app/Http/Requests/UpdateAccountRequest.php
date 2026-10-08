@@ -26,7 +26,6 @@ class UpdateAccountRequest extends FormRequest
                 'string',
                 'max:50',
                 Rule::unique('users', 'username')->ignore($this->route('user')),
-                'regex:/^[a-z0-9]+$/',
             ],
             'role_id' => ['required', 'integer', Rule::exists('roles', 'id')],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
@@ -42,16 +41,6 @@ class UpdateAccountRequest extends FormRequest
             'username' => 'Username',
             'role_id' => 'Peran',
             'password' => 'Kata Sandi Baru',
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'username.regex' => 'Username hanya boleh berisi huruf kecil dan angka.',
         ];
     }
 }

@@ -147,6 +147,29 @@ class DiscTestSubmissionTest extends TestCase
         $this->assertGreaterThan(0, DiscAnswer::where('disc_submission_id', $submission->id)->count());
     }
 
+    public function test_submitted_test_page_renders_successfully(): void
+    {
+        $vacancy = $this->createVacancyWithDiscStage();
+        $application = $this->makeApplicationAtDiscStage($vacancy);
+        $token = Str::uuid()->toString();
+        DiscSubmission::create([
+            'application_id' => $application->id,
+            'token' => $token,
+        ]);
+
+        ['most' => $most, 'least' => $least] = $this->buildDiscAnswers();
+
+        $this->post(route('tes-disc.submit', $token), [
+            'most' => $most,
+            'least' => $least,
+        ]);
+
+        $response = $this->get(route('tes-disc.show', $token));
+
+        $response->assertOk();
+        $response->assertSee('Tes DiSC Berhasil Dikirim');
+    }
+
     public function test_submission_advances_pipeline_stage(): void
     {
         $vacancy = $this->createVacancyWithDiscStage();
@@ -320,6 +343,30 @@ class DiscTestSubmissionTest extends TestCase
 
         $response->assertSessionHasErrors(['most', 'least']);
         $this->assertDatabaseMissing('disc_answers', ['disc_submission_id' => $application->id]);
+    }
+
+    public function test_same_word_most_and_least_is_rejected(): void
+    {
+        $vacancy = $this->createVacancyWithDiscStage();
+        $application = $this->makeApplicationAtDiscStage($vacancy);
+        $token = Str::uuid()->toString();
+        $submission = DiscSubmission::create([
+            'application_id' => $application->id,
+            'token' => $token,
+        ]);
+
+        ['most' => $most, 'least' => $least] = $this->buildDiscAnswers();
+        $firstQuestionId = array_key_first($most);
+        $least[$firstQuestionId] = $most[$firstQuestionId];
+
+        $response = $this->post(route('tes-disc.submit', $token), [
+            'most' => $most,
+            'least' => $least,
+        ]);
+
+        $response->assertSessionHasErrors("most.{$firstQuestionId}");
+        $this->assertNull($submission->fresh()->submitted_at);
+        $this->assertDatabaseCount('disc_answers', 0);
     }
 
     public function test_candidate_status_page_does_not_show_disc_result(): void

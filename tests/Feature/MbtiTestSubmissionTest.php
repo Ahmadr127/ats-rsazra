@@ -142,6 +142,28 @@ class MbtiTestSubmissionTest extends TestCase
         $this->assertGreaterThan(0, MbtiAnswer::where('mbti_submission_id', $submission->id)->count());
     }
 
+    public function test_submitted_test_page_renders_successfully(): void
+    {
+        $vacancy = $this->createVacancyWithMbtiStage();
+        $application = $this->makeApplicationAtMbtiStage($vacancy);
+        $token = Str::uuid()->toString();
+        MbtiSubmission::create([
+            'application_id' => $application->id,
+            'token' => $token,
+        ]);
+
+        $jawaban = $this->buildMbtiAnswers();
+
+        $this->post(route('tes-mbti.submit', $token), [
+            'jawaban' => $jawaban,
+        ]);
+
+        $response = $this->get(route('tes-mbti.show', $token));
+
+        $response->assertOk();
+        $response->assertSee('Tes MBTI Berhasil Dikirim');
+    }
+
     public function test_submission_advances_pipeline_stage(): void
     {
         $vacancy = $this->createVacancyWithMbtiStage();

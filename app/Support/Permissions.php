@@ -30,6 +30,10 @@ final class Permissions
 
     public const MENU_QUESTION_BANK = 'menu.question-bank';
 
+    public const MENU_MBTI_QUESTIONS = 'menu.mbti-questions';
+
+    public const MENU_DISC_QUESTIONS = 'menu.disc-questions';
+
     public const MENU_EMAIL_TEMPLATES = 'menu.email-templates';
 
     public const MENU_INTERVIEW_TEMPLATES = 'menu.interview-templates';
@@ -104,6 +108,24 @@ final class Permissions
     public const QUESTION_BANK_UPDATE = 'question-bank.update';
 
     public const QUESTION_BANK_DELETE = 'question-bank.delete';
+
+    // MBTI questions
+    public const MBTI_QUESTION_VIEW = 'mbti-question.view';
+
+    public const MBTI_QUESTION_CREATE = 'mbti-question.create';
+
+    public const MBTI_QUESTION_UPDATE = 'mbti-question.update';
+
+    public const MBTI_QUESTION_DELETE = 'mbti-question.delete';
+
+    // DiSC questions
+    public const DISC_QUESTION_VIEW = 'disc-question.view';
+
+    public const DISC_QUESTION_CREATE = 'disc-question.create';
+
+    public const DISC_QUESTION_UPDATE = 'disc-question.update';
+
+    public const DISC_QUESTION_DELETE = 'disc-question.delete';
 
     // Interview templates
     public const INTERVIEW_TEMPLATE_VIEW = 'interview-template.view';
@@ -211,6 +233,8 @@ final class Permissions
             self::MENU_JOB_TEMPLATES => ['label' => 'Sidemenu: Template Lowongan', 'group' => 'Menu', 'roles' => [$H]],
             self::MENU_VACANCIES => ['label' => 'Sidemenu: Lowongan Kerja', 'group' => 'Menu', 'roles' => [$H, $M, $U, $D, $E]],
             self::MENU_QUESTION_BANK => ['label' => 'Sidemenu: Template Bank Soal', 'group' => 'Menu', 'roles' => [$H]],
+            self::MENU_MBTI_QUESTIONS => ['label' => 'Sidemenu: Soal MBTI', 'group' => 'Menu', 'roles' => [$H]],
+            self::MENU_DISC_QUESTIONS => ['label' => 'Sidemenu: Soal DiSC', 'group' => 'Menu', 'roles' => [$H]],
             self::MENU_EMAIL_TEMPLATES => ['label' => 'Sidemenu: Template Email', 'group' => 'Menu', 'roles' => [$H]],
             self::MENU_INTERVIEW_TEMPLATES => ['label' => 'Sidemenu: Template Wawancara', 'group' => 'Menu', 'roles' => [$H]],
             self::MENU_RBAC => ['label' => 'Sidemenu: Hak Akses', 'group' => 'Menu', 'roles' => [$H]],
@@ -252,6 +276,16 @@ final class Permissions
             self::QUESTION_BANK_CREATE => ['label' => 'Buat template bank soal', 'group' => 'Bank Soal', 'roles' => [$H]],
             self::QUESTION_BANK_UPDATE => ['label' => 'Ubah template bank soal', 'group' => 'Bank Soal', 'roles' => [$H]],
             self::QUESTION_BANK_DELETE => ['label' => 'Hapus template bank soal', 'group' => 'Bank Soal', 'roles' => [$H]],
+
+            self::MBTI_QUESTION_VIEW => ['label' => 'Lihat soal MBTI', 'group' => 'Tes MBTI', 'roles' => [$H]],
+            self::MBTI_QUESTION_CREATE => ['label' => 'Buat soal MBTI', 'group' => 'Tes MBTI', 'roles' => [$H]],
+            self::MBTI_QUESTION_UPDATE => ['label' => 'Ubah soal MBTI', 'group' => 'Tes MBTI', 'roles' => [$H]],
+            self::MBTI_QUESTION_DELETE => ['label' => 'Hapus soal MBTI', 'group' => 'Tes MBTI', 'roles' => [$H]],
+
+            self::DISC_QUESTION_VIEW => ['label' => 'Lihat soal DiSC', 'group' => 'Tes DiSC', 'roles' => [$H]],
+            self::DISC_QUESTION_CREATE => ['label' => 'Buat soal DiSC', 'group' => 'Tes DiSC', 'roles' => [$H]],
+            self::DISC_QUESTION_UPDATE => ['label' => 'Ubah soal DiSC', 'group' => 'Tes DiSC', 'roles' => [$H]],
+            self::DISC_QUESTION_DELETE => ['label' => 'Hapus soal DiSC', 'group' => 'Tes DiSC', 'roles' => [$H]],
 
             self::INTERVIEW_TEMPLATE_VIEW => ['label' => 'Lihat template wawancara', 'group' => 'Template Wawancara', 'roles' => [$H]],
             self::INTERVIEW_TEMPLATE_CREATE => ['label' => 'Buat template wawancara', 'group' => 'Template Wawancara', 'roles' => [$H]],

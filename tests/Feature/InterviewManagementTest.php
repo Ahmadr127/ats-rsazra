@@ -502,7 +502,29 @@ class InterviewManagementTest extends TestCase
         $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
-        $response->assertSee('Belum ada kriteria, hubungi HR Admin.');
+        $response->assertSee('Belum ada kriteria penilaian');
+        $response->assertSee('Wawancara User membutuhkan template Kriteria Penilaian', false);
+        $response->assertSee('Hubungi HR Admin untuk memasang template.');
+    }
+
+    public function test_interview_empty_state_links_to_template_setup_for_authorized_user(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $admin = User::factory()->withRole(Role::HrAdmin)->create();
+        $vacancy = $this->createVacancy($unit);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user');
+        $application->stages()->where('key', 'wawancara_user')->update([
+            'jadwal' => now()->addDays(2),
+            'lokasi' => 'Ruang Meeting',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
+
+        $response->assertOk();
+        $response->assertSee('Belum ada kriteria penilaian');
+        $response->assertSee('Atur Template Wawancara');
+        $response->assertSee(route('lowongan.template-wawancara.show', $vacancy), false);
     }
 
     public function test_interview_form_shows_criteria_grouped_by_template(): void

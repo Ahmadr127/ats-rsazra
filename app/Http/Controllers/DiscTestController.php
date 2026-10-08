@@ -27,7 +27,9 @@ class DiscTestController extends Controller
         ])->where('token', $token)->firstOrFail();
 
         if ($submission->isSubmitted()) {
-            return view('disc.show', compact('submission'));
+            $questions = DiscQuestion::with('words')->orderBy('urutan')->get();
+
+            return view('disc.show', compact('submission', 'questions'));
         }
 
         if ($submission->started_at === null) {

@@ -18,4 +18,9 @@ class DiscQuestion extends Model
     {
         return $this->hasMany(DiscQuestionWord::class);
     }
+
+    public function answers(): HasMany
+    {
+        return $this->hasMany(DiscAnswer::class);
+    }
 }

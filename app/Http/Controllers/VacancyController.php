@@ -28,7 +28,7 @@ class VacancyController extends Controller
             403
         );
 
-        $query = Vacancy::with(['unit', 'workflowTemplateSnapshot']);
+        $query = Vacancy::with(['unit', 'workflowTemplateSnapshot'])->withCount('applications');
         $isUnitScoped = ! $user->hasPermission(Permissions::VACANCY_VIEW_ORG);
         $scopedUnit = null;
 

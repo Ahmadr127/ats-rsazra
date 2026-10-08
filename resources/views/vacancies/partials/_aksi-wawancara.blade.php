@@ -212,8 +212,29 @@
         <h2 class="text-sm font-semibold text-gray-800 mb-4">Penilaian Wawancara</h2>
 
         @if ($assignedTemplates->isEmpty())
+            @php
+                $interviewStageLabels = [
+                    'wawancara_user' => 'Wawancara User',
+                    'wawancara_manajer_hr' => 'Wawancara Manajer HR',
+                    'wawancara_direktur' => 'Wawancara Direktur',
+                ];
+                $interviewStageLabel = $interviewStageLabels[$currentStage?->key] ?? 'tahap ini';
+            @endphp
             <div class="text-center py-4">
-                <p class="text-sm text-gray-500">Belum ada kriteria, hubungi HR Admin.</p>
+                <p class="text-sm font-medium text-gray-700">Belum ada kriteria penilaian</p>
+                <p class="text-xs text-gray-500 mt-1 mb-3">
+                    Tahap {{ $interviewStageLabel }} membutuhkan template Kriteria Penilaian yang dipasang khusus untuk lowongan ini.
+                </p>
+                @permission('vacancy.interview-templates')
+                    <a
+                        href="{{ route('lowongan.template-wawancara.show', $lowongan) }}"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-primary/30 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors ease-out duration-150"
+                    >
+                        Atur Template Wawancara
+                    </a>
+                @else
+                    <p class="text-xs text-gray-400">Hubungi HR Admin untuk memasang template.</p>
+                @endpermission
             </div>
         @else
             <form
