@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\JenisPendidikan;
 use App\Enums\VacancyStatus;
 use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,6 +36,19 @@ class PublicCareerPageTest extends TestCase
         $response = $this->get(route('karier.index'));
 
         $response->assertSee('Perawat ICU');
+    }
+
+    public function test_career_page_shows_lulusan(): void
+    {
+        $this->seedStages();
+        Vacancy::factory()->published()->create([
+            'judul_posisi' => 'Perawat ICU',
+            'lulusan' => JenisPendidikan::D3->value,
+        ]);
+
+        $response = $this->get(route('karier.index'));
+
+        $response->assertSee('Jenis Pendidikan D3');
     }
 
     public function test_career_page_renders_flyer_image(): void
@@ -95,6 +109,20 @@ class PublicCareerPageTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('career.show');
         $response->assertSee('Bidan Senior');
+    }
+
+    public function test_vacancy_detail_shows_lulusan(): void
+    {
+        $this->seedStages();
+        $vacancy = Vacancy::factory()->published()->create([
+            'lulusan' => JenisPendidikan::D4AtauS1->value,
+        ]);
+
+        $response = $this->get(route('karier.show', $vacancy));
+
+        $response->assertStatus(200);
+        $response->assertSee('Jenis Pendidikan D4/S1');
+        $response->assertSee('Jenis Pendidikan:');
     }
 
     public function test_vacancy_detail_shows_apply_button(): void

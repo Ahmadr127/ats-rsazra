@@ -42,6 +42,7 @@ class VacancyPublisher
                 'unit_id' => $jobTemplate->unit_id,
                 'workflow_template_snapshot_id' => $snapshot->id,
                 'jenis_pekerjaan' => $jobTemplate->jenis_pekerjaan,
+                'lulusan' => $jobTemplate->lulusan,
                 'deskripsi_pekerjaan' => $jobTemplate->deskripsi_pekerjaan,
                 'kualifikasi' => $attributes['kualifikasi'] ?? $jobTemplate->kualifikasi,
                 'flyer_path' => $attributes['flyer_path'],

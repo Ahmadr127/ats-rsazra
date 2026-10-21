@@ -55,6 +55,15 @@
                 label-class="block text-xs font-medium text-gray-700 mb-1"
             />
 
+            <x-autocomplete-select
+                name="lulusan"
+                label="Jenis Pendidikan"
+                :options="collect(\App\Enums\JenisPendidikan::cases())->map(fn ($p) => ['id' => $p->value, 'label' => $p->label()])"
+                :value="old('lulusan', ($templateLowongan->lulusan ?? null)?->value)"
+                placeholder="Pilih jenis pendidikan..."
+                label-class="block text-xs font-medium text-gray-700 mb-1"
+            />
+
             @isset($statuses)
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>

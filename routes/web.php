@@ -29,6 +29,7 @@ use App\Http\Controllers\OfferingLetterController;
 use App\Http\Controllers\OfferingResponseController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionBankTemplateController;
+use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\SitemapController;
@@ -48,6 +49,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [CareerController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', RobotsController::class)->name('robots');
 Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show')->middleware('throttle:token-access');
 Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:public-submit');
 

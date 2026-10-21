@@ -15,6 +15,9 @@
     <div class="mt-4 flex flex-wrap gap-2">
         <x-ui.badge tone="info">{{ $vacancy->unit->nama }}</x-ui.badge>
         <x-ui.badge tone="neutral">{{ $vacancy->jenis_pekerjaan->label() }}</x-ui.badge>
+        @if ($vacancy->lulusan)
+            <x-ui.badge tone="neutral">Jenis Pendidikan {{ $vacancy->lulusan->label() }}</x-ui.badge>
+        @endif
         @if ($vacancy->created_at->gte(now()->subDays(3)))
             <x-ui.badge tone="success">Baru</x-ui.badge>
         @endif
@@ -30,6 +33,9 @@
 
         <x-ui.card id="deskripsi" class="scroll-mt-20 mt-4">
             <h2 class="ui-section-title">Deskripsi Pekerjaan</h2>
+            @if ($vacancy->lulusan)
+                <p class="mt-1 text-[13px] text-ink-3">Jenis Pendidikan: <span class="font-medium text-ink">{{ $vacancy->lulusan->label() }}</span></p>
+            @endif
             <div class="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-ink-2">{{ $vacancy->deskripsi_pekerjaan }}</div>
         </x-ui.card>
 
@@ -43,6 +49,12 @@
         <x-ui.card class="p-0!">
             <div class="border-b border-line bg-primary px-5 py-3 text-[12px] font-semibold uppercase tracking-wide text-white">Detail Posisi</div>
             <dl class="space-y-4 px-5 py-5">
+                @if ($vacancy->lulusan)
+                    <div>
+                        <dt class="ui-label">Jenis Pendidikan</dt>
+                        <dd class="mt-1 text-[14px] font-medium text-ink">{{ $vacancy->lulusan->label() }}</dd>
+                    </div>
+                @endif
                 <div>
                     <dt class="ui-label">Jenis Pekerjaan</dt>
                     <dd class="mt-1 text-[14px] font-medium text-ink">{{ $vacancy->jenis_pekerjaan->label() }}</dd>

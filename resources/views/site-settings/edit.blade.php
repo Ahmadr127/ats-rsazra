@@ -2,7 +2,7 @@
 
     <div class="mb-4">
         <h1 class="text-xl font-semibold text-gray-900">Tampilan Halaman Karier</h1>
-        <p class="text-xs text-gray-500 mt-0.5">Ubah teks hero yang tampil di halaman utama karier tanpa menyentuh kode</p>
+        <p class="text-xs text-gray-500 mt-0.5">Ubah teks hero, SEO, dan kontak halaman karier tanpa menyentuh kode</p>
     </div>
 
     @if (session('status'))
@@ -62,6 +62,50 @@
                                 class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring resize-y @error('settings.hero_lede') border-red-400 @else border-gray-200 @enderror"
                             >{{ old('settings.hero_lede', $settings['hero_lede']?->value ?? '') }}</textarea>
                             @error('settings.hero_lede')
+                                <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <hr class="border-t border-gray-200">
+
+                    <div class="px-4 pt-4 pb-5 space-y-4">
+                        <div>
+                            <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">SEO Halaman Karier</p>
+                            <p class="mt-1 text-[11px] text-gray-500">Mendukung token dinamis yang sama dengan paragraf hero.</p>
+                        </div>
+
+                        <div>
+                            <label for="seo_title" class="block text-xs font-medium text-gray-700 mb-1">
+                                Judul SEO <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="seo_title"
+                                name="settings[seo_title]"
+                                value="{{ old('settings.seo_title', $settings['seo_title']?->value ?? '') }}"
+                                maxlength="255"
+                                class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('settings.seo_title') border-red-400 @else border-gray-200 @enderror"
+                            >
+                            <p class="mt-1 text-[11px] text-gray-500">Tampil sebagai judul tab browser, og:title, dan hasil pencarian. Rekomendasi 50-60 karakter.</p>
+                            @error('settings.seo_title')
+                                <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="seo_description" class="block text-xs font-medium text-gray-700 mb-1">
+                                Deskripsi SEO <span class="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                id="seo_description"
+                                name="settings[seo_description]"
+                                rows="3"
+                                maxlength="500"
+                                class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring resize-y @error('settings.seo_description') border-red-400 @else border-gray-200 @enderror"
+                            >{{ old('settings.seo_description', $settings['seo_description']?->value ?? '') }}</textarea>
+                            <p class="mt-1 text-[11px] text-gray-500">Tampil sebagai meta description dan og:description. Rekomendasi 150-160 karakter.</p>
+                            @error('settings.seo_description')
                                 <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -172,7 +216,8 @@
 
         <div>
             <div class="bg-white/80 border border-gray-200 rounded-md p-4">
-                <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Token dinamis paragraf</p>
+                <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Token dinamis</p>
+                <p class="text-[11px] text-gray-500 mb-3">Berlaku untuk paragraf hero, judul SEO, dan deskripsi SEO.</p>
                 <div class="space-y-1.5">
                     @foreach ([
                         '{jumlah_posisi}' => 'Jumlah lowongan terbuka saat ini',

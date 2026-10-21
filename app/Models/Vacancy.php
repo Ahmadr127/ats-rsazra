@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EmploymentType;
+use App\Enums\JenisPendidikan;
 use App\Enums\VacancyStatus;
 use Database\Factories\VacancyFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,6 +29,7 @@ class Vacancy extends Model
         'unit_id',
         'workflow_template_snapshot_id',
         'jenis_pekerjaan',
+        'lulusan',
         'deskripsi_pekerjaan',
         'kualifikasi',
         'flyer_path',
@@ -40,6 +42,7 @@ class Vacancy extends Model
     {
         return [
             'jenis_pekerjaan' => EmploymentType::class,
+            'lulusan' => JenisPendidikan::class,
             'status' => VacancyStatus::class,
             'tenggat_lamaran' => 'date',
             'jumlah_posisi' => 'integer',

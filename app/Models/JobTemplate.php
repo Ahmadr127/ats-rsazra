@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EmploymentType;
+use App\Enums\JenisPendidikan;
 use App\Enums\JobTemplateStatus;
 use Database\Factories\JobTemplateFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,6 +24,7 @@ class JobTemplate extends Model
         'unit_id',
         'workflow_template_id',
         'jenis_pekerjaan',
+        'lulusan',
         'deskripsi_pekerjaan',
         'kualifikasi',
         'status',
@@ -32,6 +34,7 @@ class JobTemplate extends Model
     {
         return [
             'jenis_pekerjaan' => EmploymentType::class,
+            'lulusan' => JenisPendidikan::class,
             'status' => JobTemplateStatus::class,
         ];
     }

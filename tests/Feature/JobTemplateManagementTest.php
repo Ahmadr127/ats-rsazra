@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\EmploymentType;
+use App\Enums\JenisPendidikan;
 use App\Enums\JobTemplateStatus;
 use App\Enums\VacancyStatus;
 use App\Models\InterviewTemplate;
@@ -50,6 +51,7 @@ class JobTemplateManagementTest extends TestCase
             'unit_id' => ($unit ?? Unit::factory()->create())->id,
             'workflow_template_id' => ($workflow ?? WorkflowTemplate::factory()->create())->id,
             'jenis_pekerjaan' => EmploymentType::FullTime->value,
+            'lulusan' => JenisPendidikan::D3->value,
             'deskripsi_pekerjaan' => 'Merawat pasien di ICU.',
             'kualifikasi' => 'S1 Keperawatan.',
         ];
@@ -108,8 +110,20 @@ class JobTemplateManagementTest extends TestCase
         $response->assertRedirect(route('template-lowongan.index'));
         $this->assertDatabaseHas('job_templates', [
             'judul_posisi' => 'Perawat ICU',
+            'lulusan' => JenisPendidikan::D3->value,
             'status' => JobTemplateStatus::Active->value,
         ]);
+    }
+
+    public function test_store_rejects_invalid_lulusan(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+
+        $payload = $this->templatePayload();
+        $payload['lulusan'] = 'sma';
+
+        $this->actingAs($admin)->post(route('template-lowongan.store'), $payload)
+            ->assertSessionHasErrors('lulusan');
     }
 
     public function test_store_validates_required_fields(): void

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\JenisPendidikan;
 use App\Enums\VacancyStatus;
 use App\Models\InterviewTemplate;
 use App\Models\JobTemplate;
@@ -45,6 +46,7 @@ class VacancyPublisherTest extends TestCase
     {
         $template = JobTemplate::factory()->create([
             'workflow_template_id' => $this->workflowTemplateWithStages()->id,
+            'lulusan' => JenisPendidikan::D3->value,
         ]);
 
         $vacancy = app(VacancyPublisher::class)->publish($template, $this->payload());
@@ -53,6 +55,7 @@ class VacancyPublisherTest extends TestCase
         $this->assertSame($template->judul_posisi, $vacancy->judul_posisi);
         $this->assertSame($template->unit_id, $vacancy->unit_id);
         $this->assertSame($template->jenis_pekerjaan, $vacancy->jenis_pekerjaan);
+        $this->assertSame(JenisPendidikan::D3, $vacancy->lulusan);
         $this->assertSame($template->deskripsi_pekerjaan, $vacancy->deskripsi_pekerjaan);
         $this->assertSame($template->kualifikasi, $vacancy->kualifikasi);
         $this->assertSame(3, $vacancy->jumlah_posisi);

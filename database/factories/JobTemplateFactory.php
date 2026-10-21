@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\EmploymentType;
+use App\Enums\JenisPendidikan;
 use App\Enums\JobTemplateStatus;
 use App\Models\JobTemplate;
 use App\Models\Unit;
@@ -24,6 +25,7 @@ class JobTemplateFactory extends Factory
             'unit_id' => Unit::factory(),
             'workflow_template_id' => WorkflowTemplate::factory(),
             'jenis_pekerjaan' => $this->faker->randomElement(EmploymentType::cases()),
+            'lulusan' => $this->faker->randomElement(JenisPendidikan::cases()),
             'deskripsi_pekerjaan' => $this->faker->paragraph(),
             'kualifikasi' => $this->faker->paragraph(),
             'status' => JobTemplateStatus::Active,

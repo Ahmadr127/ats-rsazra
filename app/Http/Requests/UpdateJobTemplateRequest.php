@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\EmploymentType;
+use App\Enums\JenisPendidikan;
 use App\Enums\JobTemplateStatus;
 use App\Support\Permissions;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -26,6 +27,7 @@ class UpdateJobTemplateRequest extends FormRequest
             'unit_id' => ['required', 'integer', 'exists:units,id'],
             'workflow_template_id' => ['required', 'integer', 'exists:workflow_templates,id'],
             'jenis_pekerjaan' => ['required', new Enum(EmploymentType::class)],
+            'lulusan' => ['nullable', new Enum(JenisPendidikan::class)],
             'deskripsi_pekerjaan' => ['required', 'string'],
             'kualifikasi' => ['required', 'string'],
             'status' => ['required', new Enum(JobTemplateStatus::class)],
@@ -41,6 +43,7 @@ class UpdateJobTemplateRequest extends FormRequest
             'workflow_template_id.required' => 'Template alur kerja wajib dipilih.',
             'workflow_template_id.exists' => 'Template alur kerja tidak valid.',
             'jenis_pekerjaan.required' => 'Jenis pekerjaan wajib dipilih.',
+            'lulusan.enum' => 'Jenis pendidikan tidak valid.',
             'deskripsi_pekerjaan.required' => 'Deskripsi pekerjaan wajib diisi.',
             'kualifikasi.required' => 'Kualifikasi wajib diisi.',
             'status.required' => 'Status wajib dipilih.',

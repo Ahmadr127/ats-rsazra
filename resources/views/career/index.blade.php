@@ -139,7 +139,13 @@
                         <div class="p-3">
                             <p class="truncate text-[12px] font-semibold uppercase tracking-wide text-primary">{{ $vacancy->unit->nama }}</p>
                             <h3 class="mt-1 line-clamp-2 min-h-10 text-[14px] font-semibold leading-snug text-ink">{{ $vacancy->judul_posisi }}</h3>
-                            <p class="mt-1 text-[12px] text-ink-3">Tenggat {{ $vacancy->tenggat_lamaran->format('d M Y') }}</p>
+                            <div class="mt-1 flex flex-wrap items-center gap-x-2 text-[12px] text-ink-3">
+                                @if ($vacancy->lulusan)
+                                    <span>Jenis Pendidikan {{ $vacancy->lulusan->label() }}</span>
+                                    <span aria-hidden="true">&bull;</span>
+                                @endif
+                                <span>Tenggat {{ $vacancy->tenggat_lamaran->format('d M Y') }}</span>
+                            </div>
                         </div>
                     </a>
                 @endforeach

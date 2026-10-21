@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\EmploymentType;
+use App\Enums\JenisPendidikan;
 use App\Enums\VacancyStatus;
 use App\Models\Unit;
 use App\Models\Vacancy;
@@ -26,6 +27,7 @@ class VacancyFactory extends Factory
             'unit_id' => Unit::factory(),
             'workflow_template_snapshot_id' => WorkflowTemplateSnapshot::factory(),
             'jenis_pekerjaan' => $this->faker->randomElement(EmploymentType::cases()),
+            'lulusan' => $this->faker->randomElement(JenisPendidikan::cases()),
             'deskripsi_pekerjaan' => $this->faker->paragraph(),
             'kualifikasi' => $this->faker->paragraph(),
             'flyer_path' => 'flyers/'.Str::random(40).'.jpg',
