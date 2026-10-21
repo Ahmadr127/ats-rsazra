@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\EmploymentType;
+use App\Enums\JenisPendidikan;
 use App\Enums\VacancyStatus;
 use App\Models\Employee;
 use App\Models\Role;
@@ -247,12 +248,44 @@ class VacancyManagementTest extends TestCase
     {
         $admin = User::factory()->hrAdmin()->create();
         $this->seedStages();
-        $vacancy = Vacancy::factory()->create();
+        $vacancy = Vacancy::factory()->create(['lulusan' => JenisPendidikan::D3]);
 
         $response = $this->actingAs($admin)->get(route('lowongan.edit', $vacancy));
 
         $response->assertStatus(200);
         $response->assertViewIs('vacancies.edit');
+        $response->assertSee('Jenis Pendidikan');
+        $response->assertSee('name="lulusan"', false);
+    }
+
+    public function test_hr_admin_can_update_jenis_pendidikan(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $this->seedStages();
+        $vacancy = Vacancy::factory()->create();
+        $payload = $this->validPayload();
+        $payload['lulusan'] = JenisPendidikan::D4AtauS1->value;
+
+        $response = $this->actingAs($admin)->put(route('lowongan.update', $vacancy), $payload);
+
+        $response->assertRedirect(route('lowongan.index'));
+        $this->assertDatabaseHas('vacancies', [
+            'id' => $vacancy->id,
+            'lulusan' => JenisPendidikan::D4AtauS1->value,
+        ]);
+    }
+
+    public function test_update_rejects_invalid_jenis_pendidikan(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $this->seedStages();
+        $vacancy = Vacancy::factory()->create();
+        $payload = $this->validPayload();
+        $payload['lulusan'] = 'sma';
+
+        $response = $this->actingAs($admin)->put(route('lowongan.update', $vacancy), $payload);
+
+        $response->assertSessionHasErrors('lulusan');
     }
 
     public function test_hr_admin_can_update_vacancy(): void

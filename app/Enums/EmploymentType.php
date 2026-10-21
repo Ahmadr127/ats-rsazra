@@ -18,4 +18,17 @@ enum EmploymentType: string
             self::Internship => 'Magang',
         };
     }
+
+    /**
+     * Nilai employmentType untuk schema.org JobPosting.
+     */
+    public function schemaOrgType(): string
+    {
+        return match ($this) {
+            self::FullTime => 'FULL_TIME',
+            self::PartTime => 'PART_TIME',
+            self::Contract => 'CONTRACTOR',
+            self::Internship => 'INTERN',
+        };
+    }
 }

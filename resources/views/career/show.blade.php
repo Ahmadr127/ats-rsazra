@@ -3,7 +3,9 @@
     :metaDescription="$vacancy->seoDescription()"
     :canonical="route('karier.show', $vacancy)"
     :ogImage="$vacancy->flyer_path ? url($vacancy->flyerUrl()) : asset('images/logo.png')"
+    :ogImageAlt="'Flyer lowongan '.$vacancy->judul_posisi"
     ogType="article"
+    robots="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
     main-class="w-full bg-paper"
 >
 
@@ -78,5 +80,75 @@
         </x-ui.card>
     </aside>
 </div>
+
+@push('structured_data')
+    @php
+        $vacancyUrl = route('karier.show', $vacancy);
+        $postedAt = ($vacancy->published_at ?? $vacancy->created_at)->toIso8601String();
+        $validThrough = $vacancy->tenggat_lamaran->copy()->endOfDay()->toIso8601String();
+        $jobDescription = trim(preg_replace('/\s+/', ' ', strip_tags(($vacancy->deskripsi_pekerjaan ?? '').' '.($vacancy->kualifikasi ?? ''))) ?? '');
+        $jobDescription = $jobDescription !== '' ? $jobDescription : $vacancy->judul_posisi;
+        $alamat = \App\Models\SiteSetting::get(
+            'kontak_alamat',
+            'Jl. Pintu Air No.1, Sempur, Bogor Tengah, Kota Bogor 16112',
+        );
+
+        $structuredData = json_encode([
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'BreadcrumbList',
+                    'itemListElement' => [
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 1,
+                            'name' => 'Lowongan',
+                            'item' => route('home'),
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 2,
+                            'name' => $vacancy->judul_posisi,
+                            'item' => $vacancyUrl,
+                        ],
+                    ],
+                ],
+                [
+                    '@type' => 'JobPosting',
+                    'title' => $vacancy->judul_posisi,
+                    'description' => $jobDescription,
+                    'datePosted' => $postedAt,
+                    'validThrough' => $validThrough,
+                    'employmentType' => $vacancy->jenis_pekerjaan->schemaOrgType(),
+                    'identifier' => [
+                        '@type' => 'PropertyValue',
+                        'name' => 'RS Azra',
+                        'value' => $vacancy->slug ?: (string) $vacancy->id,
+                    ],
+                    'url' => $vacancyUrl,
+                    'directApply' => true,
+                    'hiringOrganization' => [
+                        '@type' => 'Organization',
+                        'name' => 'RS Azra',
+                        'sameAs' => ['https://rsazra.co.id'],
+                        'logo' => asset('images/logo.png'),
+                    ],
+                    'jobLocation' => [
+                        '@type' => 'Place',
+                        'address' => [
+                            '@type' => 'PostalAddress',
+                            'streetAddress' => $alamat,
+                            'addressLocality' => 'Bogor',
+                            'addressRegion' => 'Jawa Barat',
+                            'postalCode' => '16112',
+                            'addressCountry' => 'ID',
+                        ],
+                    ],
+                ],
+            ],
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE);
+    @endphp
+    <script type="application/ld+json">{!! $structuredData !!}</script>
+@endpush
 
 </x-layouts.public>

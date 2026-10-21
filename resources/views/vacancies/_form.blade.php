@@ -92,6 +92,15 @@
                 label-class="block text-xs font-medium text-gray-700 mb-1"
             />
 
+            <x-autocomplete-select
+                name="lulusan"
+                label="Jenis Pendidikan"
+                :options="collect(\App\Enums\JenisPendidikan::cases())->map(fn ($p) => ['id' => $p->value, 'label' => $p->label()])"
+                :value="old('lulusan', ($lowongan->lulusan ?? null)?->value)"
+                placeholder="Pilih jenis pendidikan..."
+                label-class="block text-xs font-medium text-gray-700 mb-1"
+            />
+
             <div>
                 <label for="tenggat_lamaran" class="block text-xs font-medium text-gray-700 mb-1">Tenggat Lamaran <span class="text-red-500">*</span></label>
                 <input

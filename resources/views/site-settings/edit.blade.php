@@ -77,17 +77,21 @@
 
                         <div>
                             <label for="seo_title" class="block text-xs font-medium text-gray-700 mb-1">
-                                Judul SEO <span class="text-red-500">*</span>
+                                Judul SEO
                             </label>
                             <input
                                 type="text"
                                 id="seo_title"
                                 name="settings[seo_title]"
-                                value="{{ old('settings.seo_title', $settings['seo_title']?->value ?? '') }}"
+                                value="{{ old('settings.seo_title', $settings->get('seo_title')?->value ?? '') }}"
                                 maxlength="255"
                                 class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('settings.seo_title') border-red-400 @else border-gray-200 @enderror"
                             >
-                            <p class="mt-1 text-[11px] text-gray-500">Tampil sebagai judul tab browser, og:title, dan hasil pencarian. Rekomendasi 50-60 karakter.</p>
+                            <p class="mt-1 text-[11px] text-gray-500">
+                                Kosongkan untuk memakai default “Karier - RS Azra”. Tampil sebagai judul tab browser, og:title, dan hasil pencarian.
+                                <span id="seo-title-count-field" class="font-medium text-gray-700">{{ $seoPreview['title_length'] }} karakter</span>
+                                <span class="text-gray-400">· panduan 50–60</span>
+                            </p>
                             @error('settings.seo_title')
                                 <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
                             @enderror
@@ -95,7 +99,7 @@
 
                         <div>
                             <label for="seo_description" class="block text-xs font-medium text-gray-700 mb-1">
-                                Deskripsi SEO <span class="text-red-500">*</span>
+                                Deskripsi SEO
                             </label>
                             <textarea
                                 id="seo_description"
@@ -103,8 +107,12 @@
                                 rows="3"
                                 maxlength="500"
                                 class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring resize-y @error('settings.seo_description') border-red-400 @else border-gray-200 @enderror"
-                            >{{ old('settings.seo_description', $settings['seo_description']?->value ?? '') }}</textarea>
-                            <p class="mt-1 text-[11px] text-gray-500">Tampil sebagai meta description dan og:description. Rekomendasi 150-160 karakter.</p>
+                            >{{ old('settings.seo_description', $settings->get('seo_description')?->value ?? '') }}</textarea>
+                            <p class="mt-1 text-[11px] text-gray-500">
+                                Kosongkan untuk memakai paragraf hero. Tampil sebagai meta description dan og:description.
+                                <span id="seo-description-count-field" class="font-medium text-gray-700">{{ $seoPreview['description_length'] }} karakter</span>
+                                <span class="text-gray-400">· panduan 150–160</span>
+                            </p>
                             @error('settings.seo_description')
                                 <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
                             @enderror
@@ -220,9 +228,9 @@
                 <p class="text-[11px] text-gray-500 mb-3">Berlaku untuk paragraf hero, judul SEO, dan deskripsi SEO.</p>
                 <div class="space-y-1.5">
                     @foreach ([
-                        '{jumlah_posisi}' => 'Jumlah lowongan terbuka saat ini',
-                        '{jumlah_unit}' => 'Jumlah unit yang membuka lowongan',
-                        '{lowongan_terbaru}' => 'Tiga judul lowongan terbaru',
+                        '{jumlah_posisi}' => 'Jumlah lowongan aktif yang tampil di halaman karier.',
+                        '{jumlah_unit}' => 'Jumlah unit berbeda yang memiliki lowongan aktif.',
+                        '{lowongan_terbaru}' => 'Maksimal tiga judul lowongan aktif terbaru. Jika kosong, memakai “lowongan terbaru”.',
                     ] as $token => $desc)
                         <div>
                             <code class="text-[11px] font-mono text-primary bg-primary/5 px-1.5 py-0.5 rounded">{{ $token }}</code>
@@ -231,7 +239,88 @@
                     @endforeach
                 </div>
             </div>
+
+            <div class="mt-4 bg-white/80 border border-gray-200 rounded-md p-4">
+                <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Preview hasil pencarian</p>
+                <p class="text-[11px] text-gray-500 mb-3">Ilustrasi berdasarkan token yang sedang aktif.</p>
+                <div class="rounded border border-gray-200 bg-white p-3">
+                    <p id="seo-preview-url" class="truncate text-[11px] text-green-700">{{ $seoPreview['url'] }}</p>
+                    <p id="seo-preview-title" class="mt-1 line-clamp-2 text-[14px] font-medium leading-snug text-blue-700">{{ $seoPreview['title'] }}</p>
+                    <p id="seo-preview-description" class="mt-1 line-clamp-3 text-[12px] leading-relaxed text-gray-600">{{ $seoPreview['description'] }}</p>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+                    <span id="seo-title-count" class="text-gray-500">{{ $seoPreview['title_length'] }} karakter · panduan 50–60</span>
+                    <span id="seo-description-count" class="text-gray-500">{{ $seoPreview['description_length'] }} karakter · panduan 150–160</span>
+                </div>
+                <p class="mt-2 text-[11px] text-gray-500">Pratinjau ini hanya ilustrasi. Google dapat menampilkan judul atau deskripsi yang berbeda.</p>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const titleInput = document.getElementById('seo_title');
+            const descriptionInput = document.getElementById('seo_description');
+            const heroInput = document.getElementById('hero_lede');
+            const previewTitle = document.getElementById('seo-preview-title');
+            const previewDescription = document.getElementById('seo-preview-description');
+            const previewUrl = document.getElementById('seo-preview-url');
+            const titleCount = document.getElementById('seo-title-count-field');
+            const previewTitleCount = document.getElementById('seo-title-count');
+            const descriptionCount = document.getElementById('seo-description-count-field');
+            const previewDescriptionCount = document.getElementById('seo-description-count');
+
+            if (!titleInput || !descriptionInput || !previewTitle || !previewDescription) {
+                return;
+            }
+
+            const tokens = @json($seoPreview['tokens']);
+            const fallbackTitle = @json($seoPreview['fallback_title']);
+            const defaultHero = @json($seoPreview['default_hero']);
+            const previewUrlValue = @json($seoPreview['url']);
+            const tokenPattern = /\{(?:jumlah_posisi|jumlah_unit|lowongan_terbaru)\}/g;
+
+            const applyTokens = (value) => value.replace(tokenPattern, (token) => {
+                const key = token.slice(1, -1);
+                return Object.prototype.hasOwnProperty.call(tokens, key) ? String(tokens[key]) : token;
+            });
+
+            const resolve = (value, fallback) => {
+                const template = (value || '').trim();
+
+                return applyTokens(template !== '' ? template : fallback);
+            };
+
+            const setCount = (element, value, min, max) => {
+                const length = Array.from(value).length;
+                const inRange = length >= min && length <= max;
+
+                element.textContent = `${length} karakter · panduan ${min}–${max}`;
+                element.classList.toggle('text-amber-600', !inRange);
+                element.classList.toggle('text-gray-500', inRange);
+            };
+
+            const updatePreview = () => {
+                const heroLede = resolve(heroInput?.value || '', defaultHero);
+                const title = resolve(titleInput.value, fallbackTitle);
+                const descriptionTemplate = (descriptionInput.value || '').trim();
+                const description = descriptionTemplate !== '' ? applyTokens(descriptionTemplate) : heroLede;
+
+                previewUrl.textContent = previewUrlValue;
+                previewTitle.textContent = title;
+                previewDescription.textContent = description;
+                setCount(titleCount, title, 50, 60);
+                setCount(previewTitleCount, title, 50, 60);
+                setCount(descriptionCount, description, 150, 160);
+                setCount(previewDescriptionCount, description, 150, 160);
+            };
+
+            [titleInput, descriptionInput, heroInput].filter(Boolean).forEach((input) => {
+                input.addEventListener('input', updatePreview);
+            });
+
+            updatePreview();
+        });
+    </script>
 
 </x-layouts.app>

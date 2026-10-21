@@ -9,7 +9,8 @@ class SitemapController extends Controller
 {
     public function __invoke(): Response
     {
-        $vacancies = Vacancy::published()->whereNotNull('flyer_path')
+        $vacancies = Vacancy::query()->publiclyListed()
+            ->whereNotNull('slug')
             ->orderByDesc('updated_at')
             ->get(['slug', 'updated_at']);
 

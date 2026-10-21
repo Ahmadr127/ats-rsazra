@@ -36,6 +36,7 @@ class Vacancy extends Model
         'jumlah_posisi',
         'tenggat_lamaran',
         'status',
+        'published_at',
     ];
 
     protected function casts(): array
@@ -45,6 +46,7 @@ class Vacancy extends Model
             'lulusan' => JenisPendidikan::class,
             'status' => VacancyStatus::class,
             'tenggat_lamaran' => 'date',
+            'published_at' => 'datetime',
             'jumlah_posisi' => 'integer',
         ];
     }
@@ -71,11 +73,19 @@ class Vacancy extends Model
             if (empty($vacancy->slug)) {
                 $vacancy->ensureSlug();
             }
+
+            if ($vacancy->status === VacancyStatus::Published && $vacancy->published_at === null) {
+                $vacancy->published_at = now();
+            }
         });
 
         static::updating(function (Vacancy $vacancy) {
             if (empty($vacancy->slug) || ($vacancy->isDirty('judul_posisi') && ! $vacancy->isDirty('slug'))) {
                 $vacancy->ensureSlug();
+            }
+
+            if ($vacancy->status === VacancyStatus::Published && $vacancy->published_at === null) {
+                $vacancy->published_at = now();
             }
         });
     }
@@ -180,5 +190,13 @@ class Vacancy extends Model
     {
         $query->where('status', VacancyStatus::Published)
             ->where('tenggat_lamaran', '>=', now()->toDateString());
+    }
+
+    /**
+     * Lowongan yang tampil di daftar karier dan sitemap publik.
+     */
+    public function scopePubliclyListed(Builder $query): void
+    {
+        $query->published()->whereNotNull('flyer_path');
     }
 }

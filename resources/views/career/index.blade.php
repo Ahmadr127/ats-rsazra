@@ -3,6 +3,8 @@
     :metaDescription="$seoDescription"
     :canonical="route('home')"
     :ogImage="asset('images/logo.png')"
+    ogImageAlt="RS Azra - Karier"
+    :robots="$robots"
     main-class="w-full bg-paper"
 >
 
@@ -100,6 +102,7 @@
     </aside>
 
     <div class="min-w-0">
+        <h2 class="sr-only">Daftar lowongan terbuka</h2>
         @if ($vacancies->isEmpty())
             <x-ui.card class="mt-5 text-center">
                 <h3 class="ui-section-title">Tidak ada lowongan yang cocok.</h3>

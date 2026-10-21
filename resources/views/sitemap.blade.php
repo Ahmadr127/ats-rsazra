@@ -5,11 +5,6 @@
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
-    <url>
-        <loc>{{ route('karier.index') }}</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
     @foreach ($vacancies as $vacancy)
     <url>
         <loc>{{ route('karier.show', $vacancy) }}</loc>

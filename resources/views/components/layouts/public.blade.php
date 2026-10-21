@@ -4,7 +4,9 @@
     'metaDescription' => null,
     'canonical' => null,
     'ogImage' => null,
+    'ogImageAlt' => null,
     'ogType' => 'website',
+    'robots' => 'noindex,nofollow',
 ])
 
 @php
@@ -21,6 +23,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title }}</title>
+    <meta name="robots" content="{{ $robots }}">
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     @if ($metaDescription)
         <meta name="description" content="{{ $metaDescription }}">
@@ -40,7 +43,39 @@
     @endif
     @if ($ogImage)
         <meta property="og:image" content="{{ $ogImage }}">
+        @if ($ogImageAlt)
+            <meta property="og:image:alt" content="{{ $ogImageAlt }}">
+        @endif
     @endif
+    <meta name="twitter:card" content="{{ $ogImage ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ $title }}">
+    @if ($metaDescription)
+        <meta name="twitter:description" content="{{ $metaDescription }}">
+    @endif
+    @if ($ogImage)
+        <meta name="twitter:image" content="{{ $ogImage }}">
+    @endif
+    @if ($canonical)
+        @php
+            $organizationSchema = json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'Organization',
+                'name' => 'RS Azra',
+                'url' => url('/'),
+                'logo' => asset('images/logo.png'),
+                'sameAs' => ['https://rsazra.co.id'],
+                'contactPoint' => [
+                    '@type' => 'ContactPoint',
+                    'telephone' => $kontakTelepon,
+                    'contactType' => 'customer service',
+                    'areaServed' => 'ID',
+                    'availableLanguage' => 'id',
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE);
+        @endphp
+        <script type="application/ld+json">{!! $organizationSchema !!}</script>
+    @endif
+    @stack('structured_data')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
