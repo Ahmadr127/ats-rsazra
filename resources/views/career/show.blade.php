@@ -28,7 +28,7 @@
     <div class="min-w-0">
         <a href="{{ route('home') }}" class="inline-flex items-center gap-2 text-[13px] font-semibold text-primary hover:text-primary-dark">&larr; Kembali ke Lowongan</a>
 
-        <x-ui.card class="mt-4">
+        <x-ui.card id="deskripsi" class="scroll-mt-20 mt-4">
             <h2 class="ui-section-title">Deskripsi Pekerjaan</h2>
             <div class="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-ink-2">{{ $vacancy->deskripsi_pekerjaan }}</div>
         </x-ui.card>

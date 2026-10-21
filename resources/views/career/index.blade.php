@@ -115,7 +115,7 @@
                         $isNew = $vacancy->created_at->gte(now()->subDays(3));
                         $isUrgent = $vacancy->tenggat_lamaran->lte(now()->addDays(7));
                     @endphp
-                    <a href="{{ route('karier.show', $vacancy) }}" class="ui-card group overflow-hidden p-0! transition hover:-translate-y-0.5 hover:shadow-md" aria-label="Lihat lowongan {{ $vacancy->judul_posisi }}">
+                    <a href="{{ route('karier.show', $vacancy) }}#deskripsi" class="ui-card group overflow-hidden p-0! transition hover:-translate-y-0.5 hover:shadow-md" aria-label="Lihat lowongan {{ $vacancy->judul_posisi }}">
                         <div class="relative aspect-[4/5] w-full overflow-hidden bg-paper-2">
                             @if ($isNew || $isUrgent)
                                 <div class="absolute left-3 top-3 z-10 flex gap-1.5">
