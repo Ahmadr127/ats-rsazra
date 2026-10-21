@@ -52,7 +52,7 @@ class UpdateVacancyRequest extends FormRequest
             'workflow_template_id.required' => 'Template alur kerja wajib dipilih.',
             'workflow_template_id.exists' => 'Template alur kerja tidak valid.',
             'jenis_pekerjaan.required' => 'Jenis pekerjaan wajib dipilih.',
-            'lulusan.enum' => 'Jenis pendidikan tidak valid.',
+            'lulusan.enum' => 'Pendidikan minimal tidak valid.',
             'deskripsi_pekerjaan.required' => 'Deskripsi pekerjaan wajib diisi.',
             'kualifikasi.required' => 'Kualifikasi wajib diisi.',
             'flyer.image' => 'Flyer harus berupa gambar.',

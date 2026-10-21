@@ -144,7 +144,7 @@
                             <h3 class="mt-1 line-clamp-2 min-h-10 text-[14px] font-semibold leading-snug text-ink">{{ $vacancy->judul_posisi }}</h3>
                             <div class="mt-1 flex flex-wrap items-center gap-x-2 text-[12px] text-ink-3">
                                 @if ($vacancy->lulusan)
-                                    <span>Jenis Pendidikan {{ $vacancy->lulusan->label() }}</span>
+                                    <span>Pendidikan Minimal {{ $vacancy->lulusan->label() }}</span>
                                     <span aria-hidden="true">&bull;</span>
                                 @endif
                                 <span>Tenggat {{ $vacancy->tenggat_lamaran->format('d M Y') }}</span>

@@ -57,10 +57,10 @@
 
             <x-autocomplete-select
                 name="lulusan"
-                label="Jenis Pendidikan"
+                label="Pendidikan Minimal"
                 :options="collect(\App\Enums\JenisPendidikan::cases())->map(fn ($p) => ['id' => $p->value, 'label' => $p->label()])"
                 :value="old('lulusan', ($templateLowongan->lulusan ?? null)?->value)"
-                placeholder="Pilih jenis pendidikan..."
+                placeholder="Pilih pendidikan minimal..."
                 label-class="block text-xs font-medium text-gray-700 mb-1"
             />
 

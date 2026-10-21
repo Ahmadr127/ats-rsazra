@@ -254,7 +254,7 @@ class VacancyManagementTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('vacancies.edit');
-        $response->assertSee('Jenis Pendidikan');
+        $response->assertSee('Pendidikan Minimal');
         $response->assertSee('name="lulusan"', false);
     }
 

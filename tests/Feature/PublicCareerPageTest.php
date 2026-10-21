@@ -51,7 +51,7 @@ class PublicCareerPageTest extends TestCase
 
         $response = $this->get(route('karier.index'));
 
-        $response->assertSee('Jenis Pendidikan D3');
+        $response->assertSee('Pendidikan Minimal D3');
     }
 
     public function test_career_page_renders_flyer_image(): void
@@ -124,8 +124,8 @@ class PublicCareerPageTest extends TestCase
         $response = $this->get(route('karier.show', $vacancy));
 
         $response->assertStatus(200);
-        $response->assertSee('Jenis Pendidikan D4/S1');
-        $response->assertSee('Jenis Pendidikan:');
+        $response->assertSee('Pendidikan Minimal D4/S1');
+        $response->assertSee('Pendidikan Minimal:');
     }
 
     public function test_vacancy_detail_shows_apply_button(): void
