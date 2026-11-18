@@ -24,7 +24,7 @@
             </dl>
         </div>
 
-        <form method="POST" action="{{ request()->fullUrl() }}" class="mt-6 text-left">
+        <form method="POST" action="{{ request()->getRequestUri() }}" class="mt-6 text-left">
             @csrf
             <x-ui.textarea label="Alasan Penolakan (opsional)" name="rejection_reason" rows="4" placeholder="Mohon beri tahu alasan Anda menolak penawaran ini...">{{ old('rejection_reason') }}</x-ui.textarea>
             <x-ui.button type="submit" class="mt-4 w-full">Konfirmasi Penolakan</x-ui.button>

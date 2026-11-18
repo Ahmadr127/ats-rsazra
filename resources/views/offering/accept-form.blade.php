@@ -24,7 +24,7 @@
             </dl>
         </div>
 
-        <form method="POST" action="{{ request()->fullUrl() }}" class="mt-6">
+        <form method="POST" action="{{ request()->getRequestUri() }}" class="mt-6">
             @csrf
             <x-ui.button type="submit" class="w-full">Konfirmasi Penerimaan</x-ui.button>
         </form>
