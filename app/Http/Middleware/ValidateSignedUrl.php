@@ -13,19 +13,45 @@ class ValidateSignedUrl
     /**
      * Validate signed URLs against the relative path + query only, so the
      * signature survives scheme/host differences (reverse proxy SSL
-     * termination, http vs https, www vs non-www, etc.).offer
+     * termination, http vs https, www vs non-www, etc.).
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $valid = URL::hasValidRelativeSignature($request)
-            || URL::hasValidSignature($request)
-            || $this->hasValidLegacyAbsoluteSignature($request);
+        foreach ($this->candidates($request) as $candidate) {
+            $valid = URL::hasValidRelativeSignature($candidate)
+                || URL::hasValidSignature($candidate)
+                || $this->hasValidLegacyAbsoluteSignature($candidate);
 
-        if (! $valid || ! URL::signatureHasNotExpired($request)) {
-            throw new InvalidSignatureException;
+            if ($valid && URL::signatureHasNotExpired($candidate)) {
+                return $next($request);
+            }
         }
 
-        return $next($request);
+        throw new InvalidSignatureException;
+    }
+
+    /**
+     * The request itself plus a normalized copy when mail clients submitted
+     * the URL with HTML entities left in the query string
+     * ("...&amp;signature=" instead of "...&signature=").
+     *
+     * @return array<int, Request>
+     */
+    private function candidates(Request $request): array
+    {
+        $candidates = [$request];
+        $queryString = (string) $request->server->get('QUERY_STRING');
+
+        if (str_contains($queryString, 'amp;signature=')) {
+            $normalized = Request::create(
+                $request->url().'?'.str_replace('amp;signature=', 'signature=', $queryString),
+                $request->method(),
+            );
+
+            $candidates[] = $normalized;
+        }
+
+        return $candidates;
     }
 
     /**
