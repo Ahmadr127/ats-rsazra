@@ -447,7 +447,7 @@ class InterviewManagementTest extends TestCase
         $applicationAtManajerHr = $this->makeAtInterviewStage($vacancy, 'wawancara_manajer_hr');
 
         $response = $this->actingAs($hrManager)->get(
-            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'stage' => 'wawancara_manajer_hr'])
+            route('lowongan.pipeline', ['lowongan' => $vacancy->slug, 'stage' => 'wawancara_manajer_hr'])
         );
 
         $response->assertOk();

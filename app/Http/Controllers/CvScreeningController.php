@@ -17,7 +17,6 @@ class CvScreeningController extends Controller
     public function decide(CvScreeningDecisionRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
         $user = $request->user();
-        $user->requirePermission(Permissions::SCREENING_DECIDE);
 
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 
@@ -27,6 +26,14 @@ class CvScreeningController extends Controller
                 && $stage->status->isAdvanceable());
 
         if (! $screeningStage) {
+            return back()->withErrors(['screening' => 'Keputusan tidak dapat diberikan untuk tahap ini.']);
+        }
+
+        $requiredPermission = $screeningStage->key === 'skrining_cv_hr'
+            ? Permissions::SCREENING_DECIDE_HR
+            : Permissions::SCREENING_DECIDE_USER;
+
+        if (! $user->hasPermission($requiredPermission)) {
             return back()->withErrors(['screening' => 'Keputusan tidak dapat diberikan untuk tahap ini.']);
         }
 

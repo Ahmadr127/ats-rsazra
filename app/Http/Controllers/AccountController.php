@@ -127,6 +127,8 @@ class AccountController extends Controller
 
     private static function authorizeAccountUpdate(User $actor, User $target): void
     {
+        abort_if($actor->id === $target->id, 403, 'Anda tidak dapat mengubah akun Anda sendiri.');
+
         $actor->requirePermission(Permissions::ACCOUNT_UPDATE);
     }
 

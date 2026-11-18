@@ -7,7 +7,7 @@
 />
 
 <div class="ui-shell w-full py-6">
-    <x-ui.alert tone="success" title="Lamaran Anda telah kami terima." class="mb-5">Simpan halaman ini atau catat kode lamaran Anda untuk memantau status.</x-ui.alert>
+    <x-ui.alert tone="success" title="Lamaran Anda telah kami terima." class="mb-5">Simpan halaman ini atau catat kode lamaran Anda untuk memantau status. Silakan periksa email Anda atau folder spam/email sampah Anda.</x-ui.alert>
 
     <div class="grid w-full items-start gap-5 lg:grid-cols-2">
         <x-ui.card>

@@ -45,7 +45,8 @@
         </div>{{-- /flex items-start justify-between --}}
     </div>{{-- /mb-5 --}}
 
-    {{-- Stage progress strip --}}
+    {{-- Stage progress strip (click a step to see its decision detail) --}}
+    <div x-data="stageDetailModal()">
     @if ($snapshotStages->isNotEmpty())
         <div class="mb-5 overflow-x-auto">
             <div class="flex items-start min-w-max">
@@ -73,14 +74,99 @@
                     @if ($index > 0)
                         <div class="w-8 h-0.5 flex-shrink-0 mt-1.5 {{ $lineClass }}"></div>
                     @endif
-                    <div class="flex flex-col items-center">
-                        <div class="w-3 h-3 rounded-full flex-shrink-0 {{ $dotClass }}"></div>
-                        <span class="text-[10px] mt-1 px-1 {{ $labelClass }} whitespace-nowrap">{{ $stage->nama }}</span>
-                    </div>
+                    <button
+                        type="button"
+                        data-stage-id="{{ $appStage?->id }}"
+                        data-stage-nama="{{ $stage->nama }}"
+                        @click="open($event.currentTarget.dataset)"
+                        title="Lihat detail {{ $stage->nama }}"
+                        class="flex flex-col items-center group cursor-pointer rounded-lg px-1 py-0.5 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 transition-colors"
+                    >
+                        <div class="w-3 h-3 rounded-full flex-shrink-0 transition-transform group-hover:scale-125 {{ $dotClass }}"></div>
+                        <span class="text-[10px] mt-1 px-1 {{ $labelClass }} whitespace-nowrap group-hover:underline underline-offset-2">{{ $stage->nama }}</span>
+                    </button>
                 @endforeach
             </div>
         </div>
     @endif
+
+    {{-- General stage-detail modal (content loaded via AJAX) --}}
+    <div
+        x-show="openState"
+        style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Detail tahap pipeline"
+        @keydown.window.escape="close()"
+    >
+        <div class="absolute inset-0 bg-black/40" @click="close()"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between gap-3 rounded-t-xl">
+                <h2 class="text-sm font-semibold text-gray-900 truncate" x-text="title">Detail Tahap</h2>
+                <button type="button" @click="close()" class="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer" aria-label="Tutup">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="px-5 py-4">
+                <template x-if="loading">
+                    <p class="text-xs text-gray-400 py-6 text-center">Memuat detail tahap…</p>
+                </template>
+                <template x-if="!loading && error">
+                    <p class="text-xs text-red-500 py-6 text-center" x-text="error"></p>
+                </template>
+                <div x-show="!loading && !error" x-html="html"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function stageDetailModal() {
+            return {
+                openState: false,
+                loading: false,
+                error: null,
+                html: '',
+                title: 'Detail Tahap',
+
+                async open(dataset) {
+                    const stageId = dataset.stageId;
+                    this.title = dataset.stageNama || 'Detail Tahap';
+                    this.html = '';
+                    this.error = null;
+                    this.openState = true;
+                    document.body.style.overflow = 'hidden';
+
+                    if (!stageId) {
+                        this.error = 'Tahap ini belum diproses.';
+                        return;
+                    }
+
+                    this.loading = true;
+                    try {
+                        const url = @js(route('lowongan.pipeline.tahap', [$lowongan, $application, '__STAGE_ID__'])).replace('__STAGE_ID__', stageId);
+                        const res = await fetch(url, {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' },
+                        });
+                        if (!res.ok) {
+                            throw new Error(res.status === 403 ? 'Anda tidak berhak melihat detail tahap ini.' : 'Gagal memuat detail tahap.');
+                        }
+                        this.html = await res.text();
+                    } catch (e) {
+                        this.error = e.message || 'Gagal memuat detail tahap.';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                close() {
+                    this.openState = false;
+                    document.body.style.overflow = '';
+                },
+            };
+        }
+    </script>
+    </div>{{-- /x-data stageDetailModal --}}
 
     {{-- Two-column layout --}}
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">

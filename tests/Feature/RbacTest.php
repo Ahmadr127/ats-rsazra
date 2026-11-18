@@ -58,7 +58,7 @@ class RbacTest extends TestCase
     {
         $head = User::factory()->withRole(Role::UnitHead)->create();
 
-        $this->assertTrue($head->hasPermission(Permissions::SCREENING_DECIDE));
+        $this->assertTrue($head->hasPermission(Permissions::SCREENING_DECIDE_USER));
         $this->assertTrue($head->hasPermission(Permissions::INTERVIEW_DECIDE_USER));
         $this->assertTrue($head->hasPermission(Permissions::APPLICATION_ADVANCE));
         $this->assertFalse($head->hasPermission(Permissions::VACANCY_VIEW_ORG));

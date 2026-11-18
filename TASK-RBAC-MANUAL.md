@@ -62,7 +62,8 @@
 | `vacancy.export` | Export list + PDF kandidat | H |
 | `vacancy.callback` | Panggil kembali kandidat | H |
 | `application.advance` / `application.fail` | Pipeline lanjut/gagal | H M U D |
-| `screening.decide` | Keputusan skrining CV | H U E |
+| `screening.decide-hr` | Form Pipeline: Skrining CV HR — Putuskan hasil | H |
+| `screening.decide-user` | Form Pipeline: Skrining CV User — Putuskan hasil | U E |
 | `interview.schedule` / `interview.reschedule` | Jadwalkan/ubah jadwal wawancara | H M |
 | `interview.decide-user` | Nilai wawancara user | U E |
 | `interview.decide-manager` | Nilai wawancara manajer HR | M |

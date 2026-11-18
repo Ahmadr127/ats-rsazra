@@ -83,10 +83,18 @@
     $existingResult = $currentStage?->interviewResult;
     $hasSchedule = (bool) $currentStage?->jadwal;
     $isWawancaraUser = $currentStage?->key === 'wawancara_user';
+
+    // Mirror InterviewController::decide(): only the role mapped for this stage
+    // (and, for wawancara_user, the assigned interviewer) may submit a decision.
+    $authUser = auth()->user();
+    $deciderKey = \App\Support\InterviewStageMap::stageKeyForDecider($authUser);
+    $canDecide = $deciderKey === $currentStage?->key
+        && (! $isWawancaraUser || ($currentStage?->interviewer_id !== null && $currentStage->interviewer_id === $authUser->id));
 @endphp
 
-{{-- Phase 1: No schedule yet --}}
+{{-- Phase 1: No schedule yet — only schedulers (interview.schedule) may fill this form --}}
 @if ($currentStage?->status->isAdvanceable() && !$hasSchedule)
+    @if ($authUser->hasPermission(\App\Support\Permissions::INTERVIEW_SCHEDULE))
     <div class="bg-white rounded-xl border border-gray-100 p-5">
         <h2 class="text-sm font-semibold text-gray-800 mb-4">Jadwalkan Wawancara</h2>
         <form action="{{ route('lowongan.wawancara.jadwal', [$lowongan, $application]) }}" method="POST">
@@ -135,6 +143,17 @@
             </button>
         </form>
     </div>
+    @else
+    <div class="bg-white rounded-xl border border-gray-100 p-8 flex flex-col items-center justify-center text-center min-h-48 gap-4">
+        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-gray-800 mb-1">Menunggu Jadwal Wawancara</p>
+            <p class="text-xs text-gray-500">Jadwal wawancara tahap <span class="font-medium text-gray-700">{{ $currentStage?->nama }}</span> belum ditetapkan. HR / Manajer HR akan menjadwalkannya dan kandidat akan menerima undangan.</p>
+        </div>
+    </div>
+    @endif
 
 {{-- Phase 2: Schedule set, show interview form --}}
 @elseif ($currentStage?->status->isAdvanceable() && $hasSchedule && !$existingResult)
@@ -235,6 +254,11 @@
                 @else
                     <p class="text-xs text-gray-400">Hubungi HR Admin untuk memasang template.</p>
                 @endpermission
+            </div>
+        @elseif (! $canDecide)
+            <div class="text-center py-4">
+                <p class="text-sm font-medium text-gray-700">Bukan penanggung jawab tahap ini</p>
+                <p class="text-xs text-gray-500 mt-1">Hanya pemutus yang ditetapkan untuk tahap ini yang dapat mengisi penilaian wawancara.</p>
             </div>
         @else
             <form

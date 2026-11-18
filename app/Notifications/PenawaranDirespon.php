@@ -3,9 +3,10 @@
 namespace App\Notifications;
 
 use App\Models\OfferingLetter;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class PenawaranDirespon extends Notification
+class PenawaranDirespon extends Notification implements ShouldQueue
 {
     public function __construct(public readonly OfferingLetter $offeringLetter) {}
 

@@ -4,13 +4,6 @@ namespace App\Support;
 
 use App\Models\Role;
 
-/**
- * Manual RBAC permission keys. One button/sidemenu = one permission.
- *
- * Single source of truth: PermissionSeeder builds the DB catalog from
- * self::catalog(), and the access-control UI renders from the DB.
- * Reference these constants in controllers/requests instead of magic strings.
- */
 final class Permissions
 {
     // Sidemenu
@@ -164,7 +157,9 @@ final class Permissions
     public const APPLICATION_FAIL = 'application.fail';
 
     // CV screening
-    public const SCREENING_DECIDE = 'screening.decide';
+    public const SCREENING_DECIDE_HR = 'screening.decide-hr';
+
+    public const SCREENING_DECIDE_USER = 'screening.decide-user';
 
     // Interviews
     public const INTERVIEW_SCHEDULE = 'interview.schedule';
@@ -307,7 +302,9 @@ final class Permissions
             self::APPLICATION_ADVANCE => ['label' => 'Loloskan kandidat ke tahap berikut', 'group' => 'Pipeline', 'roles' => [$H, $M, $U, $D]],
             self::APPLICATION_FAIL => ['label' => 'Gagalkan kandidat', 'group' => 'Pipeline', 'roles' => [$H, $M, $U, $D]],
 
-            self::SCREENING_DECIDE => ['label' => 'Putuskan skrining CV', 'group' => 'Pipeline', 'roles' => [$H, $U, $E]],
+            self::SCREENING_DECIDE_HR => ['label' => 'Form Pipeline: Skrining CV HR — Putuskan hasil', 'group' => 'Pipeline', 'roles' => [$H]],
+            // hr_admin keeps both by default (pre-RBAC behavior: HR could decide any skrining).
+            self::SCREENING_DECIDE_USER => ['label' => 'Form Pipeline: Skrining CV User — Putuskan hasil', 'group' => 'Pipeline', 'roles' => [$H, $U, $E]],
 
             self::INTERVIEW_SCHEDULE => ['label' => 'Jadwalkan wawancara', 'group' => 'Wawancara', 'roles' => [$H, $M]],
             self::INTERVIEW_RESCHEDULE => ['label' => 'Ubah jadwal / pewawancara', 'group' => 'Wawancara', 'roles' => [$H, $M]],

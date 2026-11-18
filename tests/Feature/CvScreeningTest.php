@@ -221,7 +221,7 @@ class CvScreeningTest extends TestCase
         $application = $this->makeApplication($vacancy);
 
         $response = $this->actingAs($admin)->get(
-            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'status' => 'aktif'])
+            route('lowongan.pipeline', ['lowongan' => $vacancy->slug, 'status' => 'aktif'])
         );
 
         $response->assertOk();
@@ -237,7 +237,7 @@ class CvScreeningTest extends TestCase
         $application = $this->makeApplication($vacancy);
 
         $response = $this->actingAs($admin)->get(
-            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'status' => 'selesai'])
+            route('lowongan.pipeline', ['lowongan' => $vacancy->slug, 'status' => 'selesai'])
         );
 
         $response->assertOk();
@@ -409,7 +409,7 @@ class CvScreeningTest extends TestCase
         ]);
 
         $response = $this->actingAs($unitHead)->get(
-            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'stage' => 'skrining_cv_user'])
+            route('lowongan.pipeline', ['lowongan' => $vacancy->slug, 'stage' => 'skrining_cv_user'])
         );
 
         $response->assertOk();

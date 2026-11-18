@@ -123,7 +123,8 @@ Pola sama untuk tiap grup — `view`, `create`, `update`, `delete`:
 |---|---|---|
 | `application.advance` | Loloskan kandidat ke tahap berikut | `hr_admin`, `hr_manager`, `unit_head`, `director` |
 | `application.fail` | Gagalkan kandidat | `hr_admin`, `hr_manager`, `unit_head`, `director` |
-| `screening.decide` | Putuskan skrining CV (HR + unit sendiri) | `hr_admin`, `unit_head`, `employee` |
+| `screening.decide-hr` | Form Pipeline: Skrining CV HR — Putuskan hasil | `hr_admin` |
+| `screening.decide-user` | Form Pipeline: Skrining CV User — Putuskan hasil | `unit_head`, `employee` |
 
 ### Wawancara (5) — tiap tahap wawancara satu permission
 
@@ -267,8 +268,8 @@ tiap matriks/peran/peran-user berubah (plus hook `role_id`-dirty).
 | Tahap | Aksi staf | Permission | Cakupan |
 |---|---|---|---|
 | `lamaran` | Otomatis saat kandidat melamar (tanpa akun, via link publik) | — | — |
-| `skrining_cv_hr` | Putuskan skrining | `screening.decide` | + `vacancy.view-org` |
-| `skrining_cv_user` | Putuskan skrining | `screening.decide` | unit sendiri (atau `view-org`) |
+| `skrining_cv_hr` | Putuskan skrining | `screening.decide-hr` | + `vacancy.view-org` |
+| `skrining_cv_user` | Putuskan skrining | `screening.decide-user` | unit sendiri (atau `view-org`) |
 | `tes_kompetensi` | Susun tes | `test.manage` | — |
 | `tes_kompetensi` | Nilai esai | `test.review-essay` | — |
 | `tes_kompetensi` | Putuskan hasil tes | `test.decide` | — |
@@ -297,3 +298,6 @@ flowchart LR
 
 Dilindungi throttle (`public-browse`, `public-submit`, `token-access`, `signed-access`),
 tidak pernah di belakang `auth`.
+
+
+queue:retry all

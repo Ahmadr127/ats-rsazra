@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\InterviewTemplateType;
 use App\Logging\LogContext;
 use App\Models\Application;
+use App\Models\ApplicationStage;
 use App\Models\Permission;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -148,9 +149,9 @@ class VacancyPipelineController extends Controller
 
         if ($currentStage) {
             [$isUserPic, $picLabel] = match (true) {
-                $currentStage->key === 'skrining_cv_hr' => [$user->hasPermission(Permissions::SCREENING_DECIDE), 'Admin HR'],
+                $currentStage->key === 'skrining_cv_hr' => [$user->hasPermission(Permissions::SCREENING_DECIDE_HR), 'Admin HR'],
                 $currentStage->key === 'skrining_cv_user' => [
-                    $user->hasPermission(Permissions::SCREENING_DECIDE) && ($user->isInUnit($lowongan->unit_id) || $user->hasPermission(Permissions::VACANCY_VIEW_ORG)),
+                    $user->hasPermission(Permissions::SCREENING_DECIDE_USER) && ($user->isInUnit($lowongan->unit_id) || $user->hasPermission(Permissions::VACANCY_VIEW_ORG)),
                     'Tim Unit '.$lowongan->unit->nama,
                 ],
                 $currentStage->key === 'tes_kompetensi' => [$user->hasPermission(Permissions::TEST_DECIDE), 'Admin HR'],
@@ -189,6 +190,41 @@ class VacancyPipelineController extends Controller
             'picLabel',
             'eligibleInterviewers',
         ));
+    }
+
+    /**
+     * Render the read-only decision detail for a single pipeline stage.
+     * Powers the general stage-detail modal on the candidate pipeline page.
+     */
+    public function stageDetail(Vacancy $lowongan, Application $application, ApplicationStage $stage): View
+    {
+        self::authorizeCandidateDetail(auth()->user(), $lowongan);
+
+        abort_if($application->vacancy_id !== $lowongan->id, 404);
+        abort_if($stage->application_id !== $application->id, 404);
+
+        $application->load([
+            'candidate',
+            'testSubmission.answers.question.options',
+            'testSubmission.answers.selectedOption',
+            'testSubmission.snapshot',
+            'discSubmission.result',
+            'mbtiSubmission.result',
+            'offeringLetter',
+            'mcuResult.reviewer',
+            'onboardingResult',
+        ]);
+
+        $stage->load([
+            'reviewedBy',
+            'interviewer',
+            'interviewResult.interviewer',
+            'interviewResult.ratings.interviewTemplate',
+            'interviewResult.readinessAnswers.interviewTemplate',
+            'mcuResult.reviewer',
+        ]);
+
+        return view('vacancies.partials._detail-tahap', compact('lowongan', 'application', 'stage'));
     }
 
     public function exportPdf(Vacancy $lowongan, Application $application): Response
