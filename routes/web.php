@@ -76,7 +76,7 @@ Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])-
 Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi')->middleware('throttle:token-access');
 Route::get('/lamaran/{token}', [CandidateStatusController::class, 'show'])->name('karier.lamaran.status')->middleware('throttle:token-access');
 
-Route::middleware(['signed', 'throttle:signed-access'])->group(function () {
+Route::middleware(['signed.relative', 'throttle:signed-access'])->group(function () {
     Route::get('/penawaran/{offering}/terima', [OfferingResponseController::class, 'showAcceptForm'])->name('offering.accept');
     Route::post('/penawaran/{offering}/terima', [OfferingResponseController::class, 'accept'])->name('offering.accept.submit');
     Route::get('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'showRejectForm'])->name('offering.reject');

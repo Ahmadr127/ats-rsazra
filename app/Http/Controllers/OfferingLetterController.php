@@ -51,13 +51,15 @@ class OfferingLetterController extends Controller
 
         $expiry = now()->addDays(7);
 
-        $acceptUrl = URL::temporarySignedRoute('offering.accept', $expiry, [
+        // Sign only the relative path so the link stays valid regardless of
+        // scheme/host the request is seen as (reverse proxy, http vs https).
+        $acceptUrl = rtrim(url('/'), '/').URL::temporarySignedRoute('offering.accept', $expiry, [
             'offering' => $offering->id,
-        ]);
+        ], absolute: false);
 
-        $rejectUrl = URL::temporarySignedRoute('offering.reject', $expiry, [
+        $rejectUrl = rtrim(url('/'), '/').URL::temporarySignedRoute('offering.reject', $expiry, [
             'offering' => $offering->id,
-        ]);
+        ], absolute: false);
 
         try {
             $this->emailNotificationService->dispatch('surat_penawaran', $application->candidate->email, [

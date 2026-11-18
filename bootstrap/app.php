@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\LogRequestMiddleware;
 use App\Http\Middleware\PermissionMiddleware;
+use App\Http\Middleware\ValidateSignedUrl;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'permission' => PermissionMiddleware::class,
+            'signed.relative' => ValidateSignedUrl::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

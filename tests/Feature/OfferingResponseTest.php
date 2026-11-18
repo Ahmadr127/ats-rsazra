@@ -90,11 +90,14 @@ class OfferingResponseTest extends TestCase
         ]);
 
         $expiry = now()->addDays(7);
+        $base = rtrim(url('/'), '/');
 
         return [
             'offering' => $offering,
-            'acceptUrl' => URL::temporarySignedRoute('offering.accept', $expiry, ['offering' => $offering->id]),
-            'rejectUrl' => URL::temporarySignedRoute('offering.reject', $expiry, ['offering' => $offering->id]),
+            // Mirrors production: sign the relative path so scheme/host
+            // differences (proxy, http vs https) do not break validation.
+            'acceptUrl' => $base.URL::temporarySignedRoute('offering.accept', $expiry, ['offering' => $offering->id], absolute: false),
+            'rejectUrl' => $base.URL::temporarySignedRoute('offering.reject', $expiry, ['offering' => $offering->id], absolute: false),
         ];
     }
 
@@ -264,6 +267,25 @@ class OfferingResponseTest extends TestCase
     }
 
     // ── Unsigned / expired ───────────────────────────────────────────────────
+
+    public function test_signed_link_valid_across_host_and_scheme_differences(): void
+    {
+        $this->seedStages();
+
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
+        $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
+        $data = $this->createOfferingWithSignedUrls($application);
+
+        $path = parse_url($data['acceptUrl'], PHP_URL_PATH);
+        $query = parse_url($data['acceptUrl'], PHP_URL_QUERY);
+
+        // Simulates reverse-proxy SSL termination: link built for one base
+        // URL, clicked on a different scheme/host.
+        $response = $this->get('https://ats.rsazra.co.id'.$path.'?'.$query);
+
+        $response->assertOk();
+        $response->assertViewIs('offering.accept-form');
+    }
 
     public function test_unsigned_link_returns_403(): void
     {
