@@ -1,6 +1,6 @@
 # Penawaran: Upload Surat & Salary oleh Admin, TTD oleh Pelamar
 
-Status: **ANALISA / RENCANA — menunggu keputusan detail**
+Status: **RENCANA FINAL — menunggu persetujuan implementasi**
 Terakhir update: 2026-11-19
 
 > **Scope: hanya tahap `surat_penawaran`.** Tidak menyentuh MCU, onboarding, wawancara, atau logika umum pipeline.
@@ -80,19 +80,23 @@ Terakhir update: 2026-11-19
 | 2 | Email ke pelamar berisi tautan ke halaman yang menampilkan **catatan, gaji, dan file surat penawaran**, plus form upload surat sudah di-TTD. Tautan tolak tetap ada. |
 | 3 | Penerima email adalah **pelamar**, bukan pewawancara. |
 | 4 | Salary tetap field `gaji` teks, bukan upload file. |
+| 5 | "File surat lamaran" = **file surat penawaran yang di-upload admin**. |
+| 6 | Upload surat sudah di-TTD di halaman terima **wajib**. |
 
-## Keputusan detail yang masih dibutuhkan
+## Detail teknis (default yang akan dipakai, bisa diubah)
 
-| No | Pertanyaan | Catatan |
+| No | Topik | Default |
 |---|---|---|
-| 1 | Upload surat penawaran oleh admin **wajib** atau opsional? | Menentukan validasi `SendOfferingLetterRequest`. |
-| 2 | Upload surat sudah di-TTD di halaman terima **wajib** agar status `accepted` + pipeline lanjut? | Deskripsi Anda menyebut form upload di halaman terima — saya asumsikan wajib; mohon dikonfirmasi. |
-| 3 | Form tolak: alasan penolakan tetap opsional atau diwajibkan? | Sekarang opsional, maks. 1000. |
-| 4 | Masa berlaku signed URL untuk pelamar tetap **7 hari**? | Sekarang 7 hari. |
-| 5 | Template `surat_penawaran` perlu diubah? | Karena detail (catatan, gaji, file) ditampilkan di halaman tautan, template lama kemungkinan besar tetap cukup. |
-| 6 | Notifikasi `PenawaranDirespon` ke HR Admin tetap seperti sekarang, atau ditambah info file TTD? | Saat ini database-only. |
-| 7 | Format & ukuran maks file surat penawaran dan TTD | Usulan awal: PDF, maks. 3 MB (mengikuti MCU). Perlu konfirmasi. |
-| 8 | File lama dihapus saat offering dikirim ulang / TTD diupload ulang? | Pola DISC/MBTI menghapus file lama saat replace. |
+| 1 | Upload surat penawaran oleh admin | **Wajib**, satu form dengan tombol Kirim. |
+| 2 | Form tolak | Alasan penolakan tetap **opsional**, maks. 1000 karakter (tidak diubah). |
+| 3 | Masa berlaku signed URL | **7 hari**, mengikuti link yang ada sekarang. |
+| 4 | Template email `surat_penawaran` | **Tidak diubah**: detail ditampilkan di halaman tautan, bukan di email. |
+| 5 | Notifikasi `PenawaranDirespon` | Tetap ke HR Admin via database; payload ditambah info keberadaan file TTD. |
+| 6 | Format & ukuran file | PDF, maks. **3 MB** per file (mengikuti pola `mcu-documents`). |
+| 7 | Cleanup file | File lama dihapus saat penggantian/rollback (mengikuti pola DISC/MBTI). |
+| 8 | Status & pipeline | `accepted` tetap memanggil `advance()`, `rejected` tetap menggagalkan stage. |
+
+Alur sudah disepakati; detail teknis di atas adalah default implementasi, bukan perubahan alur.
 
 ## Cakupan perubahan yang akan direncanakan setelah keputusan
 
