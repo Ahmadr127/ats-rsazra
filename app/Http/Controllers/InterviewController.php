@@ -36,8 +36,8 @@ class InterviewController extends Controller
             return back()->withErrors(['interview' => 'Keputusan tidak dapat diberikan untuk tahap ini.']);
         }
 
-        if ($interviewStage->interviewResult()->exists()) {
-            return back()->withErrors(['interview' => 'Hasil wawancara sudah direkam sebelumnya.']);
+        if ($interviewStage->activeInterviewResult()->exists()) {
+            return back()->withErrors(['interview' => 'Hasil wawancara aktif sudah direkam sebelumnya.']);
         }
 
         if ($interviewStage->key === 'wawancara_user' && $interviewStage->interviewer_id !== $user->id) {

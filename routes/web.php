@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationPipelineController;
+use App\Http\Controllers\ApplicationResumeController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\CallbackController;
@@ -121,6 +122,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/pipeline/{application}', [VacancyPipelineController::class, 'showApplication'])->scopeBindings()->name('lowongan.pipeline.show');
     Route::get('/lowongan/{lowongan}/pipeline/{application}/export-pdf', [VacancyPipelineController::class, 'exportPdf'])->scopeBindings()->name('lowongan.pipeline.show.export-pdf');
     Route::get('/lowongan/{lowongan}/pipeline/{application}/tahap/{stage}', [VacancyPipelineController::class, 'stageDetail'])->scopeBindings()->name('lowongan.pipeline.tahap');
+    Route::post('/lowongan/{lowongan}/lamaran/{application}/lanjutkan', [ApplicationResumeController::class, 'resume'])->scopeBindings()->name('lowongan.lamaran.resume');
+    Route::post('/lowongan/{lowongan}/lamaran/{application}/ulang', [ApplicationResumeController::class, 'startOver'])->scopeBindings()->name('lowongan.lamaran.ulang');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/lanjut', [ApplicationPipelineController::class, 'advance'])->scopeBindings()->name('lowongan.lamaran.lanjut');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/gagal', [ApplicationPipelineController::class, 'fail'])->scopeBindings()->name('lowongan.lamaran.gagal');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/tes-disc/kirim', [ApplicationPipelineController::class, 'sendDiscLink'])->scopeBindings()->name('lowongan.lamaran.tes-disc.kirim');

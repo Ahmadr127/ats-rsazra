@@ -46,6 +46,11 @@ class ApplicationStage extends Model
         return $this->hasOne(InterviewResult::class);
     }
 
+    public function activeInterviewResult(): HasOne
+    {
+        return $this->hasOne(InterviewResult::class)->where('is_superseded', false);
+    }
+
     public function mcuResult(): HasOne
     {
         return $this->hasOne(McuResult::class);

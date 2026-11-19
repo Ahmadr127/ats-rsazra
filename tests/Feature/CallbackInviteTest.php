@@ -8,11 +8,15 @@ use App\Mail\TemplatedMail;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Candidate;
+use App\Models\InterviewResult;
+use App\Models\InterviewTemplate;
+use App\Models\InterviewTemplateItem;
 use App\Models\JobTemplate;
 use App\Models\OnboardingResult;
 use App\Models\Stage;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Models\VacancyInterviewTemplate;
 use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -77,6 +81,50 @@ class CallbackInviteTest extends TestCase
             } else {
                 $status = ApplicationStageStatus::Selesai;
             }
+
+            ApplicationStage::factory()->create([
+                'application_id' => $application->id,
+                'position' => $stage->position,
+                'key' => $stage->key,
+                'nama' => $stage->nama,
+                'status' => $status,
+            ]);
+        }
+
+        return $application;
+    }
+
+    private function assignCriteriaTemplate(Vacancy $vacancy, array $stageKeys, string $templateNama = 'Kriteria Umum'): InterviewTemplate
+    {
+        $template = InterviewTemplate::factory()->kriteriaPenilaian()->create(['nama' => $templateNama]);
+        InterviewTemplateItem::factory()->count(3)->create(['interview_template_id' => $template->id]);
+
+        foreach ($stageKeys as $stageKey) {
+            VacancyInterviewTemplate::create([
+                'vacancy_id' => $vacancy->id,
+                'interview_template_id' => $template->id,
+                'stage_key' => $stageKey,
+            ]);
+        }
+
+        return $template;
+    }
+
+    private function reservedApplication(Vacancy $vacancy, Candidate $candidate, string $reservedKey): Application
+    {
+        $vacancy->load('workflowTemplateSnapshot.stages');
+
+        $application = Application::factory()->create([
+            'vacancy_id' => $vacancy->id,
+            'candidate_id' => $candidate->id,
+        ]);
+
+        foreach ($vacancy->workflowTemplateSnapshot->stages->sortBy('position') as $stage) {
+            $status = match (true) {
+                $stage->key === $reservedKey => ApplicationStageStatus::Reserved,
+                $stage->position < $vacancy->workflowTemplateSnapshot->stages->firstWhere('key', $reservedKey)->position => ApplicationStageStatus::Selesai,
+                default => ApplicationStageStatus::Pending,
+            };
 
             ApplicationStage::factory()->create([
                 'application_id' => $application->id,
@@ -405,5 +453,223 @@ class CallbackInviteTest extends TestCase
 
         $this->actingAs($employee)->get(route('callback.index', $target))
             ->assertForbidden();
+    }
+
+    public function test_reserved_candidate_is_listed_with_continue_option(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $prior = $this->vacancyWithStages($template->id);
+        $target = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create(['nama_lengkap' => 'Jodi Tunda']);
+        $this->reservedApplication($prior, $candidate, 'wawancara_user');
+
+        $this->actingAs($admin)->get(route('callback.index', $target))
+            ->assertOk()
+            ->assertSee('Jodi Tunda')
+            ->assertSee('Ditangguhkan')
+            ->assertSee('Lanjutkan')
+            ->assertSee('Ulang dari awal');
+    }
+
+    public function test_reserved_in_target_vacancy_is_listed_and_can_be_resumed(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $target = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create(['nama_lengkap' => 'Kirana Target']);
+        $application = $this->reservedApplication($target, $candidate, 'wawancara_user');
+
+        $this->actingAs($admin)->get(route('callback.index', $target))
+            ->assertOk()
+            ->assertSee('Kirana Target')
+            ->assertSee('Ditangguhkan')
+            ->assertSee('Lanjutkan');
+
+        $this->actingAs($admin)->post(route('callback.invite', $target), [
+            'candidate_ids' => [$candidate->id],
+            'mode' => [$candidate->id => 'lanjut'],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'vacancy_id' => $target->id,
+        ]);
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'wawancara_user',
+            'status' => ApplicationStageStatus::Aktif,
+        ]);
+        Mail::assertQueued(TemplatedMail::class, 1);
+    }
+
+    public function test_invite_accepts_mode_only_payload(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $target = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create();
+        $application = $this->reservedApplication($target, $candidate, 'wawancara_user');
+
+        $this->actingAs($admin)->post(route('callback.invite', $target), [
+            'mode' => [$candidate->id => 'lanjut'],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('callback_invites', ['candidate_id' => $candidate->id]);
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'wawancara_user',
+            'status' => ApplicationStageStatus::Aktif,
+        ]);
+        Mail::assertQueued(TemplatedMail::class, 1);
+    }
+
+    public function test_invite_lanjut_moves_resumable_application_and_uses_new_template(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $prior = $this->vacancyWithStages($template->id);
+        $target = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create();
+        $application = $this->reservedApplication($prior, $candidate, 'wawancara_user');
+
+        $this->actingAs($admin)->post(route('callback.invite', $target), [
+            'candidate_ids' => [$candidate->id],
+            'mode' => [$candidate->id => 'lanjut'],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'vacancy_id' => $target->id,
+        ]);
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'wawancara_user',
+            'status' => ApplicationStageStatus::Aktif,
+        ]);
+        $this->assertDatabaseHas('callback_invites', [
+            'vacancy_id' => $target->id,
+            'candidate_id' => $candidate->id,
+        ]);
+        Mail::assertQueued(TemplatedMail::class, 1);
+    }
+
+    public function test_resume_action_resumes_reserved_application(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $vacancy = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create();
+        $application = $this->reservedApplication($vacancy, $candidate, 'wawancara_user');
+        InterviewResult::create([
+            'application_id' => $application->id,
+            'application_stage_id' => $application->stages()->where('key', 'wawancara_user')->firstOrFail()->id,
+            'interviewer_id' => $admin->id,
+            'keputusan' => 'reserved',
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($admin)->post(route('lowongan.lamaran.resume', [$vacancy, $application]))
+            ->assertRedirect(route('lowongan.pipeline', $vacancy));
+
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'wawancara_user',
+            'status' => ApplicationStageStatus::Aktif,
+        ]);
+        $this->assertDatabaseHas('interview_results', [
+            'application_id' => $application->id,
+            'application_stage_id' => $application->stages()->where('key', 'wawancara_user')->firstOrFail()->id,
+            'is_superseded' => true,
+        ]);
+    }
+
+    public function test_start_over_action_resets_progress_to_screening(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $vacancy = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create();
+        $application = $this->reservedApplication($vacancy, $candidate, 'wawancara_user');
+
+        $this->actingAs($admin)->post(route('lowongan.lamaran.ulang', [$vacancy, $application]))
+            ->assertRedirect(route('lowongan.pipeline', $vacancy));
+
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'lamaran',
+            'status' => ApplicationStageStatus::Selesai,
+        ]);
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'skrining_cv_hr',
+            'status' => ApplicationStageStatus::Aktif,
+        ]);
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'wawancara_user',
+            'status' => ApplicationStageStatus::Pending,
+        ]);
+    }
+
+    public function test_invite_ulang_keeps_reserved_application_untouched(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $prior = $this->vacancyWithStages($template->id);
+        $target = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create();
+        $application = $this->reservedApplication($prior, $candidate, 'wawancara_user');
+
+        $this->actingAs($admin)->post(route('callback.invite', $target), [
+            'candidate_ids' => [$candidate->id],
+            'mode' => [$candidate->id => 'ulang'],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'vacancy_id' => $prior->id,
+        ]);
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'wawancara_user',
+            'status' => ApplicationStageStatus::Reserved,
+        ]);
+        Mail::assertQueued(TemplatedMail::class, 1);
+    }
+
+    public function test_invite_lanjut_is_ignored_for_failed_candidate(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $prior = $this->vacancyWithStages($template->id);
+        $target = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create();
+        $application = $this->gagalApplication($prior, $candidate, 'wawancara_user');
+
+        $this->actingAs($admin)->post(route('callback.invite', $target), [
+            'candidate_ids' => [$candidate->id],
+            'mode' => [$candidate->id => 'lanjut'],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'vacancy_id' => $prior->id,
+        ]);
+        $this->assertDatabaseHas('callback_invites', ['candidate_id' => $candidate->id]);
+        Mail::assertQueued(TemplatedMail::class, 1);
     }
 }

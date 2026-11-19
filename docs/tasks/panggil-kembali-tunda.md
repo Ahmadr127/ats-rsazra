@@ -1,6 +1,6 @@
 # Panggil Kembali Kandidat Bertunda (Lanjutkan / Ulang)
 
-Status: **RENCANA — menunggu keputusan alur**
+Status: **SELESAI — terverifikasi**
 Terakhir update: 2026-11-19
 
 > Analisa dulu, belum implementasi. Alur "lanjutkan" menyentuh data lamaran lama, jadi perlu disetujui sebelum kode ditulis.
@@ -108,12 +108,28 @@ Terakhir update: 2026-11-19
 - Permission `vacancy.callback`.
 - Alur lamaran publik `karier.lamar`.
 
+## Keputusan final
+
+- "Lanjutkan" = **pindahkan lamaran lama** ke lowongan target, stage `Reserved` → `Aktif`.
+- Email mode lanjut memakai **template baru** `undangan_panggil_kembali_lanjut` dengan `{link_status}`.
+- Kandidat bertunda **tampil di daftar default** dengan badge "Ditangguhkan".
+- Jika ada beberapa lamaran `Reserved`, dipilih yang **terbaru**.
+- Submission lama (tes/wawancara) tetap dipakai.
+
+## Hasil verifikasi
+
+- Skala penilaian wawancara: 1–3 (validasi, radio, tampilan `/3`, test) — `InterviewManagementTest` 42 test lulus.
+- `CallbackInviteTest`: 21 test / 66 assertion lulus, termasuk kandidat bertunda **di lowongan target itu sendiri** (sebelum perbaikan hanya kandidat dari lowongan lain yang muncul).
+- Regresi callback/notifikasi/pipeline/reserved/interview: 98 test / 237 assertion lulus.
+- Suite lengkap: 657 lulus, 3 failure pre-existing yang sama.
+- `pint --dirty`, `npm run build`, dan `EmailTemplateSeeder` selesai.
+
 ## Checklist
 
-- [ ] Keputusan 5 poin di atas
-- [ ] Finder menyertakan Reserved
-- [ ] UI pilihan lanjut/ulang
-- [ ] Controller cabang transaksi + email
-- [ ] Template email baru + seeder
-- [ ] Test & regresi
-- [ ] Commit
+- [x] Keputusan 5 poin di atas
+- [x] Finder menyertakan Reserved
+- [x] UI pilihan lanjut/ulang
+- [x] Controller cabang transaksi + email
+- [x] Template email baru + seeder
+- [x] Test & regresi
+- [ ] Commit — **sengaja tidak dilakukan, menunggu instruksi user**

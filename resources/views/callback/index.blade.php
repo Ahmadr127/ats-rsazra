@@ -4,7 +4,7 @@
         <div>
             <h1 class="text-xl font-semibold text-gray-900">Panggil Kembali Kandidat</h1>
             <p class="text-xs text-gray-500 mt-0.5">
-                Kandidat gagal periode sebelumnya untuk posisi {{ $lowongan->judul_posisi }}
+                Kandidat gagal atau ditunda pada periode sebelumnya untuk posisi {{ $lowongan->judul_posisi }}
             </p>
         </div>
         <a href="{{ route('lowongan.index') }}" class="text-xs text-gray-400 hover:text-gray-600 transition-colors ease-out duration-150">
@@ -50,8 +50,9 @@
                                 <input type="checkbox" x-data @click="$root.querySelectorAll('input[name=\'candidate_ids[]\']').forEach(c => c.checked = $event.target.checked)">
                             </th>
                             <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider">Kandidat</th>
-                            <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider">Gagal di tahap</th>
+                            <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider">Tahap</th>
                             <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider">Periode sebelumnya</th>
+                            <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider w-44">Metode</th>
                             <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider w-48">Status</th>
                         </tr>
                     </thead>
@@ -69,7 +70,28 @@
                                 <td class="px-3 py-1.5 text-xs text-gray-600">{{ $row['failed_stage_label'] }}</td>
                                 <td class="px-3 py-1.5 text-xs text-gray-600">{{ $row['application']->vacancy->judul_posisi }}</td>
                                 <td class="px-3 py-1.5">
+                                    @if ($row['is_reserved'])
+                                        <div class="flex flex-col gap-1">
+                                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                                <input type="radio" name="mode[{{ $candidate->id }}]" value="lanjut" checked class="accent-primary"
+                                                    onchange="this.closest('tr').querySelector('input[name=\'candidate_ids[]\']').checked = true">
+                                                Lanjutkan
+                                            </label>
+                                            <label class="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                                <input type="radio" name="mode[{{ $candidate->id }}]" value="ulang" class="accent-primary"
+                                                    onchange="this.closest('tr').querySelector('input[name=\'candidate_ids[]\']').checked = true">
+                                                Ulang dari awal
+                                            </label>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-gray-500">Ulang dari awal</span>
+                                    @endif
+                                </td>
+                                <td class="px-3 py-1.5">
                                     <div class="flex flex-wrap items-center gap-1">
+                                        @if ($row['is_reserved'])
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-100 text-amber-700">Ditangguhkan</span>
+                                        @endif
                                         @if ($row['responded'])
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-green-100 text-green-700">Sudah melamar</span>
                                         @elseif ($row['invited'])
@@ -83,9 +105,9 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-14 text-center">
+                                <td colspan="6" class="px-4 py-14 text-center">
                                     <p class="text-sm font-medium text-gray-700">Tidak ada kandidat untuk dipanggil kembali</p>
-                                    <p class="text-xs text-gray-400 mt-0.5">Belum ada kandidat gagal dari periode sebelumnya pada template ini.</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Belum ada kandidat gagal atau ditunda dari periode sebelumnya pada template ini.</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -95,7 +117,8 @@
         </div>
 
         @if ($rows->isNotEmpty())
-            <div class="flex justify-end mt-4">
+            <div class="flex flex-wrap items-center justify-end gap-3 mt-4">
+                <span class="text-[11px] text-gray-400">Centang kandidat yang akan dipanggil. Memilih metode otomatis mencentang barisnya.</span>
                 <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer">
                     Kirim Undangan
                 </button>

@@ -65,6 +65,12 @@ class EmailTemplateSeeder extends Seeder
                 'isi' => "Yth. {nama_kandidat},\n\nSelamat! Kami dengan bangga menawarkan posisi {jabatan_ditawarkan} di RS Azra kepada Anda.\n\nDetail Penawaran:\nPosisi: {jabatan_ditawarkan}\nGaji: {gaji}\nTanggal Mulai: {tanggal_mulai}\n\nSilakan klik salah satu tautan berikut untuk merespon penawaran ini:\n\nTerima Penawaran:\n{link_terima}\n\nTolak Penawaran:\n{link_tolak}\n\nTautan ini berlaku selama 7 hari. Jika ada pertanyaan, jangan ragu untuk menghubungi tim HR kami.\n\nSalam,\nTim HR RS Azra",
             ],
             [
+                'key' => 'undangan_panggil_kembali_lanjut',
+                'deskripsi' => 'Dikirim ke kandidat bertunda yang dipanggil kembali untuk melanjutkan lamaran',
+                'subjek' => 'Undangan Melanjutkan Proses — {judul_lowongan}',
+                'isi' => "Yth. {nama_kandidat},\n\nTerima kasih atas minat Anda untuk kembali mengikuti proses rekrutmen posisi {judul_lowongan} di RS Azra.\n\nStatus lamaran Anda yang sebelumnya ditangguhkan telah dilanjutkan. Silakan buka tautan berikut untuk melihat tahap selanjutnya:\n\n{link_status}\n\nJika ada pertanyaan, jangan ragu untuk menghubungi tim HR kami.\n\nSalam,\nTim HR RS Azra",
+            ],
+            [
                 'key' => 'instruksi_mcu',
                 'deskripsi' => 'Dikirim ke kandidat dengan instruksi pemeriksaan kesehatan (MCU)',
                 'subjek' => 'Instruksi Medical Check-Up (MCU) — {judul_lowongan}',

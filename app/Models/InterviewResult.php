@@ -20,12 +20,14 @@ class InterviewResult extends Model
         'keputusan',
         'catatan',
         'submitted_at',
+        'is_superseded',
     ];
 
     protected function casts(): array
     {
         return [
             'submitted_at' => 'datetime',
+            'is_superseded' => 'boolean',
         ];
     }
 

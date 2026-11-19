@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStageStatus;
 use App\Enums\JobTemplateStatus;
 use App\Models\Candidate;
+use App\Models\InterviewResult;
 use App\Models\Vacancy;
 use App\Services\CallbackCandidateFinder;
 use App\Services\EmailNotificationService;
@@ -48,9 +50,17 @@ class CallbackController extends Controller
             ]);
         }
 
+        // Selecting a method implies the candidate. This keeps the form usable
+        // when only the radio was submitted (e.g. a cached page without checkboxes).
+        if (! $request->has('candidate_ids') && $request->filled('mode')) {
+            $request->merge(['candidate_ids' => array_keys($request->input('mode', []))]);
+        }
+
         $validated = $request->validate([
             'candidate_ids' => ['required', 'array', 'max:200'],
             'candidate_ids.*' => ['integer', 'exists:candidates,id'],
+            'mode' => ['nullable', 'array'],
+            'mode.*' => ['required', 'in:lanjut,ulang'],
         ]);
 
         $requestedIds = array_values(array_unique($validated['candidate_ids']));
@@ -68,11 +78,31 @@ class CallbackController extends Controller
 
         $candidates = Candidate::query()->whereIn('id', $candidateIds)->get();
 
+        $mode = $validated['mode'] ?? [];
+        $resumable = $this->finder->resumableApplications($lowongan);
+        $continueIds = array_values(array_filter(
+            $candidateIds,
+            fn (int $id): bool => ($mode[$id] ?? 'ulang') === 'lanjut' && isset($resumable[$id]),
+        ));
+
         // Persist all invites atomically, then queue emails only after commit so a
         // mid-loop failure cannot leave invites half-written or emails sent for
         // records that rolled back.
-        DB::transaction(function () use ($candidates, $lowongan, $request) {
+        DB::transaction(function () use ($candidates, $lowongan, $request, $continueIds, $resumable): void {
             foreach ($candidates as $candidate) {
+                if (in_array($candidate->id, $continueIds, true)) {
+                    $application = $resumable[$candidate->id];
+                    $application->update(['vacancy_id' => $lowongan->id]);
+
+                    $reservedStageIds = $application->stages()
+                        ->where('status', ApplicationStageStatus::Reserved)
+                        ->pluck('id');
+                    InterviewResult::whereIn('application_stage_id', $reservedStageIds->all())
+                        ->update(['is_superseded' => true]);
+                    $application->stages()->whereIn('id', $reservedStageIds->all())
+                        ->update(['status' => ApplicationStageStatus::Aktif]);
+                }
+
                 $lowongan->callbackInvites()->updateOrCreate(
                     ['candidate_id' => $candidate->id],
                     ['invited_by' => $request->user()->id, 'invited_at' => now()],
@@ -81,6 +111,16 @@ class CallbackController extends Controller
         });
 
         foreach ($candidates as $candidate) {
+            if (in_array($candidate->id, $continueIds, true)) {
+                $this->emailNotificationService->dispatch('undangan_panggil_kembali_lanjut', $candidate->email, [
+                    'nama_kandidat' => $candidate->nama_lengkap,
+                    'judul_lowongan' => $lowongan->judul_posisi,
+                    'link_status' => route('karier.lamaran.status', $resumable[$candidate->id]->token),
+                ]);
+
+                continue;
+            }
+
             $this->emailNotificationService->dispatch('undangan_panggil_kembali', $candidate->email, [
                 'nama_kandidat' => $candidate->nama_lengkap,
                 'judul_lowongan' => $lowongan->judul_posisi,
