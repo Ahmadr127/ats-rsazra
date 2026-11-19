@@ -9,10 +9,8 @@ use App\Enums\VacancyStatus;
 use App\Models\Application;
 use App\Models\CallbackInvite;
 use App\Models\Candidate;
-use App\Models\DiscResult;
 use App\Models\DiscSubmission;
 use App\Models\JobTemplate;
-use App\Models\MbtiResult;
 use App\Models\MbtiSubmission;
 use App\Models\TestSubmission;
 use App\Models\User;
@@ -77,9 +75,7 @@ class DemoPipelineCaseSeeder extends Seeder
                 $application->stages()->delete();
                 $application->testSubmission?->answers()->delete();
                 $application->testSubmission?->delete();
-                $application->discSubmission?->result()->delete();
                 $application->discSubmission?->delete();
-                $application->mbtiSubmission?->result()->delete();
                 $application->mbtiSubmission?->delete();
                 $application->delete();
             }
@@ -172,14 +168,15 @@ class DemoPipelineCaseSeeder extends Seeder
         $candidate = $this->candidate('case-disc@demo.test', 'Kandidat DiSC (Demo)');
         $application = $this->makeApplication($vacancy, $snapshotStages, 'tes_disc', $candidate);
 
-        $submission = DiscSubmission::create([
+        DiscSubmission::create([
             'application_id' => $application->id,
             'token' => Str::uuid()->toString(),
-            'started_at' => now()->subMinutes(20),
-            'submitted_at' => now()->subMinutes(2),
+            'link_tes' => 'https://disc.example.test/asesmen/'.Str::uuid(),
+            'catatan' => 'Kerjakan tes sesuai instruksi dan unggah bukti hasilnya.',
+            'sent_at' => now()->subMinutes(20),
+            'proof_paths' => ['test-proofs/demo/disc-1.jpg', 'test-proofs/demo/disc-2.jpg'],
+            'proof_uploaded_at' => now()->subMinutes(2),
         ]);
-
-        DiscResult::factory()->create(['disc_submission_id' => $submission->id]);
     }
 
     private function seedMbtiCase(Vacancy $vacancy, Collection $snapshotStages): void
@@ -187,14 +184,15 @@ class DemoPipelineCaseSeeder extends Seeder
         $candidate = $this->candidate('case-mbti@demo.test', 'Kandidat MBTI (Demo)');
         $application = $this->makeApplication($vacancy, $snapshotStages, 'tes_mbti', $candidate);
 
-        $submission = MbtiSubmission::create([
+        MbtiSubmission::create([
             'application_id' => $application->id,
             'token' => Str::uuid()->toString(),
-            'started_at' => now()->subMinutes(20),
-            'submitted_at' => now()->subMinutes(2),
+            'link_tes' => 'https://mbti.example.test/asesmen/'.Str::uuid(),
+            'catatan' => 'Kerjakan tes sesuai instruksi dan unggah bukti hasilnya.',
+            'sent_at' => now()->subMinutes(20),
+            'proof_paths' => ['test-proofs/demo/mbti-1.jpg', 'test-proofs/demo/mbti-2.jpg'],
+            'proof_uploaded_at' => now()->subMinutes(2),
         ]);
-
-        MbtiResult::factory()->create(['mbti_submission_id' => $submission->id]);
     }
 
     private function seedInterviewCases(Vacancy $vacancy, Collection $snapshotStages): void

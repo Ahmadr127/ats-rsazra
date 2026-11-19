@@ -35,6 +35,18 @@ class EmailTemplateSeeder extends Seeder
                 'isi' => "Yth. {nama_kandidat},\n\nTes untuk posisi {judul_lowongan} kini tersedia untuk Anda.\n\nSilakan akses tes melalui tautan berikut:\n{link_tes}\n\nPastikan Anda mengerjakan tes sebelum batas waktu yang telah ditentukan.\n\nSalam,\nTim HR RS Azra",
             ],
             [
+                'key' => 'tes_disc_tersedia',
+                'deskripsi' => 'Dikirim ke kandidat saat Admin HR mengirim link tes DISC eksternal',
+                'subjek' => 'Tes DISC Eksternal — {judul_lowongan}',
+                'isi' => "Yth. {nama_kandidat},\n\nTes DISC untuk posisi {judul_lowongan} di RS Azra telah tersedia.\n\nSilakan kerjakan tes melalui tautan berikut:\n{link_tes}\n\nCatatan dari HR:\n{catatan}\n\nSetelah selesai, unggah bukti hasil tes melalui halaman berikut:\n{link_upload}\n\nAnda dapat mengunggah 1–5 gambar bukti (JPG, JPEG, PNG, atau WEBP) dengan ukuran maksimal 5 MB per gambar. Setelah bukti dikirim, proses seleksi akan dilanjutkan secara otomatis.\n\nSalam,\nTim HR RS Azra",
+            ],
+            [
+                'key' => 'tes_mbti_tersedia',
+                'deskripsi' => 'Dikirim ke kandidat saat Admin HR mengirim link tes MBTI eksternal',
+                'subjek' => 'Tes MBTI Eksternal — {judul_lowongan}',
+                'isi' => "Yth. {nama_kandidat},\n\nTes MBTI untuk posisi {judul_lowongan} di RS Azra telah tersedia.\n\nSilakan kerjakan tes melalui tautan berikut:\n{link_tes}\n\nCatatan dari HR:\n{catatan}\n\nSetelah selesai, unggah bukti hasil tes melalui halaman berikut:\n{link_upload}\n\nAnda dapat mengunggah 1–5 gambar bukti (JPG, JPEG, PNG, atau WEBP) dengan ukuran maksimal 5 MB per gambar. Setelah bukti dikirim, proses seleksi akan dilanjutkan secara otomatis.\n\nSalam,\nTim HR RS Azra",
+            ],
+            [
                 'key' => 'wawancara_dijadwalkan',
                 'deskripsi' => 'Dikirim ke kandidat saat wawancara dijadwalkan',
                 'subjek' => 'Undangan Wawancara — {judul_lowongan}',

@@ -6,8 +6,6 @@ use Database\Factories\MbtiSubmissionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MbtiSubmission extends Model
 {
@@ -17,15 +15,19 @@ class MbtiSubmission extends Model
     protected $fillable = [
         'application_id',
         'token',
-        'started_at',
-        'submitted_at',
+        'link_tes',
+        'catatan',
+        'sent_at',
+        'proof_paths',
+        'proof_uploaded_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'started_at' => 'datetime',
-            'submitted_at' => 'datetime',
+            'sent_at' => 'datetime',
+            'proof_paths' => 'array',
+            'proof_uploaded_at' => 'datetime',
         ];
     }
 
@@ -34,18 +36,13 @@ class MbtiSubmission extends Model
         return $this->belongsTo(Application::class);
     }
 
-    public function answers(): HasMany
+    public function isSent(): bool
     {
-        return $this->hasMany(MbtiAnswer::class);
+        return $this->sent_at !== null;
     }
 
-    public function result(): HasOne
+    public function hasProof(): bool
     {
-        return $this->hasOne(MbtiResult::class);
-    }
-
-    public function isSubmitted(): bool
-    {
-        return $this->submitted_at !== null;
+        return ! empty($this->proof_paths);
     }
 }

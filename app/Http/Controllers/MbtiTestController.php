@@ -2,93 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SubmitMbtiTestRequest;
+use App\Enums\ApplicationStageStatus;
+use App\Http\Requests\UploadTestProofRequest;
 use App\Logging\LogContext;
-use App\Models\MbtiQuestion;
 use App\Models\MbtiSubmission;
 use App\Services\ApplicationPipelineService;
-use App\Services\MbtiScoringService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class MbtiTestController extends Controller
 {
-    public function __construct(
-        private readonly MbtiScoringService $scoringService,
-        private readonly ApplicationPipelineService $pipelineService,
-    ) {}
+    public function __construct(private readonly ApplicationPipelineService $pipelineService) {}
 
-    public function show(string $token): View|RedirectResponse
+    public function show(string $token): View
     {
         $submission = MbtiSubmission::with([
+            'application.stages',
             'application.vacancy',
         ])->where('token', $token)->firstOrFail();
 
-        if ($submission->isSubmitted()) {
-            $questions = MbtiQuestion::orderBy('urutan')->get();
+        $stage = $submission->application->stages->firstWhere('key', 'tes_mbti');
+        abort_if(! $stage, 404);
 
-            return view('mbti.show', compact('submission', 'questions'));
-        }
-
-        if ($submission->started_at === null) {
-            $submission->update(['started_at' => now()]);
-        }
-
-        $questions = MbtiQuestion::orderBy('urutan')->get();
-
-        return view('mbti.show', compact('submission', 'questions'));
+        return view('external-tests.show', [
+            'submission' => $submission,
+            'stage' => $stage,
+            'testLabel' => 'MBTI',
+            'submitRoute' => 'tes-mbti.submit',
+        ]);
     }
 
-    public function submit(SubmitMbtiTestRequest $request, string $token): RedirectResponse
+    public function submit(UploadTestProofRequest $request, string $token): RedirectResponse
     {
         $submission = MbtiSubmission::with([
+            'application.stages',
             'application.candidate',
             'application.vacancy',
         ])->where('token', $token)->firstOrFail();
 
-        if ($submission->isSubmitted()) {
+        $stage = $submission->application->stages->firstWhere('key', 'tes_mbti');
+        abort_if(! $stage, 404);
+
+        if ($stage->status === ApplicationStageStatus::Selesai) {
             return redirect()->route('tes-mbti.show', $token);
         }
 
-        $jawaban = $request->validated('jawaban');
+        if ($stage->status === ApplicationStageStatus::Gagal) {
+            return back()->withErrors(['proofs' => 'Tahap tes ini sudah ditolak dan tidak dapat dilanjutkan.']);
+        }
 
-        return $this->doSubmit($submission, $jawaban);
-    }
+        if (! $stage->status->isAdvanceable()) {
+            return back()->withErrors(['proofs' => 'Tahap tes ini sedang tidak aktif.']);
+        }
 
-    /** @param array<int|string, string> $jawaban */
-    private function doSubmit(MbtiSubmission $submission, array $jawaban): RedirectResponse
-    {
-        DB::transaction(function () use ($submission, $jawaban): void {
-            $locked = MbtiSubmission::lockForUpdate()->findOrFail($submission->id);
+        if (! $submission->link_tes) {
+            return back()->withErrors(['proofs' => 'Link tes belum tersedia. Hubungi tim HR.']);
+        }
 
-            if ($locked->isSubmitted()) {
-                return;
-            }
+        $newPaths = [];
+        foreach ($request->file('proofs', []) as $file) {
+            $newPaths[] = $file->store("test-proofs/{$submission->application_id}", 'public');
+        }
 
-            $questions = MbtiQuestion::orderBy('urutan')->get();
+        $oldPaths = $submission->proof_paths ?? [];
 
-            foreach ($questions as $question) {
-                $locked->answers()->create([
-                    'mbti_question_id' => $question->id,
-                    'pilihan' => strtoupper($jawaban[$question->id]),
-                ]);
-            }
+        $submission->update([
+            'proof_paths' => $newPaths,
+            'proof_uploaded_at' => now(),
+        ]);
 
-            $locked->update(['submitted_at' => now()]);
+        Storage::disk('public')->delete($oldPaths);
 
-            $this->scoringService->calculate($locked);
+        try {
+            $this->pipelineService->advance($submission->application);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['proofs' => 'Bukti tes tersimpan, tetapi pipeline gagal dilanjutkan: '.$e->getMessage()]);
+        } catch (\Throwable $e) {
+            report($e);
 
-            $locked->load('application');
-            $this->pipelineService->advance($locked->application);
-        });
+            return back()->withErrors(['proofs' => 'Bukti tes tersimpan, tetapi pipeline gagal dilanjutkan. Silakan unggah ulang bukti.']);
+        }
 
-        Log::info('MBTI test submitted', array_merge(LogContext::make(), [
+        Log::info('MBTI test proof uploaded', array_merge(LogContext::make(), [
             'submission_id' => $submission->id,
             'application_id' => $submission->application_id,
+            'proof_count' => count($newPaths),
         ]));
 
-        return redirect()->route('tes-mbti.show', $submission->token);
+        return redirect()
+            ->route('tes-mbti.show', $token)
+            ->with('success', 'Bukti tes MBTI berhasil dikirim. Tahap pipeline otomatis dilanjutkan.');
     }
 }

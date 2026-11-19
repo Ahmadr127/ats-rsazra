@@ -21,8 +21,6 @@ class BuildCandidateProfileData
             'candidate.workExperiences',
             'stages',
             'testSubmission.answers',
-            'discSubmission.result',
-            'mbtiSubmission.result',
             'interviewResults.ratings',
             'interviewResults.interviewer',
             'interviewResults.applicationStage',

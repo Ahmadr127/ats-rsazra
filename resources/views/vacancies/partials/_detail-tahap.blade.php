@@ -149,52 +149,45 @@
             @endif
         @endif
 
-        {{-- ═══ TES DiSC ═══ --}}
-        @if ($stage->key === 'tes_disc')
-            @php $submission = $application->discSubmission; $disc = $submission?->result; @endphp
+        {{-- ═══ TES DiSC / MBTI (EKSTERNAL) ═══ --}}
+        @if (in_array($stage->key, ['tes_disc', 'tes_mbti'], true))
+            @php
+                $isDisc = $stage->key === 'tes_disc';
+                $testLabel = $isDisc ? 'DISC' : 'MBTI';
+                $submission = $isDisc ? $application->discSubmission : $application->mbtiSubmission;
+                $proofs = $submission?->proof_paths ?? [];
+            @endphp
             @if (! $submission)
-                <div class="py-3 text-xs text-gray-400">Kandidat belum mengirim tes DiSC.</div>
-            @elseif (! $disc)
-                <div class="py-3 text-xs text-gray-400">Tes sudah dikirim, hasil sedang diproses.</div>
+                <div class="py-3 text-xs text-gray-400">Submission tes {{ $testLabel }} belum dibuat.</div>
             @else
-                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Tipe Primer</dt><dd class="text-xs font-medium text-gray-800">{{ $disc->tipe_primer->shortLabel() }} ({{ $disc->tipe_primer->value }})</dd></div>
-                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Tipe Sekunder</dt><dd class="text-xs font-medium text-gray-800">{{ $disc->tipe_sekunder->shortLabel() }} ({{ $disc->tipe_sekunder->value }})</dd></div>
-                <div class="py-2">
-                    <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-1.5">Skor</p>
-                    @foreach (['D' => $disc->skor_d, 'I' => $disc->skor_i, 'S' => $disc->skor_s, 'C' => $disc->skor_c] as $dim => $skor)
-                        <div class="flex items-center gap-2 text-[11px] py-0.5">
-                            <span class="w-4 font-semibold text-gray-600">{{ $dim }}</span>
-                            <div class="flex-1 h-2 rounded bg-gray-100 overflow-hidden"><div class="h-full bg-primary/70 rounded" style="width: {{ min(100, max(0, (int) $skor)) }}%"></div></div>
-                            <span class="w-8 text-right tabular-nums text-gray-700">{{ $skor }}</span>
+                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Link Tes</dt><dd class="text-xs text-gray-800 min-w-0 break-all">
+                    @if ($submission->link_tes)
+                        <a href="{{ $submission->link_tes }}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary-dark underline underline-offset-2">{{ $submission->link_tes }}</a>
+                    @else
+                        <span class="text-amber-600">Belum dikirim</span>
+                    @endif
+                </dd></div>
+                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Catatan</dt><dd class="text-xs text-gray-800 whitespace-pre-line">{{ $submission->catatan ?: '—' }}</dd></div>
+                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Email Dikirim</dt><dd class="text-xs text-gray-800">{{ $fmt($submission->sent_at) }}</dd></div>
+                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Bukti Tes</dt><dd class="text-xs text-gray-800">
+                    @if ($submission->proof_uploaded_at)
+                        Diterima {{ $fmt($submission->proof_uploaded_at) }}
+                    @else
+                        <span class="text-amber-600">Belum diunggah</span>
+                    @endif
+                </dd></div>
+                @if ($proofs !== [])
+                    <div class="py-2">
+                        <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-1.5">Gambar Bukti</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            @foreach ($proofs as $path)
+                                <a href="{{ Storage::url($path) }}" target="_blank" rel="noopener noreferrer" class="block overflow-hidden rounded-lg border border-gray-200">
+                                    <img src="{{ Storage::url($path) }}" alt="Bukti tes {{ $testLabel }} {{ $loop->iteration }}" class="h-20 w-full object-cover">
+                                </a>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
-                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Dikirim</dt><dd class="text-xs text-gray-800">{{ $fmt($submission->submitted_at) }}</dd></div>
-            @endif
-        @endif
-
-        {{-- ═══ TES MBTI ═══ --}}
-        @if ($stage->key === 'tes_mbti')
-            @php $submission = $application->mbtiSubmission; $mbti = $submission?->result; @endphp
-            @if (! $submission)
-                <div class="py-3 text-xs text-gray-400">Kandidat belum mengirim tes MBTI.</div>
-            @elseif (! $mbti)
-                <div class="py-3 text-xs text-gray-400">Tes sudah dikirim, hasil sedang diproses.</div>
-            @else
-                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Tipe</dt><dd class="text-xs font-medium text-gray-800">{{ $mbti->tipe }}</dd></div>
-                <div class="py-2">
-                    <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-1.5">Skor Dimensi</p>
-                    @foreach ([['E', 'I', $mbti->skor_e, $mbti->skor_i], ['S', 'N', $mbti->skor_s, $mbti->skor_n], ['T', 'F', $mbti->skor_t, $mbti->skor_f], ['J', 'P', $mbti->skor_j, $mbti->skor_p]] as [$a, $b, $sa, $sb])
-                        <div class="flex items-center gap-2 text-[11px] py-0.5">
-                            <span class="w-4 font-semibold text-gray-600">{{ $a }}</span>
-                            <span class="w-6 tabular-nums text-gray-700">{{ $sa }}</span>
-                            <div class="flex-1 h-2 rounded bg-gray-100 overflow-hidden flex"><div class="h-full bg-primary/70" style="width: {{ ($sa + $sb) > 0 ? round($sa / ($sa + $sb) * 100) : 50 }}%"></div></div>
-                            <span class="w-6 text-right tabular-nums text-gray-700">{{ $sb }}</span>
-                            <span class="w-4 font-semibold text-gray-600">{{ $b }}</span>
-                        </div>
-                    @endforeach
-                </div>
-                <div class="flex gap-3 py-2"><dt class="w-32 shrink-0 text-[10px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Dikirim</dt><dd class="text-xs text-gray-800">{{ $fmt($submission->submitted_at) }}</dd></div>
+                    </div>
+                @endif
             @endif
         @endif
 

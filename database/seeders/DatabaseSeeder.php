@@ -20,8 +20,6 @@ class DatabaseSeeder extends Seeder
             SimutuOrganisasiSeeder::class,
             EmailTemplateSeeder::class,
             InterviewTemplateSeeder::class,
-            DiscQuestionSeeder::class,
-            MbtiQuestionSeeder::class,
             QuestionBankTemplateSeeder::class,
             JobTemplateSeeder::class,
             VacancySeeder::class,

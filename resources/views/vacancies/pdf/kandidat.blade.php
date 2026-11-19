@@ -495,51 +495,6 @@
     </div>
 @endif
 
-{{-- ===== SECTION 14: HASIL TES DISC ===== --}}
-@if ($application->discSubmission?->submitted_at && $application->discSubmission->result)
-    @php $discResult = $application->discSubmission->result; @endphp
-    <div class="section">
-        <div class="section-title">Hasil Tes DiSC</div>
-        <div style="margin-bottom:6px;">
-            <span class="badge">{{ $discResult->tipe_primer->value }}</span>
-            <span style="font-size:8.5pt; margin-left:8px;">Tipe Primer: {{ $discResult->tipe_primer->shortLabel() }} &mdash; Sekunder: {{ $discResult->tipe_sekunder->shortLabel() }}</span>
-        </div>
-        <table class="data-table" style="width:auto;">
-            <thead>
-                <tr><th>Dimensi</th><th>Skor</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>D (Dominance)</td><td>{{ $discResult->skor_d }}</td></tr>
-                <tr><td>I (Influence)</td><td>{{ $discResult->skor_i }}</td></tr>
-                <tr><td>S (Steadiness)</td><td>{{ $discResult->skor_s }}</td></tr>
-                <tr><td>C (Conscientiousness)</td><td>{{ $discResult->skor_c }}</td></tr>
-            </tbody>
-        </table>
-    </div>
-@endif
-
-{{-- ===== SECTION 15: HASIL TES MBTI ===== --}}
-@if ($application->mbtiSubmission?->submitted_at && $application->mbtiSubmission->result)
-    @php $mbtiResult = $application->mbtiSubmission->result; @endphp
-    <div class="section">
-        <div class="section-title">Hasil Tes MBTI</div>
-        <div style="margin-bottom:6px;">
-            <span class="badge">{{ $mbtiResult->tipe }}</span>
-        </div>
-        <table class="data-table" style="width:auto;">
-            <thead>
-                <tr><th>Dimensi</th><th>Skor A</th><th>Skor B</th><th>Kekuatan (%)</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>E / I (Ekstrovert / Introvert)</td><td>{{ $mbtiResult->skor_e }}</td><td>{{ $mbtiResult->skor_i }}</td><td>{{ $mbtiResult->kekuatan_ei }}</td></tr>
-                <tr><td>S / N (Penginderaan / Intuisi)</td><td>{{ $mbtiResult->skor_s }}</td><td>{{ $mbtiResult->skor_n }}</td><td>{{ $mbtiResult->kekuatan_sn }}</td></tr>
-                <tr><td>T / F (Pemikiran / Perasaan)</td><td>{{ $mbtiResult->skor_t }}</td><td>{{ $mbtiResult->skor_f }}</td><td>{{ $mbtiResult->kekuatan_tf }}</td></tr>
-                <tr><td>J / P (Terstruktur / Fleksibel)</td><td>{{ $mbtiResult->skor_j }}</td><td>{{ $mbtiResult->skor_p }}</td><td>{{ $mbtiResult->kekuatan_jp }}</td></tr>
-            </tbody>
-        </table>
-    </div>
-@endif
-
 {{-- ===== FOOTER (repeats every page via position:fixed) ===== --}}
 <div class="pdf-footer">
     <table>

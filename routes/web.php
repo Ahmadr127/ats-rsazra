@@ -11,7 +11,6 @@ use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CvScreeningController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DiscQuestionController;
 use App\Http\Controllers\DiscTestController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
@@ -21,7 +20,6 @@ use App\Http\Controllers\InterviewTemplateController;
 use App\Http\Controllers\JobTemplateController;
 use App\Http\Controllers\JobTemplateInterviewTemplateController;
 use App\Http\Controllers\JobTemplateTestController;
-use App\Http\Controllers\MbtiQuestionController;
 use App\Http\Controllers\MbtiTestController;
 use App\Http\Controllers\McuController;
 use App\Http\Controllers\McuScheduleController;
@@ -124,6 +122,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/pipeline/{application}/tahap/{stage}', [VacancyPipelineController::class, 'stageDetail'])->scopeBindings()->name('lowongan.pipeline.tahap');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/lanjut', [ApplicationPipelineController::class, 'advance'])->scopeBindings()->name('lowongan.lamaran.lanjut');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/gagal', [ApplicationPipelineController::class, 'fail'])->scopeBindings()->name('lowongan.lamaran.gagal');
+    Route::post('/lowongan/{lowongan}/lamaran/{application}/tes-disc/kirim', [ApplicationPipelineController::class, 'sendDiscLink'])->scopeBindings()->name('lowongan.lamaran.tes-disc.kirim');
+    Route::post('/lowongan/{lowongan}/lamaran/{application}/tes-mbti/kirim', [ApplicationPipelineController::class, 'sendMbtiLink'])->scopeBindings()->name('lowongan.lamaran.tes-mbti.kirim');
 
     Route::post('/lowongan/{lowongan}/skrining/{application}/keputusan', [CvScreeningController::class, 'decide'])->scopeBindings()->name('lowongan.skrining.keputusan');
 
@@ -181,14 +181,6 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('template-wawancara', InterviewTemplateController::class)
         ->parameters(['template-wawancara' => 'templateWawancara'])
-        ->except(['show']);
-
-    Route::resource('soal-mbti', MbtiQuestionController::class)
-        ->parameters(['soal-mbti' => 'soalMbti'])
-        ->except(['show']);
-
-    Route::resource('soal-disc', DiscQuestionController::class)
-        ->parameters(['soal-disc' => 'soalDisc'])
         ->except(['show']);
 
     Route::get('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'show'])->name('lowongan.tes.show');

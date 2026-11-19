@@ -7,10 +7,6 @@ use App\Enums\ApplicationStageStatus;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Candidate;
-use App\Models\DiscResult;
-use App\Models\DiscSubmission;
-use App\Models\MbtiResult;
-use App\Models\MbtiSubmission;
 use App\Models\McuResult;
 use App\Models\Role;
 use App\Models\Stage;
@@ -152,51 +148,6 @@ class CandidatePdfExportTest extends TestCase
 
         $this->assertStringContainsString('Skrining CV', $html);
         $this->assertStringContainsString('Kandidat sangat menjanjikan', $html);
-    }
-
-    public function test_pdf_contains_disc_results_when_available(): void
-    {
-        $this->seedStages();
-
-        $vacancy = $this->createVacancy();
-        $application = $this->makeApplication($vacancy);
-
-        $discSubmission = DiscSubmission::factory()->create([
-            'application_id' => $application->id,
-            'submitted_at' => now(),
-        ]);
-
-        DiscResult::factory()->create([
-            'disc_submission_id' => $discSubmission->id,
-        ]);
-
-        $html = $this->renderProfileView($application, $vacancy);
-
-        $this->assertStringContainsString('DiSC', $html);
-        $this->assertStringContainsString('Tipe Primer', $html);
-    }
-
-    public function test_pdf_contains_mbti_results_when_available(): void
-    {
-        $this->seedStages();
-
-        $vacancy = $this->createVacancy();
-        $application = $this->makeApplication($vacancy);
-
-        $mbtiSubmission = MbtiSubmission::factory()->create([
-            'application_id' => $application->id,
-            'submitted_at' => now(),
-        ]);
-
-        MbtiResult::factory()->create([
-            'mbti_submission_id' => $mbtiSubmission->id,
-            'tipe' => 'INTJ',
-        ]);
-
-        $html = $this->renderProfileView($application, $vacancy);
-
-        $this->assertStringContainsString('MBTI', $html);
-        $this->assertStringContainsString('INTJ', $html);
     }
 
     public function test_pdf_contains_mcu_status_when_available(): void

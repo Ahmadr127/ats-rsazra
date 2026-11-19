@@ -186,32 +186,32 @@ class NotificationDispatchTest extends TestCase
         $this->assertMailQueuedTo('tes_tersedia', $candidateEmail);
     }
 
-    public function test_advance_into_tes_disc_sends_tes_tersedia(): void
+    public function test_advance_into_tes_disc_does_not_send_email_automatically(): void
     {
         Mail::fake();
 
         $admin = $this->makeHrAdmin();
         $vacancy = $this->createVacancy(['lamaran', 'skrining_cv_hr', 'tes_disc', 'onboarding']);
         $application = $this->makeApplication($vacancy);
-        $candidateEmail = $application->candidate->email;
 
         $this->actingAs($admin)->post(route('lowongan.lamaran.lanjut', [$vacancy, $application]));
 
-        $this->assertMailQueuedTo('tes_tersedia', $candidateEmail);
+        Mail::assertNothingQueued();
+        $this->assertDatabaseHas('disc_submissions', ['application_id' => $application->id]);
     }
 
-    public function test_advance_into_tes_mbti_sends_tes_tersedia(): void
+    public function test_advance_into_tes_mbti_does_not_send_email_automatically(): void
     {
         Mail::fake();
 
         $admin = $this->makeHrAdmin();
         $vacancy = $this->createVacancy(['lamaran', 'skrining_cv_hr', 'tes_mbti', 'onboarding']);
         $application = $this->makeApplication($vacancy);
-        $candidateEmail = $application->candidate->email;
 
         $this->actingAs($admin)->post(route('lowongan.lamaran.lanjut', [$vacancy, $application]));
 
-        $this->assertMailQueuedTo('tes_tersedia', $candidateEmail);
+        Mail::assertNothingQueued();
+        $this->assertDatabaseHas('mbti_submissions', ['application_id' => $application->id]);
     }
 
     public function test_advance_from_skrining_to_non_skrining_sends_lolos_skrining_cv(): void

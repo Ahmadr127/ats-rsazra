@@ -954,7 +954,7 @@
                                 <div class="adj-item-num">Referensi <span x-text="idx+1"></span></div>
                                 <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-3">
-                                    <div class="field"><label>Nama Karyawan</label>
+                                    <div class="field"><label>Nama</label>
                                         <input :name="`references[${idx}][nama_karyawan]`" type="text" x-model="item.nama_karyawan" :class="{ error: hasFieldError('references', idx, 'nama_karyawan') }">
                                         <p class="field-error" x-show="hasFieldError('references', idx, 'nama_karyawan')" x-text="fieldError('references', idx, 'nama_karyawan')"></p>
                                     </div>

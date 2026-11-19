@@ -352,41 +352,9 @@
         @endif
     </div>
 
-    {{-- 11. Hasil DiSC --}}
+    {{-- 11. Status MCU --}}
     <div class="section">
-        <div class="section-title">11. Hasil Tes DiSC</div>
-        @php $disc = $application->discSubmission?->result; @endphp
-        @if($disc)
-            <table class="data-table">
-                <tr><td class="label">Tipe Primer</td><td class="value">{{ $disc->tipe_primer?->value ?? '-' }}</td></tr>
-                <tr><td class="label">Tipe Sekunder</td><td class="value">{{ $disc->tipe_sekunder?->value ?? '-' }}</td></tr>
-                <tr><td class="label">Skor D / I / S / C</td><td class="value">{{ $disc->skor_d }} / {{ $disc->skor_i }} / {{ $disc->skor_s }} / {{ $disc->skor_c }}</td></tr>
-            </table>
-        @else
-            <div class="empty-note">Tes DiSC belum diselesaikan.</div>
-        @endif
-    </div>
-
-    {{-- 12. Hasil MBTI --}}
-    <div class="section">
-        <div class="section-title">12. Hasil Tes MBTI</div>
-        @php $mbti = $application->mbtiSubmission?->result; @endphp
-        @if($mbti)
-            <table class="data-table">
-                <tr><td class="label">Tipe</td><td class="value">{{ $mbti->tipe ?? '-' }}</td></tr>
-                <tr><td class="label">E/I</td><td class="value">E={{ $mbti->skor_e }} / I={{ $mbti->skor_i }} (kekuatan: {{ $mbti->kekuatan_ei ?? '-' }})</td></tr>
-                <tr><td class="label">S/N</td><td class="value">S={{ $mbti->skor_s }} / N={{ $mbti->skor_n }} (kekuatan: {{ $mbti->kekuatan_sn ?? '-' }})</td></tr>
-                <tr><td class="label">T/F</td><td class="value">T={{ $mbti->skor_t }} / F={{ $mbti->skor_f }} (kekuatan: {{ $mbti->kekuatan_tf ?? '-' }})</td></tr>
-                <tr><td class="label">J/P</td><td class="value">J={{ $mbti->skor_j }} / P={{ $mbti->skor_p }} (kekuatan: {{ $mbti->kekuatan_jp ?? '-' }})</td></tr>
-            </table>
-        @else
-            <div class="empty-note">Tes MBTI belum diselesaikan.</div>
-        @endif
-    </div>
-
-    {{-- 13. Status MCU --}}
-    <div class="section">
-        <div class="section-title">13. Status MCU (Medical Check-Up)</div>
+        <div class="section-title">11. Status MCU (Medical Check-Up)</div>
         @php $mcu = $application->mcuResult; @endphp
         @if($mcu)
             <table class="data-table">
@@ -399,9 +367,9 @@
         @endif
     </div>
 
-    {{-- 14. Timeline --}}
+    {{-- 12. Timeline --}}
     <div class="section">
-        <div class="section-title">14. Timeline Lamaran</div>
+        <div class="section-title">12. Timeline Lamaran</div>
         <table class="items-table">
             <tr><th>Tahap</th><th>Status</th><th>Tanggal Update</th></tr>
             <tr>

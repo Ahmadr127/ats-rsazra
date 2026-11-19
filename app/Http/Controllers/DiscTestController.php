@@ -2,111 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SubmitDiscTestRequest;
+use App\Enums\ApplicationStageStatus;
+use App\Http\Requests\UploadTestProofRequest;
 use App\Logging\LogContext;
-use App\Models\DiscQuestion;
 use App\Models\DiscSubmission;
 use App\Services\ApplicationPipelineService;
-use App\Services\DiscScoringService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DiscTestController extends Controller
 {
-    public function __construct(
-        private readonly DiscScoringService $scoringService,
-        private readonly ApplicationPipelineService $pipelineService,
-    ) {}
+    public function __construct(private readonly ApplicationPipelineService $pipelineService) {}
 
-    public function show(string $token): View|RedirectResponse
+    public function show(string $token): View
     {
         $submission = DiscSubmission::with([
+            'application.stages',
             'application.vacancy',
         ])->where('token', $token)->firstOrFail();
 
-        if ($submission->isSubmitted()) {
-            $questions = DiscQuestion::with('words')->orderBy('urutan')->get();
+        $stage = $submission->application->stages->firstWhere('key', 'tes_disc');
+        abort_if(! $stage, 404);
 
-            return view('disc.show', compact('submission', 'questions'));
-        }
-
-        if ($submission->started_at === null) {
-            $submission->update(['started_at' => now()]);
-        }
-
-        $questions = DiscQuestion::with('words')->orderBy('urutan')->get();
-
-        return view('disc.show', compact('submission', 'questions'));
+        return view('external-tests.show', [
+            'submission' => $submission,
+            'stage' => $stage,
+            'testLabel' => 'DISC',
+            'submitRoute' => 'tes-disc.submit',
+        ]);
     }
 
-    public function submit(SubmitDiscTestRequest $request, string $token): RedirectResponse
+    public function submit(UploadTestProofRequest $request, string $token): RedirectResponse
     {
         $submission = DiscSubmission::with([
+            'application.stages',
             'application.candidate',
             'application.vacancy',
         ])->where('token', $token)->firstOrFail();
 
-        if ($submission->isSubmitted()) {
+        $stage = $submission->application->stages->firstWhere('key', 'tes_disc');
+        abort_if(! $stage, 404);
+
+        if ($stage->status === ApplicationStageStatus::Selesai) {
             return redirect()->route('tes-disc.show', $token);
         }
 
-        $most = $request->validated('most');
-        $least = $request->validated('least');
+        if ($stage->status === ApplicationStageStatus::Gagal) {
+            return back()->withErrors(['proofs' => 'Tahap tes ini sudah ditolak dan tidak dapat dilanjutkan.']);
+        }
 
-        return $this->doSubmit($submission, $most, $least);
-    }
+        if (! $stage->status->isAdvanceable()) {
+            return back()->withErrors(['proofs' => 'Tahap tes ini sedang tidak aktif.']);
+        }
 
-    private function doSubmit(DiscSubmission $submission, array $most, array $least): RedirectResponse
-    {
-        DB::transaction(function () use ($submission, $most, $least): void {
-            $locked = DiscSubmission::lockForUpdate()->findOrFail($submission->id);
+        if (! $submission->link_tes) {
+            return back()->withErrors(['proofs' => 'Link tes belum tersedia. Hubungi tim HR.']);
+        }
 
-            if ($locked->isSubmitted()) {
-                return;
-            }
+        $newPaths = [];
+        foreach ($request->file('proofs', []) as $file) {
+            $newPaths[] = $file->store("test-proofs/{$submission->application_id}", 'public');
+        }
 
-            $questions = DiscQuestion::with('words')->orderBy('urutan')->get();
+        $oldPaths = $submission->proof_paths ?? [];
 
-            foreach ($questions as $question) {
-                $mostWordId = isset($most[$question->id]) ? (int) $most[$question->id] : null;
-                $leastWordId = isset($least[$question->id]) ? (int) $least[$question->id] : null;
+        $submission->update([
+            'proof_paths' => $newPaths,
+            'proof_uploaded_at' => now(),
+        ]);
 
-                if ($mostWordId === null || $leastWordId === null) {
-                    continue;
-                }
+        Storage::disk('public')->delete($oldPaths);
 
-                $wordIds = $question->words->pluck('id')->all();
+        try {
+            $this->pipelineService->advance($submission->application);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['proofs' => 'Bukti tes tersimpan, tetapi pipeline gagal dilanjutkan: '.$e->getMessage()]);
+        } catch (\Throwable $e) {
+            report($e);
 
-                if (! in_array($mostWordId, $wordIds) || ! in_array($leastWordId, $wordIds)) {
-                    continue;
-                }
+            return back()->withErrors(['proofs' => 'Bukti tes tersimpan, tetapi pipeline gagal dilanjutkan. Silakan unggah ulang bukti.']);
+        }
 
-                if ($mostWordId === $leastWordId) {
-                    continue;
-                }
-
-                $locked->answers()->create([
-                    'disc_question_id' => $question->id,
-                    'most_disc_word_id' => $mostWordId,
-                    'least_disc_word_id' => $leastWordId,
-                ]);
-            }
-
-            $locked->update(['submitted_at' => now()]);
-
-            $this->scoringService->calculate($locked);
-
-            $locked->load('application');
-            $this->pipelineService->advance($locked->application);
-        });
-
-        Log::info('DISC test submitted', array_merge(LogContext::make(), [
+        Log::info('DISC test proof uploaded', array_merge(LogContext::make(), [
             'submission_id' => $submission->id,
             'application_id' => $submission->application_id,
+            'proof_count' => count($newPaths),
         ]));
 
-        return redirect()->route('tes-disc.show', $submission->token);
+        return redirect()
+            ->route('tes-disc.show', $token)
+            ->with('success', 'Bukti tes DISC berhasil dikirim. Tahap pipeline otomatis dilanjutkan.');
     }
 }

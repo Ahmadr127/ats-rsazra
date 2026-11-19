@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ApplicationStageStatus;
 use App\Models\Application;
+use App\Models\ApplicationStage;
 use App\Models\DiscSubmission;
 use App\Models\MbtiSubmission;
 use App\Models\TestSubmission;
@@ -33,6 +34,8 @@ class ApplicationPipelineService
             if (! $currentStage) {
                 throw new \RuntimeException('Tidak ada tahap aktif yang dapat dilanjutkan.');
             }
+
+            $this->guardExternalTestProof($application, $currentStage);
 
             $nextStage = $stages->first(
                 fn ($s) => $s->position > $currentStage->position && $s->status === ApplicationStageStatus::Pending
@@ -85,42 +88,22 @@ class ApplicationPipelineService
         }
 
         if ($nextStage?->key === 'tes_disc') {
-            $token = Str::uuid()->toString();
             DiscSubmission::create([
                 'application_id' => $application->id,
-                'token' => $token,
+                'token' => Str::uuid()->toString(),
             ]);
 
-            try {
-                $this->emailNotificationService->dispatch('tes_tersedia', $application->candidate->email, [
-                    'nama_kandidat' => $application->candidate->nama_lengkap,
-                    'judul_lowongan' => $application->vacancy->judul_posisi,
-                    'link_tes' => route('tes-disc.show', $token),
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
+            // Admin HR sends the external test link manually via the pipeline panel.
             return;
         }
 
         if ($nextStage?->key === 'tes_mbti') {
-            $token = Str::uuid()->toString();
             MbtiSubmission::create([
                 'application_id' => $application->id,
-                'token' => $token,
+                'token' => Str::uuid()->toString(),
             ]);
 
-            try {
-                $this->emailNotificationService->dispatch('tes_tersedia', $application->candidate->email, [
-                    'nama_kandidat' => $application->candidate->nama_lengkap,
-                    'judul_lowongan' => $application->vacancy->judul_posisi,
-                    'link_tes' => route('tes-mbti.show', $token),
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
+            // Admin HR sends the external test link manually via the pipeline panel.
             return;
         }
 
@@ -162,6 +145,24 @@ class ApplicationPipelineService
             ]);
         } catch (\Throwable $e) {
             report($e);
+        }
+    }
+
+    /**
+     * External DISC/MBTI stages may only advance after the candidate uploads proof.
+     */
+    private function guardExternalTestProof(Application $application, ApplicationStage $currentStage): void
+    {
+        if (! in_array($currentStage->key, ['tes_disc', 'tes_mbti'], true)) {
+            return;
+        }
+
+        $submission = $currentStage->key === 'tes_disc'
+            ? $application->discSubmission()->first()
+            : $application->mbtiSubmission()->first();
+
+        if (! $submission?->proof_uploaded_at) {
+            throw new \RuntimeException('Bukti tes wajib diunggah sebelum tahap ini dapat dilanjutkan.');
         }
     }
 
