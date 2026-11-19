@@ -49,10 +49,12 @@
             <table class="w-full text-xs border-collapse border border-gray-200">
                 <thead>
                     <tr>
-                        <th class="text-left font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Nama</th>
-                        <th class="text-left font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Posisi</th>
-                        <th class="text-left font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Unit</th>
-                        <th class="text-left font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Pipeline Progress</th>
+                        <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Tanggal Lamaran</th>
+                        <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Nama</th>
+                        <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Posisi</th>
+                        <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Unit</th>
+                        <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Pipeline Progress</th>
+                        <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Tanggal Masuk</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,6 +74,9 @@
                             };
                         @endphp
                         <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="border border-gray-200 px-3 py-2.5 text-gray-500 whitespace-nowrap">
+                                {{ $application->created_at?->format('d M Y') ?? '—' }}
+                            </td>
                             <td class="border border-gray-200 px-3 py-2.5 font-medium text-gray-800 whitespace-nowrap">
                                 {{ $application->candidate?->nama_lengkap ?? '—' }}
                             </td>
@@ -91,6 +96,9 @@
                                     </span>
                                     <span class="text-gray-400 shrink-0">{{ $completed }}/{{ $totalStages }}</span>
                                 </div>
+                            </td>
+                            <td class="border border-gray-200 px-3 py-2.5 text-gray-500 whitespace-nowrap">
+                                {{ $application->onboardingResult?->tanggal_bergabung?->format('d M Y') ?? '—' }}
                             </td>
                         </tr>
                     @endforeach

@@ -46,7 +46,7 @@ class StoreInterviewResultRequest extends FormRequest
             'ratings' => ['required', 'array', 'size:'.$expectedCount],
             'ratings.*.interview_template_id' => ['required', 'integer', Rule::in($validTemplateIds)],
             'ratings.*.nama_kriteria' => ['required', 'string', Rule::in($validCriteriaNames)],
-            'ratings.*.nilai' => ['required', 'integer', 'min:1', 'max:5'],
+            'ratings.*.nilai' => ['required', 'integer', 'min:1', 'max:3'],
         ]);
 
         if ($readinessTemplates->isNotEmpty()) {
@@ -123,7 +123,7 @@ class StoreInterviewResultRequest extends FormRequest
             'ratings.size' => 'Jumlah penilaian tidak sesuai dengan kriteria yang ditentukan.',
             'ratings.*.nilai.required' => 'Setiap kriteria wajib diberi nilai.',
             'ratings.*.nilai.min' => 'Nilai minimal adalah 1.',
-            'ratings.*.nilai.max' => 'Nilai maksimal adalah 5.',
+            'ratings.*.nilai.max' => 'Nilai maksimal adalah 3.',
             'readiness_answers.required' => 'Jawaban kesiapan wajib diisi.',
             'readiness_answers.size' => 'Jumlah jawaban kesiapan tidak sesuai dengan pertanyaan yang ditentukan.',
             'readiness_answers.*.jawaban.required' => 'Setiap pertanyaan kesiapan wajib dijawab.',

@@ -304,7 +304,9 @@ class ReportingDashboardTest extends TestCase
             ->assertSee($vacancy->judul_posisi)
             ->assertSee($vacancy->unit->nama)
             ->assertSee('Skrining CV HR')
-            ->assertSee('1/3');
+            ->assertSee('1/3')
+            ->assertSee('Tanggal Lamaran')
+            ->assertSee('Tanggal Masuk');
     }
 
     public function test_application_list_is_paginated(): void

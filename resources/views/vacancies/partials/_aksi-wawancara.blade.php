@@ -45,7 +45,7 @@
                                     @foreach ($groupRatings as $rating)
                                         <div class="flex items-center justify-between text-xs">
                                             <span class="text-gray-600">{{ $rating->nama_kriteria }}</span>
-                                            <span class="font-medium text-gray-800">{{ $rating->nilai }}/5</span>
+                                            <span class="font-medium text-gray-800">{{ $rating->nilai }}/3</span>
                                         </div>
                                     @endforeach
                                 </div>
@@ -281,7 +281,7 @@
                                 <input type="hidden" name="ratings[{{ $ratingIndex }}][interview_template_id]" value="{{ $template->id }}">
                                 <input type="hidden" name="ratings[{{ $ratingIndex }}][nama_kriteria]" value="{{ $item->teks }}">
                                 <div class="flex items-center gap-2">
-                                    @for ($i = 1; $i <= 5; $i++)
+                                    @for ($i = 1; $i <= 3; $i++)
                                         <label class="flex flex-col items-center cursor-pointer">
                                             <input
                                                 type="radio"
@@ -436,7 +436,7 @@
                 @foreach ($existingResult->ratings as $rating)
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-gray-600">{{ $rating->nama_kriteria }}</span>
-                        <span class="text-xs font-semibold text-gray-900">{{ $rating->nilai }}/5</span>
+                        <span class="text-xs font-semibold text-gray-900">{{ $rating->nilai }}/3</span>
                     </div>
                 @endforeach
             </div>

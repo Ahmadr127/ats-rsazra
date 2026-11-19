@@ -15,9 +15,9 @@ class SimutuOrganisasiSeeder extends Seeder
      * diekstrak ke database/data/simutu_organisasi.json.
      *
      * Mapping role Simutu -> Role ATS:
-     * - Administrator      -> HrAdmin
-     * - Kepala unit/Kepala -> UnitHead (kepala departemen)
-     * - lainnya            -> Employee
+     * - Administrator      -> HrAdmin (user + karyawan)
+     * - Kepala unit/Kepala -> UnitHead (user + karyawan)
+     * - lainnya            -> Employee (karyawan saja, tanpa user/login)
      */
     public function run(): void
     {
@@ -26,28 +26,38 @@ class SimutuOrganisasiSeeder extends Seeder
         $roles = collect($data['roles'])->keyBy('id');
         $unitIds = $this->seedUnits($data['units']);
 
+        // Staff (role "employee") are seeded as employee data only — no login users.
+        $staffRole = Role::where('key', Role::Employee)->first();
+        if ($staffRole !== null) {
+            User::where('role_id', $staffRole->id)->delete();
+        }
+
         foreach ($data['users'] as $row) {
             /** @var array{nama_role: string, deskripsi_role: ?string} $role */
             $role = $roles->get((int) $row['role_id']);
+            $roleKey = $this->mapRoleKey((int) $row['role_id']);
 
-            $user = User::updateOrCreate(
-                ['username' => $row['username']],
-                [
-                    'name' => $row['nama_lengkap'],
-                    'password' => $row['password'],
-                    'role_id' => Role::firstOrCreate(
-                        ['key' => $this->mapRoleKey((int) $row['role_id'])],
-                        ['label' => Role::defaultLabel($this->mapRoleKey((int) $row['role_id']))]
-                    )->id,
-                    'must_change_password' => false,
-                    'is_active' => $row['status_user'] === 'aktif',
-                ]
-            );
+            $user = null;
+            if ($roleKey !== Role::Employee) {
+                $user = User::updateOrCreate(
+                    ['username' => $row['username']],
+                    [
+                        'name' => $row['nama_lengkap'],
+                        'password' => $row['password'],
+                        'role_id' => Role::firstOrCreate(
+                            ['key' => $roleKey],
+                            ['label' => Role::defaultLabel($roleKey)]
+                        )->id,
+                        'must_change_password' => false,
+                        'is_active' => $row['status_user'] === 'aktif',
+                    ]
+                );
+            }
 
             Employee::updateOrCreate(
                 ['nip' => $row['nip']],
                 [
-                    'user_id' => $user->id,
+                    'user_id' => $user?->id,
                     'nama_karyawan' => $row['nama_lengkap'],
                     'unit_id' => $unitIds[(int) $row['unit_id']],
                     'posisi_pekerjaan' => $this->posisiPekerjaan($role),

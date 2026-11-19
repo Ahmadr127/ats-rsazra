@@ -50,6 +50,7 @@ class DashboardController extends Controller
                 'vacancy:id,judul_posisi,unit_id',
                 'vacancy.unit:id,nama',
                 'stages:id,application_id,key,nama,status,position',
+                'onboardingResult:id,application_id,tanggal_bergabung',
             ])
             ->when($filters['date_from'] ?? null, fn ($q, $d) => $q->whereDate('created_at', '>=', $d))
             ->when($filters['date_to'] ?? null, fn ($q, $d) => $q->whereDate('created_at', '<=', $d))

@@ -133,7 +133,7 @@
                                     @foreach ($group as $rating)
                                         <div class="flex items-center justify-between text-[11px]">
                                             <span class="text-gray-600">{{ $rating->nama_kriteria }}</span>
-                                            <span class="font-medium text-gray-800 tabular-nums">{{ $rating->nilai }}/5</span>
+                                            <span class="font-medium text-gray-800 tabular-nums">{{ $rating->nilai }}/3</span>
                                         </div>
                                     @endforeach
                                 </div>

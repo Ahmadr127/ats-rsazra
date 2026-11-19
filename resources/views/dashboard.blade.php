@@ -133,12 +133,12 @@
                 <table class="w-full text-xs border-collapse border border-gray-200">
                     <thead>
                         <tr>
-                            <th class="text-left font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Posisi</th>
-                            <th class="text-left font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Unit</th>
-                            <th class="text-right font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Pelamar</th>
-                            <th class="text-right font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Terisi / Tersedia</th>
-                            <th class="text-left font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Status</th>
-                            <th class="text-left font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2">Tenggat</th>
+                            <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Posisi</th>
+                            <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Unit</th>
+                            <th class="text-right font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Pelamar</th>
+                            <th class="text-right font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Terisi / Tersedia</th>
+                            <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Status</th>
+                            <th class="text-left font-semibold text-white bg-primary border border-gray-200 px-3 py-2">Tenggat</th>
                         </tr>
                     </thead>
                     <tbody>

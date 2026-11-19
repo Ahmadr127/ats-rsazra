@@ -213,7 +213,7 @@ class InterviewManagementTest extends TestCase
                 $ratings[] = [
                     'interview_template_id' => $template->id,
                     'nama_kriteria' => $item->teks,
-                    'nilai' => 4,
+                    'nilai' => 3,
                 ];
             }
         }
@@ -831,7 +831,7 @@ class InterviewManagementTest extends TestCase
         $response->assertSessionHasErrors('ratings');
     }
 
-    public function test_rating_nilai_must_be_1_to_5(): void
+    public function test_rating_nilai_must_be_1_to_3(): void
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
