@@ -92,7 +92,7 @@ class ReportingDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Dashboard Rekrutmen');
-        $response->assertSee('Corong Pipeline');
+        $response->assertSee('Daftar Pengajuan');
     }
 
     public function test_hr_manager_sees_org_wide_reporting_dashboard(): void
@@ -103,7 +103,7 @@ class ReportingDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Dashboard Rekrutmen');
-        $response->assertSee('Corong Pipeline');
+        $response->assertSee('Daftar Pengajuan');
         // Org tier keeps the unit selector.
         $response->assertSee('Semua Unit');
     }
@@ -116,7 +116,7 @@ class ReportingDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Dashboard Rekrutmen');
-        $response->assertSee('Corong Pipeline');
+        $response->assertSee('Daftar Pengajuan');
         $response->assertSee('Semua Unit');
     }
 
@@ -130,7 +130,7 @@ class ReportingDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Dashboard Rekrutmen');
-        $response->assertSee('Corong Pipeline');
+        $response->assertSee('Daftar Pengajuan');
         // Unit name shown in heading, unit selector removed.
         $response->assertSee('Unit Bedah Test');
         $response->assertDontSee('Semua Unit');
@@ -284,144 +284,65 @@ class ReportingDashboardTest extends TestCase
         $response->assertSee('onboarding selesai');
     }
 
-    public function test_pipeline_funnel_shows_cumulative_stage_counts(): void
+    public function test_application_list_shows_candidate_position_unit_and_progress(): void
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
         $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
-        // Reached onboarding
-        $this->makeApplication($vacancy, [
+        $application = $this->makeApplication($vacancy, [
             0 => ApplicationStageStatus::Selesai,
-            1 => ApplicationStageStatus::Selesai,
-            2 => ApplicationStageStatus::Aktif,
+            1 => ApplicationStageStatus::Aktif,
+            2 => ApplicationStageStatus::Pending,
         ]);
-        // Failed at skrining (never reached onboarding)
-        $this->makeApplication($vacancy, [
-            0 => ApplicationStageStatus::Selesai,
-            1 => ApplicationStageStatus::Gagal,
+
+        $response = $this->actingAs($admin)->get(route('dashboard'));
+
+        $response->assertOk()
+            ->assertSee('Daftar Pengajuan')
+            ->assertSee($application->candidate->nama_lengkap)
+            ->assertSee($vacancy->judul_posisi)
+            ->assertSee($vacancy->unit->nama)
+            ->assertSee('Skrining CV HR')
+            ->assertSee('1/3');
+    }
+
+    public function test_application_list_is_paginated(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
+
+        for ($i = 0; $i < 16; $i++) {
+            $this->makeApplication($vacancy);
+        }
+
+        $response = $this->actingAs($admin)->get(route('dashboard'));
+
+        $response->assertOk()
+            ->assertSee('Menampilkan 1–15 dari 16 pengajuan')
+            ->assertSee('page=2', false);
+    }
+
+    public function test_application_list_can_be_searched_by_candidate_name(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
+
+        $match = $this->makeApplication($vacancy);
+        $match->update([
+            'candidate_id' => Candidate::factory()->create(['nama_lengkap' => 'UNIKSEARCH Andi'])->id,
         ]);
-        // Still at skrining
         $this->makeApplication($vacancy);
 
-        $response = $this->actingAs($admin)->get(route('dashboard'));
+        $response = $this->actingAs($admin)->get(route('dashboard', ['search' => 'uniksearch']));
 
-        $response->assertOk();
-        $response->assertSee('Corong Pipeline');
-        $response->assertSee('Lamaran');
-        $response->assertSee('Skrining CV HR');
-        $response->assertSee('Onboarding');
-    }
-
-    public function test_time_to_hire_calculates_average_days_correctly(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
-
-        $appliedAt = Carbon::parse('2026-01-01 08:00:00');
-        $app = $this->makeApplication($vacancy, [
-            0 => ApplicationStageStatus::Selesai,
-            1 => ApplicationStageStatus::Selesai,
-        ], $appliedAt);
-
-        DB::table('application_stages')
-            ->where('application_id', $app->id)
-            ->where('key', 'onboarding')
-            ->update(['updated_at' => $appliedAt->copy()->addDays(10)]);
-
-        $response = $this->actingAs($admin)->get(route('dashboard'));
-
-        $response->assertOk();
-        $response->assertSeeInOrder(['Waktu Rekrutmen', '10']);
-    }
-
-    public function test_time_to_hire_averages_multiple_completed_applications(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
-
-        $base = Carbon::parse('2026-01-01 08:00:00');
-
-        $app1 = $this->makeApplication($vacancy, [0 => ApplicationStageStatus::Selesai, 1 => ApplicationStageStatus::Selesai], $base);
-        $app2 = $this->makeApplication($vacancy, [0 => ApplicationStageStatus::Selesai, 1 => ApplicationStageStatus::Selesai], $base);
-
-        DB::table('application_stages')
-            ->where('application_id', $app1->id)->where('key', 'onboarding')
-            ->update(['updated_at' => $base->copy()->addDays(10)]);
-
-        DB::table('application_stages')
-            ->where('application_id', $app2->id)->where('key', 'onboarding')
-            ->update(['updated_at' => $base->copy()->addDays(20)]);
-
-        $response = $this->actingAs($admin)->get(route('dashboard'));
-
-        $response->assertOk();
-        $response->assertSeeInOrder(['Waktu Rekrutmen', '15']);
-    }
-
-    public function test_time_to_hire_placeholder_when_no_completed_onboarding(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
-
-        $this->makeApplication($vacancy);
-
-        $response = $this->actingAs($admin)->get(route('dashboard'));
-
-        $response->assertOk();
-        $response->assertSee('Belum ada kandidat yang menyelesaikan onboarding');
-    }
-
-    public function test_stage_rates_shows_pass_fail_reserved_breakdown(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
-
-        $this->makeApplication($vacancy, [0 => ApplicationStageStatus::Selesai, 1 => ApplicationStageStatus::Selesai, 2 => ApplicationStageStatus::Aktif]);
-        $this->makeApplication($vacancy, [0 => ApplicationStageStatus::Selesai, 1 => ApplicationStageStatus::Gagal]);
-        $this->makeApplication($vacancy, [0 => ApplicationStageStatus::Selesai, 1 => ApplicationStageStatus::Reserved]);
-
-        $response = $this->actingAs($admin)->get(route('dashboard'));
-
-        $response->assertOk();
-        $response->assertSee('Tingkat Lulus / Gagal per Tahap');
-        $response->assertSee('Skrining CV HR');
-    }
-
-    public function test_stage_bottleneck_shows_average_days_per_stage(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
-
-        $base = Carbon::parse('2026-01-01 08:00:00');
-        $app = $this->makeApplication($vacancy, [
-            0 => ApplicationStageStatus::Selesai,
-            1 => ApplicationStageStatus::Selesai,
-            2 => ApplicationStageStatus::Selesai,
-        ], $base);
-
-        DB::table('application_stages')
-            ->where('application_id', $app->id)->where('key', 'lamaran')
-            ->update(['created_at' => $base, 'updated_at' => $base]);
-
-        DB::table('application_stages')
-            ->where('application_id', $app->id)->where('key', 'skrining_cv_hr')
-            ->update(['created_at' => $base, 'updated_at' => $base->copy()->addDays(5)]);
-
-        DB::table('application_stages')
-            ->where('application_id', $app->id)->where('key', 'onboarding')
-            ->update(['created_at' => $base, 'updated_at' => $base->copy()->addDays(8)]);
-
-        $response = $this->actingAs($admin)->get(route('dashboard'));
-
-        $response->assertOk();
-        $response->assertSee('Hambatan Tahap');
-        $response->assertSeeInOrder(['Hambatan Tahap', 'hr']);
+        $response->assertOk()
+            ->assertSee('UNIKSEARCH Andi')
+            ->assertSee('Menampilkan 1–1 dari 1 pengajuan')
+            ->assertSee('name="search"', false)
+            ->assertSee('value="uniksearch"', false);
     }
 
     public function test_vacancy_summary_shows_applicant_count_and_filled_positions(): void

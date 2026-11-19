@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\GetRecruitmentMetrics;
+use App\Models\Application;
 use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -25,6 +26,7 @@ class DashboardController extends Controller
             'date_to' => 'nullable|date|after_or_equal:date_from',
             'unit_id' => 'nullable|integer|exists:units,id',
             'vacancy_id' => 'nullable|integer|exists:vacancies,id',
+            'search' => ['nullable', 'string', 'max:100'],
         ]);
 
         $lockedUnit = null;
@@ -41,11 +43,41 @@ class DashboardController extends Controller
             $lockedUnit = $user->employee?->unit;
         }
 
+        $applications = Application::query()
+            ->with([
+                'candidate:id,nama_lengkap',
+                'vacancy:id,judul_posisi,unit_id',
+                'vacancy.unit:id,nama',
+                'stages:id,application_id,key,nama,status,position',
+            ])
+            ->when($filters['date_from'] ?? null, fn ($q, $d) => $q->whereDate('created_at', '>=', $d))
+            ->when($filters['date_to'] ?? null, fn ($q, $d) => $q->whereDate('created_at', '<=', $d))
+            ->when($filters['vacancy_id'] ?? null, fn ($q, $id) => $q->where('vacancy_id', $id))
+            ->when(
+                $filters['unit_id'] ?? null,
+                fn ($q, $id) => $q->whereHas('vacancy', fn ($vq) => $vq->where('unit_id', $id))
+            )
+            ->when($filters['search'] ?? null, function ($q, string $search): void {
+                $term = '%'.mb_strtolower($search).'%';
+
+                $q->where(function ($q) use ($term): void {
+                    $q->whereHas('candidate', fn ($cq) => $cq->whereRaw('lower(nama_lengkap) like ?', [$term]))
+                        ->orWhereHas('vacancy', function ($vq) use ($term): void {
+                            $vq->whereRaw('lower(judul_posisi) like ?', [$term])
+                                ->orWhereHas('unit', fn ($uq) => $uq->whereRaw('lower(nama) like ?', [$term]));
+                        });
+                });
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
         return view('dashboard', [
             'scope' => $isUnitScope ? 'unit' : 'org',
             'lockedUnit' => $lockedUnit,
             'hasUnit' => $hasUnit,
             'filters' => $filters,
+            'applications' => $applications,
             ...$metrics->execute($filters, includeUnitOptions: ! $isUnitScope),
         ]);
     }
