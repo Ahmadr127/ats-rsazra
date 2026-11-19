@@ -34,11 +34,17 @@ class QuestionBankTemplateController extends Controller
         return view('question-bank-templates.index', compact('templates'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         auth()->user()->requirePermission(Permissions::QUESTION_BANK_CREATE);
 
-        return view('question-bank-templates.create');
+        $import = $request->session()->pull('question_import');
+
+        return view('question-bank-templates.create', [
+            'initialQuestions' => $import['questions'] ?? [],
+            'importNama' => $import['nama'] ?? null,
+            'importErrors' => $request->session()->pull('import_errors', []),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

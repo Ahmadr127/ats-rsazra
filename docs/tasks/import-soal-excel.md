@@ -1,6 +1,6 @@
 # Import Soal dari Excel ke Form Bank Soal (+ Template)
 
-Status: **RENCANA — menunggu persetujuan**
+Status: **SELESAI — terverifikasi**
 Terakhir update: 2026-11-19
 
 ## Analisa kondisi saat ini
@@ -182,6 +182,13 @@ File baru `tests/Feature/QuestionImportExcelTest.php`. Buat file uji dengan `Exc
 15. Nama template duplikat tetap ditolak oleh `store()` (regresi).
 16. Regresi: `QuestionImageTest`, `CompetencyTestEngineTest`, `RbacTest`.
 
+Hasil verifikasi:
+
+- `QuestionImportExcelTest`: 16 test / 75 assertion lulus.
+- Regresi terpilih (import + gambar + engine + PDF + RBAC + eksternal): 86 test / 397 assertion lulus.
+- Suite lengkap: 653 lulus, 3 gagal — ketiganya pre-existing dan tidak terkait (`PasswordChangeTest`, 2 assertion `CandidateStatusPageTest`).
+- `pint --dirty` dan `npm run build` selesai.
+
 ## Urutan implementasi
 
 1. Export template 3 sheet + dropdown + contoh + petunjuk.
@@ -207,12 +214,12 @@ File baru `tests/Feature/QuestionImportExcelTest.php`. Buat file uji dengan `Exc
 
 ## Checklist
 
-- [ ] Disetujui
-- [ ] Export template 3 sheet + dropdown + contoh + petunjuk
-- [ ] ParseRequest + reader + service parse/validasi baris
-- [ ] Controller template/parse + routes sebelum resource
-- [ ] Update controller & view create agar terisi otomatis + normalizeQuestion
-- [ ] Test feature lulus
-- [ ] Regresi lulus
-- [ ] Pint/npm build/suite
-- [ ] Commit
+- [x] Disetujui
+- [x] Export template 3 sheet + dropdown + contoh + petunjuk
+- [x] ParseRequest + reader + service parse/validasi baris
+- [x] Controller template/parse + routes sebelum resource
+- [x] Update controller & view create agar terisi otomatis + normalizeQuestion
+- [x] Test feature lulus
+- [x] Regresi lulus
+- [x] Pint/npm build/suite
+- [x] Commit

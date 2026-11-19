@@ -28,6 +28,7 @@ use App\Http\Controllers\OfferingLetterController;
 use App\Http\Controllers\OfferingResponseController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionBankTemplateController;
+use App\Http\Controllers\QuestionBankTemplateImportController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
@@ -174,6 +175,11 @@ Route::middleware('auth')->group(function () {
         ->name('audit-log.show');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+
+    Route::get('/template-bank-soal/import/template', [QuestionBankTemplateImportController::class, 'template'])
+        ->name('template-bank-soal.import.template');
+    Route::post('/template-bank-soal/import/parse', [QuestionBankTemplateImportController::class, 'parse'])
+        ->name('template-bank-soal.import.parse');
 
     Route::resource('template-bank-soal', QuestionBankTemplateController::class)
         ->parameters(['template-bank-soal' => 'templateBankSoal'])

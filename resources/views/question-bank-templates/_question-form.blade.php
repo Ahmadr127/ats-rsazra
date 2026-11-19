@@ -209,7 +209,9 @@
             gambar_baru_url: null,
             hapus_gambar: false,
             correct_option: question.correct_option ?? 0,
-            options: question.options ?? [{ teks_opsi: '' }, { teks_opsi: '' }, { teks_opsi: '' }, { teks_opsi: '' }],
+            options: question.options && question.options.length
+                ? question.options
+                : [{ teks_opsi: '' }, { teks_opsi: '' }, { teks_opsi: '' }, { teks_opsi: '' }],
         };
     }
 
