@@ -174,8 +174,6 @@ class DemoPipelineCaseSeeder extends Seeder
             'link_tes' => 'https://disc.example.test/asesmen/'.Str::uuid(),
             'catatan' => 'Kerjakan tes sesuai instruksi dan unggah bukti hasilnya.',
             'sent_at' => now()->subMinutes(20),
-            'proof_paths' => ['test-proofs/demo/disc-1.jpg', 'test-proofs/demo/disc-2.jpg'],
-            'proof_uploaded_at' => now()->subMinutes(2),
         ]);
     }
 
@@ -190,8 +188,6 @@ class DemoPipelineCaseSeeder extends Seeder
             'link_tes' => 'https://mbti.example.test/asesmen/'.Str::uuid(),
             'catatan' => 'Kerjakan tes sesuai instruksi dan unggah bukti hasilnya.',
             'sent_at' => now()->subMinutes(20),
-            'proof_paths' => ['test-proofs/demo/mbti-1.jpg', 'test-proofs/demo/mbti-2.jpg'],
-            'proof_uploaded_at' => now()->subMinutes(2),
         ]);
     }
 

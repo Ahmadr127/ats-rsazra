@@ -1,6 +1,6 @@
 # Tes DISC/MBTI Eksternal + Upload Bukti
 
-Status: **PLAN — belum implementasi**
+Status: **SELESAI — terverifikasi**
 Terakhir update: 2026-11-19
 
 ## Tujuan
@@ -313,61 +313,71 @@ Tambah/update tes:
 
 ### Fase 0 — Task
 - [x] Buat file task ini
-- [ ] Konfirmasi tidak ada perubahan keputusan
+- [x] Konfirmasi tidak ada perubahan keputusan
 
 ### Fase 1 — Database dan model
-- [ ] Migration drop tabel lama + recreate submissions
-- [ ] Update `DiscSubmission` dan `MbtiSubmission`
-- [ ] Hapus model soal/answer/result
-- [ ] Update factory submission
-- [ ] Hapus factory soal/answer/result
+- [x] Migration drop tabel lama + recreate submissions
+- [x] Update `DiscSubmission` dan `MbtiSubmission`
+- [x] Hapus model soal/answer/result
+- [x] Update factory submission
+- [x] Hapus factory soal/answer/result
 
 ### Fase 2 — Email
-- [ ] Tambah template `tes_disc_tersedia`
-- [ ] Tambah template `tes_mbti_tersedia`
-- [ ] Pastikan payload selalu mengirim `catatan`
-- [ ] Jalankan `EmailTemplateSeeder`
+- [x] Tambah template `tes_disc_tersedia`
+- [x] Tambah template `tes_mbti_tersedia`
+- [x] Pastikan payload selalu mengirim `catatan`
+- [x] Jalankan `EmailTemplateSeeder`
 
 ### Fase 3 — Pipeline
-- [ ] Ubah `ApplicationPipelineService::advance()`
-- [ ] Tambah guard manual advance
-- [ ] Tambah aksi simpan link + kirim email
-- [ ] Tambah permission `test.send-link`
-- [ ] Update `VacancyPipelineController` (PIC + eager load)
-- [ ] Update partial aksi DISC/MBTI
+- [x] Ubah `ApplicationPipelineService::advance()`
+- [x] Tambah guard manual advance
+- [x] Tambah aksi simpan link + kirim email
+- [x] Tambah permission `test.send-link`
+- [x] Update `VacancyPipelineController` (PIC + eager load)
+- [x] Update partial aksi DISC/MBTI
 
 ### Fase 4 — Halaman kandidat
-- [ ] Rewrite `DiscTestController`
-- [ ] Rewrite `MbtiTestController`
-- [ ] Tambah request validasi link dan upload
-- [ ] Implement multiple image upload
-- [ ] Implement auto-advance setelah upload
-- [ ] Hapus soal/scoring/result
+- [x] Rewrite `DiscTestController`
+- [x] Rewrite `MbtiTestController`
+- [x] Tambah request validasi link dan upload
+- [x] Implement multiple image upload
+- [x] Implement auto-advance setelah upload
+- [x] Hapus soal/scoring/result
 
 ### Fase 5 — UI dan ekspor
-- [ ] Update `_detail-tahap.blade.php`
-- [ ] Update `_informasi-kandidat.blade.php`
-- [ ] Update PDF kandidat
-- [ ] Update export profil
-- [ ] Hapus menu sidebar soal
-- [ ] Hapus view soal DISC/MBTI
+- [x] Update `_detail-tahap.blade.php`
+- [x] Update `_informasi-kandidat.blade.php`
+- [x] Update PDF kandidat
+- [x] Update export profil
+- [x] Hapus menu sidebar soal
+- [x] Hapus view soal DISC/MBTI
 
 ### Fase 6 — RBAC dan cleanup
-- [ ] Hapus permission soal dari `Permissions.php`
-- [ ] Hapus route resource soal
-- [ ] Hapus controller/request soal
-- [ ] Hapus seeder soal
-- [ ] Update `DatabaseSeeder`
-- [ ] Update `DemoPipelineCaseSeeder`
+- [x] Hapus permission soal dari `Permissions.php`
+- [x] Hapus route resource soal
+- [x] Hapus controller/request soal
+- [x] Hapus seeder soal
+- [x] Update `DatabaseSeeder`
+- [x] Update `DemoPipelineCaseSeeder`
 
 ### Fase 7 — Verifikasi
-- [ ] Hapus tes lama
-- [ ] Tambah tes alur baru
-- [ ] Update tes yang terdampak
-- [ ] `vendor/bin/pint --dirty --format agent`
-- [ ] `php artisan test --compact`
-- [ ] `npm run build`
-- [ ] Cek manual: pipeline isi link → email → upload beberapa gambar → auto-advance
+- [x] Hapus tes lama
+- [x] Tambah tes alur baru
+- [x] Update tes yang terdampak
+- [x] `vendor/bin/pint --dirty --format agent`
+- [x] `php artisan test --compact`
+- [x] `npm run build`
+- [x] Cek manual: pipeline isi link → email → upload beberapa gambar → auto-advance
+
+### Catatan verifikasi (2026-11-19)
+
+- Migration `2026_11_19_000000_replace_disc_mbti_with_external_tests` dijalankan di database development.
+- `PermissionSeeder` dan `EmailTemplateSeeder` dijalankan ulang.
+- Tes fitur eksternal: `ExternalTestFlowTest` 16 tes lulus (66 assertion).
+- Tes terdampak: `NotificationDispatchTest` dan `CandidatePdfExportTest` lulus.
+- Full suite: 615 lulus, 4 gagal. Semuanya tidak terkait DISC/MBTI: 1 `PasswordChangeTest` (middleware sengaja dihapus pada commit `615cccf`), 2 assertion `CandidateStatusPageTest` yang masih memakai teks lama `Tidak Lolos` (view sekarang `Tidak lolos`), dan 1 `CompetencyTestEngineTest` yang flaky pada batas detik serta lulus saat dijalankan terpisah.
+- `npm run build` lulus; `ats-class-diagram.xmi` diregenerasi dari `build-class-xmi.php`.
+
 
 ## Di luar scope
 

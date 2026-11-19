@@ -5,7 +5,7 @@
     $advanceable = $currentStage?->status->isAdvanceable() ?? false;
     $hasProof = $submission?->proof_uploaded_at !== null;
     $proofs = $submission?->proof_paths ?? [];
-    $canEdit = $advanceable && $submission !== null && ! $hasProof;
+    $canEdit = $advanceable && ! $hasProof;
     $sentAt = $submission?->sent_at;
 @endphp
 
@@ -31,9 +31,7 @@
             @endif
         </div>
 
-        @if (! $submission)
-            <p class="text-xs text-gray-400">Submission tes belum dibuat. Lanjutkan pipeline untuk membuat tautan tes.</p>
-        @elseif ($canEdit)
+        @if ($canEdit)
             <form method="POST" action="{{ route($sendRoute, [$lowongan, $application]) }}" class="space-y-3">
                 @csrf
 
@@ -43,7 +41,7 @@
                         id="link_tes-{{ $testLabel }}"
                         type="url"
                         name="link_tes"
-                        value="{{ old('link_tes', $submission->link_tes) }}"
+                        value="{{ old('link_tes', $submission?->link_tes) }}"
                         required
                         maxlength="2048"
                         placeholder="https://..."
@@ -63,7 +61,7 @@
                         maxlength="2000"
                         placeholder="Catatan ini akan tampil di email kandidat."
                         class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    >{{ old('catatan', $submission->catatan) }}</textarea>
+                    >{{ old('catatan', $submission?->catatan) }}</textarea>
                     @error('catatan')
                         <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
                     @enderror
@@ -84,7 +82,7 @@
             <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-[11px] text-green-700">
                 Kandidat sudah mengunggah bukti pada {{ $submission->proof_uploaded_at->translatedFormat('d M Y, H:i') }}. Pipeline otomatis dilanjutkan.
             </div>
-        @elseif ($advanceable && $submission && ! $sentAt)
+        @elseif ($advanceable && ! $sentAt)
             <p class="mt-2 text-[11px] text-amber-600">Kandidat belum dapat mengerjakan tes sampai link dikirim.</p>
         @endif
 

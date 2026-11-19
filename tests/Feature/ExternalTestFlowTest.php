@@ -171,6 +171,60 @@ class ExternalTestFlowTest extends TestCase
         )->assertForbidden();
     }
 
+    public function test_sending_link_creates_submission_when_missing(): void
+    {
+        Mail::fake();
+
+        $vacancy = $this->createVacancy(['lamaran', 'tes_disc', 'onboarding']);
+        $application = $this->makeApplicationAt($vacancy, 'tes_disc');
+
+        $this->actingAs($this->hrAdmin())->post(
+            route('lowongan.lamaran.tes-disc.kirim', [$vacancy, $application]),
+            ['link_tes' => 'https://disc.example.test/asesmen/baru'],
+        )->assertSessionHasNoErrors();
+
+        $submission = DiscSubmission::where('application_id', $application->id)->first();
+
+        $this->assertNotNull($submission);
+        $this->assertSame('https://disc.example.test/asesmen/baru', $submission->link_tes);
+        $this->assertNotNull($submission->sent_at);
+
+        Mail::assertQueued(TemplatedMail::class, fn (TemplatedMail $mail) => $mail->key === 'tes_disc_tersedia');
+    }
+
+    public function test_link_cannot_be_changed_after_proof_uploaded(): void
+    {
+        Mail::fake();
+
+        $vacancy = $this->createVacancy(['lamaran', 'tes_disc', 'onboarding']);
+        $application = $this->makeApplicationAt($vacancy, 'tes_disc');
+        $submission = DiscSubmission::factory()->withProof()->create([
+            'application_id' => $application->id,
+            'link_tes' => 'https://disc.example.test/asesmen/awal',
+        ]);
+
+        $this->actingAs($this->hrAdmin())->post(
+            route('lowongan.lamaran.tes-disc.kirim', [$vacancy, $application]),
+            ['link_tes' => 'https://disc.example.test/asesmen/ubah'],
+        )->assertSessionHasErrors('link_tes');
+
+        $this->assertSame('https://disc.example.test/asesmen/awal', $submission->fresh()->link_tes);
+        Mail::assertNothingQueued();
+    }
+
+    public function test_pipeline_panel_allows_sending_link_when_submission_is_missing(): void
+    {
+        $vacancy = $this->createVacancy(['lamaran', 'tes_disc', 'onboarding']);
+        $application = $this->makeApplicationAt($vacancy, 'tes_disc');
+
+        $this->actingAs($this->hrAdmin())
+            ->get(route('lowongan.pipeline.show', [$vacancy, $application]))
+            ->assertOk()
+            ->assertSee('Link belum dikirim')
+            ->assertSee('Simpan & Kirim Email')
+            ->assertSee('Kirim link tes');
+    }
+
     public function test_link_must_be_a_valid_http_url(): void
     {
         $vacancy = $this->createVacancy(['lamaran', 'tes_disc', 'onboarding']);
@@ -219,7 +273,7 @@ class ExternalTestFlowTest extends TestCase
             ->assertSee('https://disc.example.test/asesmen/abc')
             ->assertSee('Catatan untuk kandidat')
             ->assertSee('Unggah Bukti Tes')
-            ->assertSee('Kirim Bukti & Lanjut');
+            ->assertSee('Kirim Bukti & Lanjut', false);
     }
 
     // ===== Upload proof =====

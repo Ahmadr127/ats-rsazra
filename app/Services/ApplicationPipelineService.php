@@ -161,7 +161,7 @@ class ApplicationPipelineService
             ? $application->discSubmission()->first()
             : $application->mbtiSubmission()->first();
 
-        if (! $submission?->proof_uploaded_at) {
+        if (! $submission?->proof_uploaded_at || ! $submission->hasProof()) {
             throw new \RuntimeException('Bukti tes wajib diunggah sebelum tahap ini dapat dilanjutkan.');
         }
     }
