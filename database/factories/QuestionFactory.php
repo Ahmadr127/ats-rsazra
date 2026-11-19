@@ -32,4 +32,14 @@ class QuestionFactory extends Factory
     {
         return $this->state(['tipe' => QuestionType::Essay->value]);
     }
+
+    public function image(): static
+    {
+        return $this->state(['tipe' => QuestionType::Image->value]);
+    }
+
+    public function withImage(string $path): static
+    {
+        return $this->state(['gambar_path' => $path]);
+    }
 }

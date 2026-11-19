@@ -18,6 +18,7 @@ class Question extends Model
         'question_bank_template_id',
         'tipe',
         'pertanyaan',
+        'gambar_path',
         'nilai_poin',
         'urutan',
     ];

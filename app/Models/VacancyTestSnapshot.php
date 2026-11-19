@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class VacancyTestSnapshot extends Model
 {
@@ -60,6 +62,7 @@ class VacancyTestSnapshot extends Model
                 'urutan' => $question->pivot->urutan,
                 'tipe' => $question->tipe->value,
                 'pertanyaan' => $question->pertanyaan,
+                'gambar_path' => self::copyQuestionImage($question->gambar_path, $snapshot->id, $question->pivot->urutan),
                 'nilai_poin' => $question->nilai_poin,
             ]);
 
@@ -72,5 +75,26 @@ class VacancyTestSnapshot extends Model
         });
 
         return $snapshot;
+    }
+
+    private static function copyQuestionImage(?string $sourcePath, int $snapshotId, int $urutan): ?string
+    {
+        if (! $sourcePath) {
+            return null;
+        }
+
+        $disk = Storage::disk('public');
+
+        if (! $disk->exists($sourcePath)) {
+            return null;
+        }
+
+        $extension = pathinfo($sourcePath, PATHINFO_EXTENSION);
+        $filename = $urutan.'-'.Str::uuid()->toString();
+        $targetPath = 'test-snapshot-images/'.$snapshotId.'/'.$filename.($extension ? '.'.$extension : '');
+
+        $disk->copy($sourcePath, $targetPath);
+
+        return $targetPath;
     }
 }

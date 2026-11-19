@@ -24,15 +24,18 @@
 
     <div x-data="templateForm(@js($template->questions->map(fn ($q) => [
         'id' => $q->id,
+        'uid' => 'q-'.$q->id,
         'tipe' => $q->tipe->value,
         'pertanyaan' => $q->pertanyaan,
         'nilai_poin' => $q->nilai_poin,
+        'gambar_path' => $q->gambar_path,
+        'gambar_url' => $q->gambar_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($q->gambar_path) : null,
         'correct_option' => $q->options->search(fn ($o) => $o->is_correct) ?: 0,
         'options' => $q->tipe->value === 'mc'
             ? $q->options->map(fn ($o) => ['teks_opsi' => $o->teks_opsi])->values()->all()
             : [['teks_opsi' => ''], ['teks_opsi' => ''], ['teks_opsi' => ''], ['teks_opsi' => '']],
     ])->values()->all()))" class="max-w-4xl">
-        <form method="POST" action="{{ route('template-bank-soal.update', $template) }}" @submit="prepareSubmit($event)">
+        <form method="POST" action="{{ route('template-bank-soal.update', $template) }}" enctype="multipart/form-data" @submit="prepareSubmit($event)">
             @csrf
             @method('PUT')
 

@@ -12,6 +12,7 @@ class TestAnswer extends Model
         'vacancy_test_snapshot_question_id',
         'vacancy_test_snapshot_option_id',
         'jawaban_teks',
+        'gambar_jawaban_path',
         'skor',
         'is_reviewed',
     ];

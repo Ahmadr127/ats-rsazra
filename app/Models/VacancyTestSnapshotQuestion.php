@@ -16,6 +16,7 @@ class VacancyTestSnapshotQuestion extends Model
         'urutan',
         'tipe',
         'pertanyaan',
+        'gambar_path',
         'nilai_poin',
     ];
 

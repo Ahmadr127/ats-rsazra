@@ -54,9 +54,15 @@
                         </span>
                         <div>
                             <p class="text-xs text-gray-800">{{ $answer->question->pertanyaan }}</p>
+                            @if ($answer->question->gambar_path)
+                                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($answer->question->gambar_path) }}" target="_blank" rel="noopener" class="mt-2 block w-fit">
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($answer->question->gambar_path) }}"
+                                        alt="Gambar pertanyaan" class="h-24 max-w-full rounded border border-gray-200 object-contain">
+                                </a>
+                            @endif
                             <div class="flex items-center gap-2 mt-1">
                                 <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full
-                                    {{ $answer->question->tipe->value === 'mc' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600' }}">
+                                    {{ $answer->question->tipe->value === 'mc' ? 'bg-blue-50 text-blue-600' : ($answer->question->tipe->value === 'image' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600') }}">
                                     {{ $answer->question->tipe->label() }}
                                 </span>
                                 <span class="text-[10px] text-gray-400">Maks. {{ $answer->question->nilai_poin }} poin</span>
@@ -92,9 +98,21 @@
                     </div>
                 @else
                     <div class="pl-7">
-                        <div class="bg-gray-50 rounded-lg p-2.5 text-xs text-gray-700 mb-2 whitespace-pre-wrap">
-                            {{ $answer->jawaban_teks ?: '(tidak ada jawaban)' }}
-                        </div>
+                        @if ($answer->question->tipe->value === 'image')
+                            @if ($answer->gambar_jawaban_path)
+                                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($answer->gambar_jawaban_path) }}" target="_blank" rel="noopener" class="mb-2 block w-fit">
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($answer->gambar_jawaban_path) }}"
+                                        alt="Jawaban gambar kandidat" class="h-40 max-w-full rounded-lg border border-gray-200 object-contain">
+                                    <span class="mt-1 inline-block text-[11px] text-primary hover:underline">Buka gambar jawaban</span>
+                                </a>
+                            @else
+                                <p class="mb-2 text-xs text-gray-400">(tidak ada jawaban gambar)</p>
+                            @endif
+                        @else
+                            <div class="bg-gray-50 rounded-lg p-2.5 text-xs text-gray-700 mb-2 whitespace-pre-wrap">
+                                {{ $answer->jawaban_teks ?: '(tidak ada jawaban)' }}
+                            </div>
+                        @endif
 
                         @if ($currentStage?->status === \App\Enums\ApplicationStageStatus::Aktif && !$answer->is_reviewed)
                             <form method="POST" action="{{ route('lowongan.tes.ulasan.skor', [$lowongan, $answer]) }}"

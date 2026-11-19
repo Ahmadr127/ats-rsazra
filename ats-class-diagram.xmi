@@ -83,6 +83,7 @@
         <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_QuestionType" name="QuestionType" visibility="public">
           <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_QuestionType_0" name="Mc"/>
           <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_QuestionType_1" name="Essay"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_QuestionType_2" name="Image"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_InterviewTemplateType" name="InterviewTemplateType" visibility="public">
           <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_InterviewTemplateType_0" name="KriteriaPenilaian"/>
@@ -294,6 +295,7 @@
         <packagedElement xmi:type="uml:Class" xmi:id="cls_Question" name="Question" visibility="public">
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a0" name="tipe" visibility="public" type="enum_QuestionType"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a1" name="pertanyaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a4" name="gambar_path" visibility="public" type="prim_String"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a2" name="nilai_poin" visibility="public" type="prim_int"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a3" name="urutan" visibility="public" type="prim_int"/>
           <ownedOperation xmi:type="uml:Operation" xmi:id="cls_Question_o0" name="correctOption" visibility="public">
@@ -323,6 +325,7 @@
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a0" name="urutan" visibility="public" type="prim_int"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a1" name="tipe" visibility="public" type="enum_QuestionType"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a2" name="pertanyaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a4" name="gambar_path" visibility="public" type="prim_String"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a3" name="nilai_poin" visibility="public" type="prim_int"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="cls_VacancyTestSnapshotOption" name="VacancyTestSnapshotOption" visibility="public">
@@ -346,6 +349,7 @@
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="cls_TestAnswer" name="TestAnswer" visibility="public">
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestAnswer_a0" name="jawaban_teks" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestAnswer_a3" name="gambar_jawaban_path" visibility="public" type="prim_String"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestAnswer_a1" name="skor" visibility="public" type="prim_int"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestAnswer_a2" name="is_reviewed" visibility="public" type="prim_boolean"/>
         </packagedElement>

@@ -313,6 +313,24 @@
                 <tr><td class="label">Skor Total</td><td class="value">{{ $test->total_skor ?? '-' }}</td></tr>
                 <tr><td class="label">Waktu Submit</td><td class="value">{{ $test->submitted_at->format('d M Y, H:i') }}</td></tr>
             </table>
+            @if($test->answers->isNotEmpty())
+                <table class="items-table" style="margin-top:6px;">
+                    <tr><th>Pertanyaan</th><th>Jawaban</th><th>Skor</th></tr>
+                    @foreach($test->answers as $answer)
+                        <tr>
+                            <td>{{ \Illuminate\Support\Str::limit($answer->question?->pertanyaan ?? '-', 120) }}</td>
+                            <td>
+                                @if($answer->question?->tipe === \App\Enums\QuestionType::Image)
+                                    {{ $answer->gambar_jawaban_path ? 'Jawaban berupa gambar (tersimpan di sistem)' : '(tidak ada jawaban)' }}
+                                @else
+                                    {{ $answer->selectedOption?->teks_opsi ?: (\Illuminate\Support\Str::limit($answer->jawaban_teks ?? '-', 160)) }}
+                                @endif
+                            </td>
+                            <td>{{ $answer->is_reviewed ? $answer->skor : 'belum dinilai' }}</td>
+                        </tr>
+                    @endforeach
+                </table>
+            @endif
         @else
             <div class="empty-note">Tes belum diselesaikan.</div>
         @endif

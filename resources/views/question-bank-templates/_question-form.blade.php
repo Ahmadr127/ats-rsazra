@@ -14,7 +14,7 @@
     </div>
 
     <div class="space-y-4">
-        <template x-for="(question, qIndex) in questions" :key="qIndex">
+        <template x-for="(question, qIndex) in questions" :key="question.uid">
             <div class="border border-gray-200 rounded p-3 bg-gray-50/50">
                 <div class="flex items-start justify-between gap-3 mb-3">
                     <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0" x-text="qIndex + 1"></span>
@@ -48,6 +48,11 @@
                                 class="px-3 py-1.5 rounded border text-xs font-medium transition-colors ease-out duration-150 cursor-pointer">
                                 Esai
                             </button>
+                            <button type="button" @click="question.tipe = 'image'"
+                                :class="question.tipe === 'image' ? 'bg-primary text-white border-primary hover:bg-primary' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'"
+                                class="px-3 py-1.5 rounded border text-xs font-medium transition-colors ease-out duration-150 cursor-pointer">
+                                Unggah Gambar
+                            </button>
                         </div>
                     </div>
                     <div class="md:col-span-1">
@@ -62,6 +67,29 @@
                     <textarea x-model="question.pertanyaan" rows="2"
                         class="w-full text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-white focus-ring"
                         placeholder="Tulis pertanyaan..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-[10px] font-medium text-gray-500 uppercase tracking-wide mb-1">Gambar Soal <span class="text-gray-400 normal-case font-normal">(opsional, satu gambar)</span></label>
+                    <input type="file" name="pending-file" :data-uid="question.uid"
+                        accept="image/jpeg,image/png,image/webp"
+                        @change="onImageChange($event, question)"
+                        class="w-full text-[11px] border border-gray-200 rounded px-2.5 py-1.5 bg-white focus-ring file:mr-2 file:border-0 file:bg-primary/10 file:text-primary file:text-[10px] file:font-medium file:px-2 file:py-1 file:rounded">
+                    <template x-if="question.gambar_url && !question.gambar_baru">
+                        <div class="mt-2 flex items-center gap-3">
+                            <img :src="question.gambar_url" alt="Pratinjau gambar soal" class="h-16 w-16 rounded border border-gray-200 object-cover">
+                            <label class="flex items-center gap-1.5 text-[11px] text-gray-600 cursor-pointer">
+                                <input type="checkbox" x-model="question.hapus_gambar" class="w-3.5 h-3.5 text-red-500 focus:ring-red-400/40">
+                                Hapus gambar
+                            </label>
+                        </div>
+                    </template>
+                    <template x-if="question.gambar_baru_url">
+                        <div class="mt-2">
+                            <img :src="question.gambar_baru_url" alt="Pratinjau gambar baru" class="h-16 w-16 rounded border border-gray-200 object-cover">
+                        </div>
+                    </template>
+                    <p class="mt-1 text-[10px] text-gray-400">JPG, JPEG, PNG, atau WEBP &mdash; maksimal 5 MB.</p>
                 </div>
 
                 <div x-show="question.tipe === 'mc'" x-cloak>
@@ -96,7 +124,7 @@
 <script>
     function templateForm(initialQuestions) {
         return {
-            questions: initialQuestions && initialQuestions.length ? initialQuestions : [makeQuestion()],
+            questions: initialQuestions && initialQuestions.length ? initialQuestions.map(normalizeQuestion) : [makeQuestion()],
             get totalPoin() {
                 return this.questions.reduce((sum, q) => sum + (parseInt(q.nilai_poin) || 0), 0);
             },
@@ -113,7 +141,7 @@
             },
             moveDown(index) {
                 if (index >= this.questions.length - 1) return;
-                [this.questions[index], this.questions[index + 1]] = [this.questions[index + 1], this.questions[index]];
+                [this.questions[index + 1], this.questions[index]] = [this.questions[index], this.questions[index + 1]];
             },
             addOption(qIndex) {
                 this.questions[qIndex].options.push({ teks_opsi: '' });
@@ -125,9 +153,17 @@
                     this.questions[qIndex].correct_option = 0;
                 }
             },
-            prepareSubmit(event) {
+            onImageChange(event, question) {
+                const file = event.target.files[0];
+                question.gambar_baru = !!file;
+                question.hapus_gambar = false;
+                question.gambar_baru_url = file ? URL.createObjectURL(file) : null;
+            },
+            prepareSubmit() {
                 const container = document.getElementById('hidden-fields');
                 container.innerHTML = '';
+                const fileInputs = Array.from(document.querySelectorAll('input[type="file"][data-uid]'));
+
                 this.questions.forEach((q, qi) => {
                     if (q.id) {
                         addHidden(container, `questions[${qi}][id]`, q.id);
@@ -135,33 +171,68 @@
                     addHidden(container, `questions[${qi}][tipe]`, q.tipe);
                     addHidden(container, `questions[${qi}][pertanyaan]`, q.pertanyaan);
                     addHidden(container, `questions[${qi}][nilai_poin]`, q.nilai_poin);
+                    addHidden(container, `questions[${qi}][hapus_gambar]`, q.hapus_gambar ? '1' : '0');
+                    if (q.gambar_path) {
+                        addHidden(container, `questions[${qi}][gambar_lama]`, q.gambar_path);
+                    }
                     if (q.tipe === 'mc') {
                         addHidden(container, `questions[${qi}][correct_option]`, q.correct_option);
                         q.options.forEach((o, oi) => {
                             addHidden(container, `questions[${qi}][options][${oi}][teks_opsi]`, o.teks_opsi);
                         });
                     }
+
+                    const fileInput = fileInputs.find((input) => input.dataset.uid === q.uid);
+                    if (fileInput) {
+                        if (q.gambar_baru) {
+                            fileInput.name = `questions[${qi}][gambar]`;
+                            fileInput.disabled = false;
+                        } else {
+                            fileInput.disabled = true;
+                        }
+                    }
                 });
             },
         };
     }
 
-    function makeQuestion() {
+    function normalizeQuestion(question) {
         return {
-            id: null,
-            tipe: 'mc',
-            pertanyaan: '',
-            nilai_poin: 1,
-            correct_option: 0,
-            options: [{ teks_opsi: '' }, { teks_opsi: '' }, { teks_opsi: '' }, { teks_opsi: '' }],
+            id: question.id ?? null,
+            uid: question.uid ?? makeUid(),
+            tipe: question.tipe ?? 'mc',
+            pertanyaan: question.pertanyaan ?? '',
+            nilai_poin: question.nilai_poin ?? 1,
+            gambar_path: question.gambar_path ?? null,
+            gambar_url: question.gambar_url ?? null,
+            gambar_baru: false,
+            gambar_baru_url: null,
+            hapus_gambar: false,
+            correct_option: question.correct_option ?? 0,
+            options: question.options ?? [{ teks_opsi: '' }, { teks_opsi: '' }, { teks_opsi: '' }, { teks_opsi: '' }],
         };
+    }
+
+    function makeQuestion() {
+        return normalizeQuestion({
+            uid: makeUid(),
+            tipe: 'mc',
+            nilai_poin: 1,
+        });
+    }
+
+    function makeUid() {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        return 'q-' + Date.now() + '-' + Math.random().toString(36).slice(2);
     }
 
     function addHidden(container, name, value) {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = name;
-        input.value = value;
+        input.value = value ?? '';
         container.appendChild(input);
     }
 </script>

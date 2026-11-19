@@ -72,8 +72,24 @@
                             @foreach ($submission->answers as $answer)
                                 <li class="border border-gray-100 rounded-lg p-2.5 bg-gray-50/50">
                                     <p class="text-[11px] text-gray-700 leading-snug mb-1">{{ $answer->question?->pertanyaan ?? '(pertanyaan dihapus)' }}</p>
+                                    @if ($answer->question?->gambar_path)
+                                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($answer->question->gambar_path) }}" target="_blank" rel="noopener" class="mb-1.5 block w-fit">
+                                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($answer->question->gambar_path) }}"
+                                                alt="Gambar pertanyaan" class="h-16 max-w-full rounded border border-gray-200 object-contain">
+                                        </a>
+                                    @endif
                                     <div class="flex items-start justify-between gap-2">
-                                        <p class="text-[11px] text-gray-600 min-w-0">{{ $answer->selectedOption?->teks_opsi ?: ($answer->jawaban_teks ?: '—') }}</p>
+                                        <div class="min-w-0">
+                                            @if ($answer->gambar_jawaban_path)
+                                                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($answer->gambar_jawaban_path) }}" target="_blank" rel="noopener">
+                                                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($answer->gambar_jawaban_path) }}"
+                                                        alt="Jawaban gambar kandidat" class="h-16 max-w-full rounded border border-gray-200 object-contain">
+                                                    <span class="text-[10px] text-primary hover:underline">Buka gambar jawaban</span>
+                                                </a>
+                                            @else
+                                                <p class="text-[11px] text-gray-600">{{ $answer->selectedOption?->teks_opsi ?: ($answer->jawaban_teks ?: '—') }}</p>
+                                            @endif
+                                        </div>
                                         <span class="text-[10px] font-medium text-gray-500 shrink-0 tabular-nums">
                                             {{ $answer->is_reviewed ? ($answer->skor.' poin') : 'belum dinilai' }}
                                         </span>

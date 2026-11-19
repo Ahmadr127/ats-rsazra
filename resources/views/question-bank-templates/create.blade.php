@@ -22,7 +22,7 @@
     @endif
 
     <div x-data="templateForm()" class="max-w-4xl">
-        <form method="POST" action="{{ route('template-bank-soal.store') }}" @submit="prepareSubmit($event)">
+        <form method="POST" action="{{ route('template-bank-soal.store') }}" enctype="multipart/form-data" @submit="prepareSubmit($event)">
             @csrf
 
             <div class="bg-white/80 border border-gray-200 rounded-md">

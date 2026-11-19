@@ -293,7 +293,7 @@ final class Permissions
             self::ONBOARDING_COMPLETE => ['label' => 'Selesaikan onboarding', 'group' => 'Offering & MCU & Onboarding', 'roles' => [$H]],
 
             self::TEST_MANAGE => ['label' => 'Susun tes kompetensi lowongan', 'group' => 'Tes', 'roles' => [$H]],
-            self::TEST_REVIEW_ESSAY => ['label' => 'Nilai jawaban esai', 'group' => 'Tes', 'roles' => [$H]],
+            self::TEST_REVIEW_ESSAY => ['label' => 'Nilai jawaban esai/gambar', 'group' => 'Tes', 'roles' => [$H]],
             self::TEST_DECIDE => ['label' => 'Putuskan hasil tes kompetensi', 'group' => 'Tes', 'roles' => [$H]],
             self::TEST_SEND_LINK => ['label' => 'Kirim link tes eksternal DISC/MBTI', 'group' => 'Tes', 'roles' => [$H]],
 

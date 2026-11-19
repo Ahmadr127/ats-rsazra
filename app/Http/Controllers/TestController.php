@@ -7,8 +7,11 @@ use App\Logging\LogContext;
 use App\Models\TestSubmission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class TestController extends Controller
@@ -31,7 +34,7 @@ class TestController extends Controller
         }
 
         if ($submission->isExpired()) {
-            return $this->doSubmit($submission, []);
+            return $this->doSubmit($submission, [], []);
         }
 
         $questions = $submission->snapshot->questions;
@@ -51,61 +54,98 @@ class TestController extends Controller
             return redirect()->route('tes.show', $token);
         }
 
-        $answers = $request->input('answers', []);
+        $questions = $submission->snapshot->questions;
+        $rules = [];
+        $messages = [];
 
-        return $this->doSubmit($submission, $answers);
+        foreach ($questions as $question) {
+            if ($question->tipe !== QuestionType::Image) {
+                continue;
+            }
+
+            $key = "answers.{$question->id}";
+            $rules[$key] = ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'];
+            $messages["{$key}.required"] = 'Gambar jawaban wajib diunggah.';
+            $messages["{$key}.image"] = 'Jawaban harus berupa gambar.';
+            $messages["{$key}.mimes"] = 'Format gambar harus JPG, JPEG, PNG, atau WEBP.';
+            $messages["{$key}.max"] = 'Ukuran gambar maksimal 5 MB.';
+        }
+
+        $request->validate($rules, $messages);
+
+        $answers = $request->input('answers', []);
+        $files = $request->file('answers', []);
+
+        return $this->doSubmit($submission, $answers, $files);
     }
 
-    private function doSubmit(TestSubmission $submission, array $answers): RedirectResponse
+    private function doSubmit(TestSubmission $submission, array $answers, array $files = []): RedirectResponse
     {
-        DB::transaction(function () use ($submission, $answers): void {
-            $locked = TestSubmission::lockForUpdate()->findOrFail($submission->id);
+        $storedPaths = [];
 
-            if ($locked->isSubmitted()) {
-                return;
-            }
+        try {
+            DB::transaction(function () use ($submission, $answers, $files, &$storedPaths): void {
+                $locked = TestSubmission::lockForUpdate()->findOrFail($submission->id);
 
-            $totalSkor = 0;
-            $questions = $submission->snapshot->questions;
-
-            foreach ($questions as $question) {
-                $selectedOptionId = $answers[$question->id] ?? null;
-
-                $skor = null;
-                $snapshotOptionId = null;
-                $jawabanTeks = null;
-
-                if ($question->tipe === QuestionType::Mc) {
-                    $snapshotOptionId = $selectedOptionId ? (int) $selectedOptionId : null;
-                    $correctOption = $question->options->firstWhere('is_correct', true);
-
-                    if ($correctOption && $snapshotOptionId === $correctOption->id) {
-                        $skor = $question->nilai_poin;
-                    } else {
-                        $skor = 0;
-                    }
-
-                    $totalSkor += $skor;
-                } else {
-                    $jawabanTeks = $answers[$question->id] ?? null;
+                if ($locked->isSubmitted()) {
+                    return;
                 }
 
-                $submission->answers()->create([
-                    'vacancy_test_snapshot_question_id' => $question->id,
-                    'vacancy_test_snapshot_option_id' => $snapshotOptionId,
-                    'jawaban_teks' => $jawabanTeks,
-                    'skor' => $skor,
-                    'is_reviewed' => $question->tipe === QuestionType::Mc,
+                $totalSkor = 0;
+                $questions = $submission->snapshot->questions;
+
+                foreach ($questions as $question) {
+                    $selectedOptionId = $answers[$question->id] ?? null;
+
+                    $skor = null;
+                    $snapshotOptionId = null;
+                    $jawabanTeks = null;
+                    $gambarJawabanPath = null;
+
+                    if ($question->tipe === QuestionType::Mc) {
+                        $snapshotOptionId = $selectedOptionId ? (int) $selectedOptionId : null;
+                        $correctOption = $question->options->firstWhere('is_correct', true);
+
+                        if ($correctOption && $snapshotOptionId === $correctOption->id) {
+                            $skor = $question->nilai_poin;
+                        } else {
+                            $skor = 0;
+                        }
+
+                        $totalSkor += $skor;
+                    } elseif ($question->tipe === QuestionType::Essay) {
+                        $jawabanTeks = $answers[$question->id] ?? null;
+                    } elseif ($question->tipe === QuestionType::Image) {
+                        $file = $files[$question->id] ?? null;
+
+                        if ($file instanceof UploadedFile) {
+                            $gambarJawabanPath = $this->storeAnswerImage($file, $submission->application_id, $question->id);
+                            $storedPaths[] = $gambarJawabanPath;
+                        }
+                    }
+
+                    $submission->answers()->create([
+                        'vacancy_test_snapshot_question_id' => $question->id,
+                        'vacancy_test_snapshot_option_id' => $snapshotOptionId,
+                        'jawaban_teks' => $jawabanTeks,
+                        'gambar_jawaban_path' => $gambarJawabanPath,
+                        'skor' => $skor,
+                        'is_reviewed' => $question->tipe === QuestionType::Mc,
+                    ]);
+                }
+
+                $hasManualReview = $questions->contains(fn ($q) => in_array($q->tipe, [QuestionType::Essay, QuestionType::Image], true));
+
+                $submission->update([
+                    'submitted_at' => now(),
+                    'total_skor' => $hasManualReview ? null : $totalSkor,
                 ]);
-            }
+            });
+        } catch (\Throwable $e) {
+            Storage::disk('public')->delete($storedPaths);
 
-            $hasEssay = $questions->contains(fn ($q) => $q->tipe === QuestionType::Essay);
-
-            $submission->update([
-                'submitted_at' => now(),
-                'total_skor' => $hasEssay ? null : $totalSkor,
-            ]);
-        });
+            throw $e;
+        }
 
         Log::info('Competency test submitted', array_merge(LogContext::make(), [
             'submission_id' => $submission->id,
@@ -113,5 +153,13 @@ class TestController extends Controller
         ]));
 
         return redirect()->route('tes.show', $submission->token);
+    }
+
+    private function storeAnswerImage(UploadedFile $file, int $applicationId, int $questionId): string
+    {
+        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $filename = $questionId.'-'.Str::uuid()->toString().'.'.$extension;
+
+        return $file->storeAs("test-answer-images/{$applicationId}", $filename, 'public');
     }
 }

@@ -186,7 +186,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'show'])->name('lowongan.tes.show');
     Route::post('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'save'])->name('lowongan.tes.save');
 
-    Route::post('/lowongan/{lowongan}/tes/ulasan/jawaban/{answer}/skor', [TestReviewController::class, 'scoreEssay'])->name('lowongan.tes.ulasan.skor');
+    Route::post('/lowongan/{lowongan}/tes/ulasan/jawaban/{answer}/skor', [TestReviewController::class, 'scoreManual'])->name('lowongan.tes.ulasan.skor');
     Route::post('/lowongan/{lowongan}/tes/ulasan/{submission}/keputusan', [TestReviewController::class, 'decide'])->name('lowongan.tes.ulasan.keputusan');
 
     Route::get('/lowongan/{lowongan}/template-wawancara', [VacancyInterviewTemplateController::class, 'show'])->name('lowongan.template-wawancara.show');

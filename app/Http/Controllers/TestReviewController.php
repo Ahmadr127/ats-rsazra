@@ -17,12 +17,12 @@ class TestReviewController extends Controller
 {
     public function __construct(private readonly ApplicationPipelineService $pipelineService) {}
 
-    public function scoreEssay(Request $request, Vacancy $lowongan, TestAnswer $answer): RedirectResponse
+    public function scoreManual(Request $request, Vacancy $lowongan, TestAnswer $answer): RedirectResponse
     {
         $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
         $request->user()->requirePermission(Permissions::TEST_REVIEW_ESSAY);
 
-        abort_if($answer->question->tipe !== QuestionType::Essay, 422);
+        abort_if($answer->question->tipe === QuestionType::Mc, 422);
         abort_if($answer->submission->snapshot->vacancy_test_id !== $vacancyTest->id, 404);
 
         $validated = $request->validate([
@@ -41,7 +41,7 @@ class TestReviewController extends Controller
             $submission->update(['total_skor' => $allAnswers->sum('skor')]);
         }
 
-        return back()->with('success', 'Nilai esai berhasil disimpan.');
+        return back()->with('success', 'Nilai jawaban berhasil disimpan.');
     }
 
     public function decide(CompetencyTestDecisionRequest $request, Vacancy $lowongan, TestSubmission $submission): RedirectResponse

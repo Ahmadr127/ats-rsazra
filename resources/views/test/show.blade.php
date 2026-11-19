@@ -42,7 +42,7 @@
                 </p>
             </div>
 
-            <form id="test-form" method="POST" action="{{ route('tes.submit', $submission->token) }}">
+            <form id="test-form" method="POST" action="{{ route('tes.submit', $submission->token) }}" enctype="multipart/form-data">
                 @csrf
 
                 <div class="grid w-full gap-4 lg:grid-cols-2">
@@ -52,8 +52,14 @@
                                 <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[12px] font-semibold text-primary">{{ $index + 1 }}</span>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-[14px] text-ink">{{ $question->pertanyaan }}</p>
+                                    @if ($question->gambar_path)
+                                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($question->gambar_path) }}" target="_blank" rel="noopener" class="mt-2 block w-fit">
+                                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($question->gambar_path) }}"
+                                                alt="Gambar pertanyaan" class="max-h-52 max-w-full rounded-lg border border-line-2 object-contain">
+                                        </a>
+                                    @endif
                                     <div class="mt-1.5 flex items-center gap-2">
-                                        <x-ui.badge tone="{{ $question->tipe->value === 'mc' ? 'info' : 'warning' }}">{{ $question->tipe->label() }}</x-ui.badge>
+                                        <x-ui.badge tone="{{ $question->tipe->value === 'mc' ? 'info' : ($question->tipe->value === 'image' ? 'success' : 'warning') }}">{{ $question->tipe->label() }}</x-ui.badge>
                                         <span class="text-[12px] text-ink-4">{{ $question->nilai_poin }} poin</span>
                                     </div>
                                 </div>
@@ -67,6 +73,17 @@
                                             <span>{{ $option->teks_opsi }}</span>
                                         </label>
                                     @endforeach
+                                </div>
+                            @elseif ($question->tipe->value === 'image')
+                                <div>
+                                    <label class="mb-1.5 block text-[12px] font-medium text-ink-2">Unggah satu gambar jawaban</label>
+                                    <input type="file" name="answers[{{ $question->id }}]"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        class="ui-textarea focus-ring file:mr-2 file:border-0 file:bg-primary/10 file:text-[12px] file:font-medium file:text-primary file:px-2 file:py-1 file:rounded">
+                                    <p class="mt-1 text-[11px] text-ink-4">JPG, JPEG, PNG, atau WEBP &mdash; maksimal 5 MB. Wajib diunggah.</p>
+                                    @error("answers.{$question->id}")
+                                        <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             @else
                                 <textarea name="answers[{{ $question->id }}]" rows="4" placeholder="Tulis jawaban Anda di sini..." class="ui-textarea focus-ring"></textarea>

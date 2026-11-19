@@ -58,7 +58,7 @@
                                     <p class="text-xs text-gray-800" x-text="getQuestion(qId)?.pertanyaan || 'Soal #' + qId"></p>
                                     <div class="flex items-center gap-2 mt-1">
                                         <span class="text-[10px] font-medium px-1.5 py-0.5 rounded"
-                                            :class="getQuestion(qId)?.tipe === 'mc' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'"
+                                            :class="getQuestion(qId)?.tipe === 'mc' ? 'bg-blue-50 text-blue-600' : (getQuestion(qId)?.tipe === 'image' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600')"
                                             x-text="getQuestion(qId)?.tipe_label || ''"></span>
                                         <span class="text-[10px] text-gray-400" x-text="(getQuestion(qId)?.nilai_poin || 0) + ' poin'"></span>
                                     </div>
