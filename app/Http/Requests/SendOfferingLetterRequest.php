@@ -25,6 +25,7 @@ class SendOfferingLetterRequest extends FormRequest
             'gaji' => ['required', 'string', 'max:100'],
             'tanggal_mulai' => ['required', 'date', 'after_or_equal:today'],
             'catatan' => ['nullable', 'string', 'max:2000'],
+            'surat' => ['required', 'file', 'mimes:pdf', 'max:3072'],
         ];
     }
 
@@ -34,6 +35,7 @@ class SendOfferingLetterRequest extends FormRequest
             'jabatan_ditawarkan' => 'jabatan yang ditawarkan',
             'gaji' => 'gaji',
             'tanggal_mulai' => 'tanggal mulai kerja',
+            'surat' => 'surat penawaran',
         ];
     }
 }

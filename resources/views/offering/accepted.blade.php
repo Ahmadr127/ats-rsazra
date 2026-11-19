@@ -21,6 +21,14 @@
                     <dt class="text-[13px] text-ink-3">Tanggal Mulai</dt>
                     <dd class="text-right text-[14px] font-medium text-ink">{{ $offering->tanggal_mulai->format('d M Y') }}</dd>
                 </div>
+                @if ($offering->suratTtdUrl())
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-[13px] text-ink-3">Surat Di-TTD</dt>
+                        <dd class="text-right text-[14px]">
+                            <a href="{{ $offering->suratTtdUrl() }}" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">Lihat / unduh surat</a>
+                        </dd>
+                    </div>
+                @endif
             </dl>
         </div>
     </x-ui.card>

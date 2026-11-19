@@ -9,6 +9,7 @@ use App\Services\EmailNotificationService;
 use App\Support\Permissions;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
 class OfferingLetterController extends Controller
@@ -38,6 +39,9 @@ class OfferingLetterController extends Controller
 
         $tanggalMulaiFormatted = Carbon::parse($request->input('tanggal_mulai'))->translatedFormat('d F Y');
 
+        $oldPath = $application->offeringLetter?->surat_path;
+        $path = $request->file('surat')->store("offering-documents/{$application->id}", 'public');
+
         $offering = $application->offeringLetter()->updateOrCreate(
             ['application_id' => $application->id],
             [
@@ -45,6 +49,7 @@ class OfferingLetterController extends Controller
                 'gaji' => $request->input('gaji'),
                 'tanggal_mulai' => $request->input('tanggal_mulai'),
                 'catatan' => $request->input('catatan'),
+                'surat_path' => $path,
                 'status' => 'pending',
             ]
         );
@@ -75,6 +80,9 @@ class OfferingLetterController extends Controller
             $offering->update(['sent_at' => now()]);
         } catch (\Throwable $e) {
             report($e);
+
+            $offering->update(['surat_path' => $oldPath]);
+            Storage::disk('public')->delete($path);
 
             return back()->withErrors(['offering' => 'Gagal mengirim email penawaran. Silakan coba lagi.']);
         }

@@ -57,7 +57,7 @@
     <h2 class="text-sm font-semibold text-gray-800 mb-4">Detail Penawaran</h2>
 
     @if (! $hasSent && $currentStage->status->isAdvanceable())
-        <form method="POST" action="{{ route('lowongan.surat-penawaran.kirim', [$lowongan, $application]) }}">
+        <form method="POST" action="{{ route('lowongan.surat-penawaran.kirim', [$lowongan, $application]) }}" enctype="multipart/form-data">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -125,8 +125,24 @@
                 @enderror
             </div>
 
+            <div class="mb-5">
+                <label class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1">
+                    Surat Penawaran <span class="text-red-500">*</span>
+                </label>
+                <input
+                    type="file"
+                    name="surat"
+                    accept=".pdf,application/pdf"
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
+                >
+                @error('surat')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+                <p class="mt-1 text-[11px] text-gray-400">PDF, maksimal 3 MB. Surat ini akan bisa dilihat pelamar lewat tautan di email.</p>
+            </div>
+
             <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                <p class="text-xs text-amber-700">Setelah surat penawaran dikirim, kandidat akan menerima email berisi tautan untuk menerima atau menolak penawaran. Tautan berlaku selama 7 hari.</p>
+                <p class="text-xs text-amber-700">Setelah dikirim, pelamar menerima email berisi tautan untuk melihat catatan, gaji, surat penawaran, dan mengunggah surat yang sudah di-TTD. Tautan berlaku selama 7 hari.</p>
             </div>
 
             <button
@@ -157,5 +173,13 @@
                 <dd class="text-sm text-gray-700 mt-1 bg-gray-50 rounded-lg px-3 py-2">{{ $offering->catatan }}</dd>
             </div>
         @endif
+        <div class="mt-3 flex flex-wrap gap-4">
+            @if ($offering?->surat_path)
+                <a href="{{ $offering->suratUrl() }}" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Lihat Surat Penawaran</a>
+            @endif
+            @if ($offering?->surat_ttd_path)
+                <a href="{{ $offering->suratTtdUrl() }}" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Lihat Surat Sudah di-TTD</a>
+            @endif
+        </div>
     @endif
 </div>

@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Enums\ApplicationStageStatus;
 use App\Enums\OfferingLetterStatus;
+use App\Http\Requests\UploadSignedOfferingRequest;
 use App\Models\OfferingLetter;
 use App\Models\User;
 use App\Notifications\PenawaranDirespon;
 use App\Services\ApplicationPipelineService;
 use App\Support\Permissions;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class OfferingResponseController extends Controller
@@ -33,7 +36,7 @@ class OfferingResponseController extends Controller
         ]);
     }
 
-    public function accept(Request $request, OfferingLetter $offering): View
+    public function accept(UploadSignedOfferingRequest $request, OfferingLetter $offering): View|RedirectResponse
     {
         if ($offering->isResponded()) {
             return view('offering.already-responded', [
@@ -43,14 +46,23 @@ class OfferingResponseController extends Controller
 
         $offering->load('application.candidate', 'application.vacancy', 'application.stages');
 
-        DB::transaction(function () use ($offering): void {
-            $offering->update([
-                'status' => OfferingLetterStatus::Accepted,
-                'responded_at' => now(),
-            ]);
+        $path = $request->file('surat_ttd')->store("offering-documents/{$offering->application_id}", 'public');
 
-            $this->pipelineService->advance($offering->application);
-        });
+        try {
+            DB::transaction(function () use ($offering, $path): void {
+                $offering->update([
+                    'status' => OfferingLetterStatus::Accepted,
+                    'responded_at' => now(),
+                    'surat_ttd_path' => $path,
+                ]);
+
+                $this->pipelineService->advance($offering->application);
+            });
+        } catch (\Throwable $e) {
+            Storage::disk('public')->delete($path);
+
+            return back()->withErrors(['surat_ttd' => 'Gagal menyimpan surat sudah di-TTD: '.$e->getMessage()]);
+        }
 
         $hrAdmins = User::withPermission(Permissions::OFFERING_MANAGE);
         Notification::send($hrAdmins, new PenawaranDirespon($offering));

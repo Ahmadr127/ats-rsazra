@@ -31,6 +31,7 @@ class PenawaranDirespon extends Notification implements ShouldQueue
             'nama_kandidat' => $this->offeringLetter->application->candidate->nama_lengkap,
             'status' => $this->offeringLetter->status->value,
             'responded_at' => $this->offeringLetter->responded_at->toDateTimeString(),
+            'surat_ttd' => (bool) $this->offeringLetter->surat_ttd_path,
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\OfferingLetterStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class OfferingLetter extends Model
 {
@@ -14,6 +15,8 @@ class OfferingLetter extends Model
         'gaji',
         'tanggal_mulai',
         'catatan',
+        'surat_path',
+        'surat_ttd_path',
         'sent_at',
         'status',
         'responded_at',
@@ -43,5 +46,15 @@ class OfferingLetter extends Model
     public function isResponded(): bool
     {
         return $this->status !== OfferingLetterStatus::Pending;
+    }
+
+    public function suratUrl(): ?string
+    {
+        return $this->surat_path ? Storage::disk('public')->url($this->surat_path) : null;
+    }
+
+    public function suratTtdUrl(): ?string
+    {
+        return $this->surat_ttd_path ? Storage::disk('public')->url($this->surat_ttd_path) : null;
     }
 }

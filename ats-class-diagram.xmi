@@ -412,6 +412,8 @@
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a1" name="gaji" visibility="public" type="prim_String"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a2" name="tanggal_mulai" visibility="public" type="prim_Date"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a3" name="catatan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a8" name="surat_path" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a9" name="surat_ttd_path" visibility="public" type="prim_String"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a4" name="sent_at" visibility="public" type="prim_DateTime"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a5" name="status" visibility="public" type="enum_OfferingLetterStatus"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a6" name="responded_at" visibility="public" type="prim_DateTime"/>

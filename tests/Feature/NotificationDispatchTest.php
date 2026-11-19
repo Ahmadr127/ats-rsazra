@@ -24,7 +24,9 @@ use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use App\Services\EmailNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -39,6 +41,7 @@ class NotificationDispatchTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('public');
         $this->artisan('db:seed', ['--class' => 'StageSeeder']);
         $this->artisan('db:seed', ['--class' => 'EmailTemplateSeeder']);
     }
@@ -279,6 +282,7 @@ class NotificationDispatchTest extends TestCase
             'jabatan_ditawarkan' => 'Perawat Rawat Inap',
             'gaji' => 'Rp 5.000.000',
             'tanggal_mulai' => now()->addDays(14)->toDateString(),
+            'surat' => UploadedFile::fake()->create('surat-penawaran.pdf', 100, 'application/pdf'),
         ]);
 
         $this->assertMailQueuedTo('surat_penawaran', $candidateEmail);

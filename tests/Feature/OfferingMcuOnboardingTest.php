@@ -27,6 +27,17 @@ class OfferingMcuOnboardingTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake('public');
+    }
+
+    private function suratFile(): UploadedFile
+    {
+        return UploadedFile::fake()->create('surat-penawaran.pdf', 100, 'application/pdf');
+    }
+
     private function seedStages(): void
     {
         $this->artisan('db:seed', ['--class' => 'StageSeeder']);
@@ -131,6 +142,7 @@ class OfferingMcuOnboardingTest extends TestCase
             'gaji' => 'Rp 5.000.000',
             'tanggal_mulai' => now()->addDays(14)->toDateString(),
             'catatan' => 'Harap konfirmasi kehadiran.',
+            'surat' => $this->suratFile(),
         ]);
 
         $response->assertRedirect(route('lowongan.pipeline', $vacancy));
@@ -146,6 +158,10 @@ class OfferingMcuOnboardingTest extends TestCase
             'key' => 'surat_penawaran',
             'status' => ApplicationStageStatus::Aktif,
         ]);
+
+        $offering = OfferingLetter::where('application_id', $application->id)->firstOrFail();
+        $this->assertNotNull($offering->surat_path);
+        Storage::disk('public')->assertExists($offering->surat_path);
 
         $this->assertDatabaseHas('offering_letters', [
             'application_id' => $application->id,
@@ -171,6 +187,7 @@ class OfferingMcuOnboardingTest extends TestCase
             'jabatan_ditawarkan' => 'Dokter Umum',
             'gaji' => 'Rp 8.000.000',
             'tanggal_mulai' => now()->addDays(7)->toDateString(),
+            'surat' => $this->suratFile(),
         ]);
 
         $offering = OfferingLetter::where('application_id', $application->id)->first();
@@ -189,6 +206,7 @@ class OfferingMcuOnboardingTest extends TestCase
             'jabatan_ditawarkan' => 'Perawat',
             'gaji' => 'Rp 4.000.000',
             'tanggal_mulai' => now()->addDays(7)->toDateString(),
+            'surat' => $this->suratFile(),
         ];
 
         $this->actingAs($admin)->post(route('lowongan.surat-penawaran.kirim', [$vacancy, $application]), $payload);
@@ -208,7 +226,7 @@ class OfferingMcuOnboardingTest extends TestCase
 
         $response = $this->actingAs($admin)->post(route('lowongan.surat-penawaran.kirim', [$vacancy, $application]), []);
 
-        $response->assertSessionHasErrors(['jabatan_ditawarkan', 'gaji', 'tanggal_mulai']);
+        $response->assertSessionHasErrors(['jabatan_ditawarkan', 'gaji', 'tanggal_mulai', 'surat']);
     }
 
     // ── MCU ───────────────────────────────────────────────────────────────────

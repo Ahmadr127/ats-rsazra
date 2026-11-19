@@ -16,13 +16,26 @@ use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use App\Notifications\PenawaranDirespon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class OfferingResponseTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake('public');
+    }
+
+    private function ttdFile(): UploadedFile
+    {
+        return UploadedFile::fake()->create('surat-ttd.pdf', 100, 'application/pdf');
+    }
 
     private function seedStages(): void
     {
@@ -80,11 +93,16 @@ class OfferingResponseTest extends TestCase
 
     private function createOfferingWithSignedUrls(Application $application): array
     {
+        $suratPath = "offering-documents/{$application->id}/surat-penawaran.pdf";
+        Storage::disk('public')->put($suratPath, 'surat penawaran');
+
         $offering = OfferingLetter::create([
             'application_id' => $application->id,
             'jabatan_ditawarkan' => 'Perawat',
             'gaji' => 'Rp 5.000.000',
             'tanggal_mulai' => now()->addDays(14)->toDateString(),
+            'catatan' => 'Harap hadir tepat waktu.',
+            'surat_path' => $suratPath,
             'sent_at' => now(),
             'status' => 'pending',
         ]);
@@ -115,6 +133,48 @@ class OfferingResponseTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('offering.accept-form');
+        $response->assertSee('Harap hadir tepat waktu.');
+        $response->assertSee('Rp 5.000.000');
+        $response->assertSee(Storage::disk('public')->url('offering-documents/'.$application->id.'/surat-penawaran.pdf'), false);
+        $response->assertSee('name="surat_ttd"', false);
+        $response->assertSee('enctype="multipart/form-data"', false);
+    }
+
+    public function test_accept_requires_signed_letter_upload(): void
+    {
+        $this->seedStages();
+
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
+        $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
+        $data = $this->createOfferingWithSignedUrls($application);
+
+        $this->post($data['acceptUrl'], [])->assertSessionHasErrors('surat_ttd');
+
+        $this->assertDatabaseHas('offering_letters', ['id' => $data['offering']->id, 'status' => 'pending']);
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'surat_penawaran',
+            'status' => ApplicationStageStatus::Aktif,
+        ]);
+    }
+
+    public function test_accept_rejects_non_pdf_and_oversized_signed_letter(): void
+    {
+        $this->seedStages();
+
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
+        $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
+        $data = $this->createOfferingWithSignedUrls($application);
+
+        $this->post($data['acceptUrl'], [
+            'surat_ttd' => UploadedFile::fake()->create('surat.docx', 100, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+        ])->assertSessionHasErrors('surat_ttd');
+
+        $this->post($data['acceptUrl'], [
+            'surat_ttd' => UploadedFile::fake()->create('surat.pdf', 4000, 'application/pdf'),
+        ])->assertSessionHasErrors('surat_ttd');
+
+        $this->assertDatabaseHas('offering_letters', ['id' => $data['offering']->id, 'status' => 'pending']);
     }
 
     public function test_candidate_can_accept_offering_via_signed_link(): void
@@ -126,7 +186,7 @@ class OfferingResponseTest extends TestCase
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
         $data = $this->createOfferingWithSignedUrls($application);
 
-        $response = $this->post($data['acceptUrl']);
+        $response = $this->post($data['acceptUrl'], ['surat_ttd' => $this->ttdFile()]);
 
         $response->assertOk();
         $response->assertViewIs('offering.accepted');
@@ -135,6 +195,10 @@ class OfferingResponseTest extends TestCase
             'id' => $data['offering']->id,
             'status' => OfferingLetterStatus::Accepted,
         ]);
+
+        $ttdPath = $data['offering']->refresh()->surat_ttd_path;
+        $this->assertNotNull($ttdPath);
+        Storage::disk('public')->assertExists($ttdPath);
 
         $this->assertDatabaseHas('application_stages', [
             'application_id' => $application->id,
@@ -159,7 +223,7 @@ class OfferingResponseTest extends TestCase
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
         $data = $this->createOfferingWithSignedUrls($application);
 
-        $this->post($data['acceptUrl']);
+        $this->post($data['acceptUrl'], ['surat_ttd' => $this->ttdFile()]);
 
         Notification::assertSentTo($hrAdmin, PenawaranDirespon::class);
     }
@@ -255,9 +319,9 @@ class OfferingResponseTest extends TestCase
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
         $data = $this->createOfferingWithSignedUrls($application);
 
-        $this->post($data['acceptUrl']);
+        $this->post($data['acceptUrl'], ['surat_ttd' => $this->ttdFile()]);
 
-        $response = $this->post($data['acceptUrl']);
+        $response = $this->post($data['acceptUrl'], ['surat_ttd' => $this->ttdFile()]);
         $response->assertOk();
         $response->assertViewIs('offering.already-responded');
 

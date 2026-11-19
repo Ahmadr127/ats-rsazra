@@ -1,6 +1,6 @@
 # Penawaran: Upload Surat & Salary oleh Admin, TTD oleh Pelamar
 
-Status: **RENCANA FINAL — menunggu persetujuan implementasi**
+Status: **SELESAI — terverifikasi**
 Terakhir update: 2026-11-19
 
 > **Scope: hanya tahap `surat_penawaran`.** Tidak menyentuh MCU, onboarding, wawancara, atau logika umum pipeline.
@@ -121,10 +121,16 @@ Alur sudah disepakati; detail teknis di atas adalah default implementasi, bukan 
 - Permission `offering.manage` dan `interview.decide-*`.
 - Makna `pending` / `accepted` / `rejected`.
 
+## Hasil verifikasi
+
+- `OfferingResponseTest`, `OfferingMcuOnboardingTest`, `NotificationDispatchTest`: 45 test / 116 assertion lulus.
+- Suite lengkap: 655 lulus, 3 gagal — ketiganya pre-existing dan tidak terkait (`PasswordChangeTest`, 2 assertion `CandidateStatusPageTest`).
+- `pint --dirty`, `npm run build`, dan `php artisan migrate` selesai. Template email tidak diubah (detail tampil di halaman tautan), permission tidak ditambah.
+
 ## Checklist
 
-- [ ] Keputusan detail di atas dijawab
-- [ ] Plan final ditulis ulang
-- [ ] Implementasi & test
-- [ ] Pint, npm build, migrate/seed, XMI
-- [ ] Commit
+- [x] Keputusan detail di atas dijawab
+- [x] Plan final ditulis ulang
+- [x] Implementasi & test
+- [x] Pint, npm build, migrate, XMI
+- [ ] Commit — **sengaja tidak dilakukan, menunggu instruksi user**
