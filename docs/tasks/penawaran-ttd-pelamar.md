@@ -7,10 +7,10 @@ Terakhir update: 2026-11-19
 
 ## Permintaan
 
-1. Di pipeline tahap **Penawaran**, admin mengisi data penawaran — termasuk **gaji yang sudah ada sebagai field teks** — dan meng-upload **surat penawaran**. Tidak ada upload file salary terpisah.
-2. Email dikirim ke **pelamar**, berisi dua tautan:
-   - tautan ke form **upload ulang surat yang sudah di-TTD** jika menerima;
-   - tautan **tolak** jika menolak.
+1. Di pipeline tahap **Penawaran**, admin mengisi data penawaran — termasuk **gaji yang sudah ada sebagai field teks** — dan meng-upload **surat penawaran** dalam **satu form yang sama** dengan tombol Kirim. Tidak ada upload file salary terpisah.
+2. Email dikirim ke **pelamar**, berisi tautan:
+   - tautan **terima** membuka halaman yang menampilkan **catatan**, **gaji**, dan **file surat penawaran** yang di-upload admin, lalu di halaman tersebut ada **form upload surat yang sudah di-TTD**;
+   - tautan **tolak** untuk menolak penawaran.
 
 ## Analisa kondisi saat ini
 
@@ -72,20 +72,27 @@ Terakhir update: 2026-11-19
 - `tests/Feature/OfferingMcuOnboardingTest.php`: kirim offering, validasi, pencegahan double-send, lalu MCU & onboarding.
 - `tests/Feature/NotificationDispatchTest.php`: pola verifikasi email/notification.
 
+## Keputusan yang sudah diberikan
+
+| No | Keputusan |
+|---|---|
+| 1 | Admin memakai **satu form**: data penawaran + upload surat penawaran + tombol Kirim. |
+| 2 | Email ke pelamar berisi tautan ke halaman yang menampilkan **catatan, gaji, dan file surat penawaran**, plus form upload surat sudah di-TTD. Tautan tolak tetap ada. |
+| 3 | Penerima email adalah **pelamar**, bukan pewawancara. |
+| 4 | Salary tetap field `gaji` teks, bukan upload file. |
+
 ## Keputusan detail yang masih dibutuhkan
 
 | No | Pertanyaan | Catatan |
 |---|---|---|
-| 1 | Surat penawaran diupload **bersamaan tombol Kirim** atau diunggah terpisah dulu? | Data `gaji` tetap diisi seperti sekarang; tidak ada upload salary. |
-| 2 | Upload surat penawaran **wajib** atau opsional? | Menentukan validasi `SendOfferingLetterRequest`. |
-| 3 | Saat pelamar menekan terima, upload surat sudah di-TTD **wajib** agar status `accepted` + pipeline lanjut? | Jika wajib, form terima menolak submit tanpa file. |
-| 4 | Form tolak: alasan penolakan tetap opsional atau diwajibkan? | Sekarang opsional, maks. 1000. |
-| 5 | Tautan `link_terima` lama diganti ke form upload TTD, atau form lama tetap ada lalu upload menyusul? | Menentukan apakah route `offering.accept` diubah atau ditambah. |
-| 6 | Masa berlaku signed URL untuk pelamar tetap **7 hari**? | Sekarang 7 hari. |
-| 7 | Template `surat_penawaran` **dimodifikasi** (tambah placeholder tautan upload TTD) atau dibuat template baru? | Template lama dipakai alur saat ini. |
-| 8 | Notifikasi `PenawaranDirespon` ke HR Admin tetap seperti sekarang, atau ditambah info file TTD? | Saat ini database-only. |
-| 9 | Format & ukuran maks file surat penawaran dan TTD | Usulan awal: PDF, maks. 3 MB (mengikuti MCU). Perlu konfirmasi. |
-| 10 | File lama dihapus saat offering dikirim ulang / TTD diupload ulang? | Pola DISC/MBTI menghapus file lama saat replace. |
+| 1 | Upload surat penawaran oleh admin **wajib** atau opsional? | Menentukan validasi `SendOfferingLetterRequest`. |
+| 2 | Upload surat sudah di-TTD di halaman terima **wajib** agar status `accepted` + pipeline lanjut? | Deskripsi Anda menyebut form upload di halaman terima — saya asumsikan wajib; mohon dikonfirmasi. |
+| 3 | Form tolak: alasan penolakan tetap opsional atau diwajibkan? | Sekarang opsional, maks. 1000. |
+| 4 | Masa berlaku signed URL untuk pelamar tetap **7 hari**? | Sekarang 7 hari. |
+| 5 | Template `surat_penawaran` perlu diubah? | Karena detail (catatan, gaji, file) ditampilkan di halaman tautan, template lama kemungkinan besar tetap cukup. |
+| 6 | Notifikasi `PenawaranDirespon` ke HR Admin tetap seperti sekarang, atau ditambah info file TTD? | Saat ini database-only. |
+| 7 | Format & ukuran maks file surat penawaran dan TTD | Usulan awal: PDF, maks. 3 MB (mengikuti MCU). Perlu konfirmasi. |
+| 8 | File lama dihapus saat offering dikirim ulang / TTD diupload ulang? | Pola DISC/MBTI menghapus file lama saat replace. |
 
 ## Cakupan perubahan yang akan direncanakan setelah keputusan
 
@@ -93,10 +100,10 @@ Terakhir update: 2026-11-19
 
 - **Migrasi**: kolom path file di `offering_letters` (surat penawaran dan surat TTD) + rollback. Field `gaji` tetap apa adanya.
 - **Model**: `OfferingLetter` fillable/cast/helper aksesor URL file.
-- **Request**: perluasan `SendOfferingLetterRequest` untuk upload admin; request baru untuk upload TTD pelamar.
-- **Controller**: `OfferingLetterController::send()` (simpan file + generate signed URL + email ke pelamar); `OfferingResponseController` (form terima dengan upload TTD, form tolak).
-- **View**: `_aksi-surat-penawaran.blade.php` (field upload + preview/tautan file), `offering/accept-form.blade.php` (input file TTD), mungkin `reject-form.blade.php`.
-- **Route**: kemungkinan route public baru dengan `signed.relative` + `throttle:signed-access` untuk upload TTD.
+- **Request**: perluasan `SendOfferingLetterRequest` untuk upload surat penawaran pada form yang sama; request baru untuk upload TTD pelamar.
+- **Controller**: `OfferingLetterController::send()` (simpan file surat penawaran + generate signed URL + email ke pelamar); `OfferingResponseController::showAcceptForm()` (kirim data catatan, gaji, dan URL file surat penawaran ke view) serta `accept()` (simpan file TTD + status accepted + `advance()`); `reject()` tetap.
+- **View**: `_aksi-surat-penawaran.blade.php` (satu form: field lama + input file surat penawaran); `offering/accept-form.blade.php` menampilkan catatan, gaji, tautan/download file surat penawaran, dan input file TTD; `reject-form.blade.php` tetap.
+- **Route**: `offering.accept` GET/POST dipakai untuk halaman detail + upload TTD; kemungkinan tidak perlu route baru.
 - **Email**: `EmailTemplateSeeder` + payload `EmailNotificationService`.
 - **Storage**: disk `public`, path `offering-documents/{application_id}/...`, cleanup file gagal/replace.
 - **Test**: `OfferingResponseTest`, `OfferingMcuOnboardingTest`, `NotificationDispatchTest`, test upload & email.
