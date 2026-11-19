@@ -7,7 +7,7 @@ Terakhir update: 2026-11-19
 
 ## Permintaan
 
-1. Di pipeline tahap **Penawaran**, admin meng-upload **surat penawaran** dan **salary**.
+1. Di pipeline tahap **Penawaran**, admin mengisi data penawaran — termasuk **gaji yang sudah ada sebagai field teks** — dan meng-upload **surat penawaran**. Tidak ada upload file salary terpisah.
 2. Email dikirim ke **pelamar**, berisi dua tautan:
    - tautan ke form **upload ulang surat yang sudah di-TTD** jika menerima;
    - tautan **tolak** jika menolak.
@@ -20,9 +20,9 @@ Terakhir update: 2026-11-19
   - Fillable: `application_id`, `jabatan_ditawarkan`, `gaji`, `tanggal_mulai`, `catatan`, `sent_at`, `status`, `responded_at`, `rejection_reason`.
   - Cast: `tanggal_mulai` date, `sent_at`/`responded_at` datetime, `status` => `OfferingLetterStatus`.
   - Helper `isPending()` / `isResponded()`.
-  - **Belum ada kolom path file** untuk surat penawaran, lampiran salary, atau surat hasil TTD.
+  - **Belum ada kolom path file** untuk surat penawaran maupun surat hasil TTD.
 - Migrasi: `2026_05_17_043041_create_offering_letters_table.php`, `2026_05_20_065206_add_response_columns_to_offering_letters_table.php`.
-- `gaji` saat ini adalah **text biasa** (`string`, maks. 100 karakter di `SendOfferingLetterRequest`), bukan file.
+- `gaji` saat ini adalah **text biasa** (`string`, maks. 100 karakter di `SendOfferingLetterRequest`) dan sudah tampil di form penawaran maupun email. Jadi "salary" yang dimaksud adalah data ini, bukan dokumen upload baru.
 - `app/Enums/OfferingLetterStatus.php`: `pending`, `accepted`, `rejected`; label sudah "Diterima/Ditolak **Kandidat**" sehingga tidak perlu diubah untuk alur ini.
 
 ### 2. Alur pengiriman yang berjalan sekarang
@@ -76,22 +76,22 @@ Terakhir update: 2026-11-19
 
 | No | Pertanyaan | Catatan |
 |---|---|---|
-| 1 | "Salary" yang di-upload admin adalah **file PDF** atau tetap field `gaji` text? | Jika file: satu/multiple, format, ukuran maks. |
-| 2 | Surat penawaran & salary diupload **bersamaan tombol Kirim** atau diunggah terpisah dulu? | Keduanya wajib atau opsional? |
-| 3 | Saat pelamar menekan terima, upload surat sudah di-TTD **wajib** agar status `accepted` + pipeline lanjut? | Jika wajib, form terima harus menolak submit tanpa file. |
+| 1 | Surat penawaran diupload **bersamaan tombol Kirim** atau diunggah terpisah dulu? | Data `gaji` tetap diisi seperti sekarang; tidak ada upload salary. |
+| 2 | Upload surat penawaran **wajib** atau opsional? | Menentukan validasi `SendOfferingLetterRequest`. |
+| 3 | Saat pelamar menekan terima, upload surat sudah di-TTD **wajib** agar status `accepted` + pipeline lanjut? | Jika wajib, form terima menolak submit tanpa file. |
 | 4 | Form tolak: alasan penolakan tetap opsional atau diwajibkan? | Sekarang opsional, maks. 1000. |
 | 5 | Tautan `link_terima` lama diganti ke form upload TTD, atau form lama tetap ada lalu upload menyusul? | Menentukan apakah route `offering.accept` diubah atau ditambah. |
 | 6 | Masa berlaku signed URL untuk pelamar tetap **7 hari**? | Sekarang 7 hari. |
 | 7 | Template `surat_penawaran` **dimodifikasi** (tambah placeholder tautan upload TTD) atau dibuat template baru? | Template lama dipakai alur saat ini. |
 | 8 | Notifikasi `PenawaranDirespon` ke HR Admin tetap seperti sekarang, atau ditambah info file TTD? | Saat ini database-only. |
-| 9 | Format & ukuran maks file surat penawaran, salary, dan TTD | Usulan awal: PDF, maks. 3 MB (mengikuti MCU). Perlu konfirmasi. |
+| 9 | Format & ukuran maks file surat penawaran dan TTD | Usulan awal: PDF, maks. 3 MB (mengikuti MCU). Perlu konfirmasi. |
 | 10 | File lama dihapus saat offering dikirim ulang / TTD diupload ulang? | Pola DISC/MBTI menghapus file lama saat replace. |
 
 ## Cakupan perubahan yang akan direncanakan setelah keputusan
 
 (belum diimplementasikan — peta area yang akan tersentuh)
 
-- **Migrasi**: kolom path file di `offering_letters` (surat penawaran, lampiran salary, surat TTD) + rollback.
+- **Migrasi**: kolom path file di `offering_letters` (surat penawaran dan surat TTD) + rollback. Field `gaji` tetap apa adanya.
 - **Model**: `OfferingLetter` fillable/cast/helper aksesor URL file.
 - **Request**: perluasan `SendOfferingLetterRequest` untuk upload admin; request baru untuk upload TTD pelamar.
 - **Controller**: `OfferingLetterController::send()` (simpan file + generate signed URL + email ke pelamar); `OfferingResponseController` (form terima dengan upload TTD, form tolak).
@@ -105,6 +105,7 @@ Terakhir update: 2026-11-19
 ## Yang tidak akan diubah tanpa instruksi eksplisit
 
 - Penerima email: **pelamar** (bukan pewawancara).
+- Field `gaji` yang sudah ada (tidak diubah menjadi upload file).
 - Stage lain (MCU, onboarding, wawancara) dan `ApplicationPipelineService`.
 - Permission `offering.manage` dan `interview.decide-*`.
 - Makna `pending` / `accepted` / `rejected`.
