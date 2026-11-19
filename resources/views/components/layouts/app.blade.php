@@ -252,6 +252,19 @@
                 <span>Hak Akses</span>
             </a>
             @endpermission
+
+            @permission('menu.audit-log')
+            <a
+                href="{{ route('audit-log.index') }}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ease-out duration-150 whitespace-nowrap
+                    {{ request()->routeIs('audit-log.*') ? 'bg-secondary text-white font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white' }}"
+            >
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h1m4 0h1M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                </svg>
+                <span>Log Audit</span>
+            </a>
+            @endpermission
         </nav>
     </aside>
 

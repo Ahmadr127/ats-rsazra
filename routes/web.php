@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationPipelineController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\CallbackController;
 use App\Http\Controllers\CandidateExportController;
@@ -164,6 +165,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/pengaturan/tampilan', [SiteSettingController::class, 'update'])
         ->middleware('permission:'.Permissions::MENU_TAMPILAN)
         ->name('pengaturan-tampilan.update');
+
+    Route::get('/pengaturan/audit-log', [AuditLogController::class, 'index'])
+        ->middleware('permission:'.Permissions::AUDIT_LOG_VIEW)
+        ->name('audit-log.index');
+    Route::get('/pengaturan/audit-log/{auditLog}', [AuditLogController::class, 'show'])
+        ->middleware('permission:'.Permissions::AUDIT_LOG_VIEW)
+        ->name('audit-log.show');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
 

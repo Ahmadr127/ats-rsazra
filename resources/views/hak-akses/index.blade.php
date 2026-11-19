@@ -63,6 +63,7 @@
             'Hak Akses' => 'Kelola matriks hak akses ini sendiri.',
             'Peran' => 'Kelola peran (contoh: Admin HR, Manajer HR).',
             'Notifikasi' => 'Siapa saja yang menerima notifikasi internal.',
+            'Log Audit' => 'Melihat jejak aktivitas aplikasi: perubahan model, antrean job, worker, email, dan penjadwalan.',
         ];
 
         $isFormPipeline = fn ($key) => in_array($key, $formPipelineKeys, true);

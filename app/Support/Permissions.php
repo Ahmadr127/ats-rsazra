@@ -37,6 +37,8 @@ final class Permissions
 
     public const MENU_TAMPILAN = 'menu.tampilan';
 
+    public const MENU_AUDIT_LOG = 'menu.audit-log';
+
     // Dashboard scope
     public const DASHBOARD_VIEW_ORG = 'dashboard.view-org';
 
@@ -205,6 +207,9 @@ final class Permissions
     // Notifications
     public const NOTIFICATION_RESERVED_REMINDER = 'notification.reserved-reminder';
 
+    // Audit log
+    public const AUDIT_LOG_VIEW = 'audit-log.view';
+
     /**
      * Full catalog: key => [label, group, default roles].
      * Defaults preserve the pre-RBAC behavior (see TASK-RBAC-MANUAL.md).
@@ -235,6 +240,7 @@ final class Permissions
             self::MENU_RBAC => ['label' => 'Sidemenu: Hak Akses', 'group' => 'Menu', 'roles' => [$H]],
             self::MENU_ROLES => ['label' => 'Sidemenu: Peran', 'group' => 'Menu', 'roles' => [$H]],
             self::MENU_TAMPILAN => ['label' => 'Sidemenu: Tampilan Karier', 'group' => 'Menu', 'roles' => [$H]],
+            self::MENU_AUDIT_LOG => ['label' => 'Sidemenu: Log Audit', 'group' => 'Menu', 'roles' => [$H]],
 
             self::DASHBOARD_VIEW_ORG => ['label' => 'Dasbor seluruh organisasi', 'group' => 'Dasbor', 'roles' => [$H, $M, $D]],
             self::DASHBOARD_VIEW_UNIT => ['label' => 'Dasbor unit sendiri', 'group' => 'Dasbor', 'roles' => [$H, $U, $E]],
@@ -330,6 +336,8 @@ final class Permissions
             self::ROLE_DELETE => ['label' => 'Hapus peran', 'group' => 'Peran', 'roles' => [$H]],
 
             self::NOTIFICATION_RESERVED_REMINDER => ['label' => 'Terima pengingat kandidat ditangguhkan', 'group' => 'Notifikasi', 'roles' => [$H]],
+
+            self::AUDIT_LOG_VIEW => ['label' => 'Lihat log audit', 'group' => 'Log Audit', 'roles' => [$H]],
         ];
     }
 

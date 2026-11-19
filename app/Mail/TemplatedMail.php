@@ -48,7 +48,7 @@ class TemplatedMail extends Mailable implements ShouldQueue
 
         return preg_replace_callback(
             '/https?:\/\/[^\s<]+/u',
-            fn (array $match) => '<a href="'.$match[0].'" style="color:#1a5c3a;">'.$match[0].'</a>',
+            fn (array $match) => '<a href="'.$match[0].'" style="color:#007774;">'.$match[0].'</a>',
             $escaped
         );
     }

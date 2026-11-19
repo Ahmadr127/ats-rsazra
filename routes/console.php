@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('notifikasi:pengingat-kandidat-reserved')->dailyAt('08:00');
 Schedule::command('pipeline:auto-reject-reserved')->dailyAt('00:05');
+Schedule::command('audit:prune')->dailyAt('03:00');
