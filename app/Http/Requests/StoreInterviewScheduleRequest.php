@@ -17,7 +17,7 @@ class StoreInterviewScheduleRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'jadwal' => ['required', 'date', 'after:now'],
+            'jadwal' => ['required', 'date', 'after_or_equal:today'],
             'lokasi' => ['required', 'string', 'max:255'],
             'interviewer_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('is_active', true)],
         ];

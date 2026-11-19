@@ -40,6 +40,7 @@ Menambah cara mengisi form create template bank soal dari file Excel:
 | 10 | Gambar | **Tidak ada kolom gambar** di template; hasil import selalu tanpa gambar | Gambar ditambahkan lewat file input di form create/edit. |
 | 11 | Strategi error | Jika ada satu baris invalid, **form tidak diisi** dan ditampilkan daftar error "Baris N: ..." | Tidak ada penulisan DB sampai user menekan Simpan. |
 | 12 | RBAC | `question-bank.create` | Tanpa permission/role baru. |
+| 13 | Contoh baris di sheet `Soal` | **3 baris contoh** (satu per tipe) langsung di sheet `Soal`, sama dengan sheet `Contoh` | Memudahkan user melihat nilai valid tiap kolom per tipe; baris contoh wajib diganti/dihapus sebelum unggah. |
 
 ## Format template Excel
 
@@ -52,7 +53,7 @@ Header baris 1 (bold, freeze pane, auto-filter):
 | Tipe | Pertanyaan | Poin | Opsi A | Opsi B | Opsi C | Opsi D | Kunci Jawaban |
 |---|---|---|---|---|---|---|---|
 
-- Baris 2 ke bawah dikosongkan.
+- Baris 2–4 **diisi contoh valid** untuk ketiga tipe (Pilihan Ganda, Esai, Unggah Gambar); user mengganti atau menghapus baris contoh sebelum mengunggah.
 - Dropdown data validation:
   - Kolom A (`Tipe`): `Pilihan Ganda`, `Esai`, `Unggah Gambar`.
   - Kolom H (`Kunci Jawaban`): `A`, `B`, `C`, `D`, `-`.

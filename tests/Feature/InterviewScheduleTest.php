@@ -353,7 +353,7 @@ class InterviewScheduleTest extends TestCase
         $response->assertSessionHasErrors(['jadwal', 'lokasi', 'interviewer_id']);
     }
 
-    public function test_jadwal_must_be_future_date(): void
+    public function test_jadwal_in_the_past_is_rejected(): void
     {
         $this->seedStages();
 
@@ -374,6 +374,72 @@ class InterviewScheduleTest extends TestCase
         );
 
         $response->assertSessionHasErrors('jadwal');
+    }
+
+    public function test_jadwal_today_is_accepted(): void
+    {
+        Mail::fake();
+        Notification::fake();
+        $this->seedStages();
+        $this->seedEmailTemplates();
+
+        $unit = Unit::factory()->create();
+        $admin = User::factory()->hrAdmin()->create();
+        $interviewer = $this->makeUnitHead($unit);
+
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'wawancara_user', 'onboarding'], $unit);
+        $application = $this->makeApplicationAtStage($vacancy, 'wawancara_user');
+
+        $response = $this->actingAs($admin)->post(
+            route('lowongan.wawancara.jadwal', [$vacancy, $application]),
+            [
+                'jadwal' => today()->setTime(8, 0)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Meeting',
+                'interviewer_id' => $interviewer->id,
+            ]
+        );
+
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
+        $response->assertSessionHasNoErrors();
+
+        $stage = $application->stages()->where('key', 'wawancara_user')->first();
+        $this->assertNotNull($stage->jadwal);
+        $this->assertTrue($stage->jadwal->isToday());
+    }
+
+    public function test_jadwal_update_today_is_accepted(): void
+    {
+        Mail::fake();
+        Notification::fake();
+        $this->seedStages();
+        $this->seedEmailTemplates();
+
+        $unit = Unit::factory()->create();
+        $admin = User::factory()->hrAdmin()->create();
+        $interviewer = $this->makeUnitHead($unit);
+
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'wawancara_user', 'onboarding'], $unit);
+        $application = $this->makeApplicationAtStage($vacancy, 'wawancara_user');
+        $application->stages()->where('key', 'wawancara_user')->update([
+            'jadwal' => now()->addDay(),
+            'lokasi' => 'Ruang Lama',
+            'interviewer_id' => $interviewer->id,
+        ]);
+
+        $response = $this->actingAs($admin)->put(
+            route('lowongan.wawancara.jadwal.update', [$vacancy, $application]),
+            [
+                'jadwal' => today()->setTime(9, 0)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Baru',
+            ]
+        );
+
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
+        $response->assertSessionHasNoErrors();
+
+        $stage = $application->stages()->where('key', 'wawancara_user')->first();
+        $this->assertTrue($stage->jadwal->isToday());
+        $this->assertSame('Ruang Baru', $stage->lokasi);
     }
 
     public function test_returns_404_for_mismatched_vacancy(): void

@@ -15,6 +15,7 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
 
 class QuestionImportExcelTest extends TestCase
@@ -105,6 +106,63 @@ class QuestionImportExcelTest extends TestCase
 
         $this->assertCount(3, $reader->sheets);
         $this->assertEquals(QuestionImportTemplateExport::HEADINGS, $reader->sheets[0]->first()->values()->all());
+    }
+
+    public function test_template_soal_sheet_contains_example_row_for_each_type(): void
+    {
+        Excel::store(new QuestionImportTemplateExport, 'template.xlsx', 'fake');
+
+        $reader = new class implements ToCollection
+        {
+            /** @var array<int, Collection<int, Collection<int, mixed>>> */
+            public array $sheets = [];
+
+            public function collection(Collection $rows): void
+            {
+                $this->sheets[] = $rows;
+            }
+        };
+        Excel::import($reader, Storage::disk('fake')->path('template.xlsx'));
+
+        $rows = $reader->sheets[0]->slice(1)
+            ->map(fn (Collection $row): array => $row->values()->all())
+            ->values()
+            ->all();
+
+        $this->assertCount(3, $rows);
+        $this->assertSame(['Pilihan Ganda', 'Esai', 'Unggah Gambar'], array_column($rows, 0));
+        $this->assertEquals([10, 20, 15], array_column($rows, 2));
+        $this->assertSame(['A', '-', '-'], array_column($rows, 7));
+    }
+
+    public function test_template_sheets_are_named(): void
+    {
+        Excel::store(new QuestionImportTemplateExport, 'template.xlsx', 'fake');
+
+        $spreadsheet = IOFactory::load(Storage::disk('fake')->path('template.xlsx'));
+
+        $this->assertSame(['Soal', 'Contoh', 'Petunjuk'], $spreadsheet->getSheetNames());
+    }
+
+    public function test_parsing_downloaded_template_only_reads_soal_sheet(): void
+    {
+        Excel::store(new QuestionImportTemplateExport, 'template.xlsx', 'fake');
+        $file = new UploadedFile(
+            Storage::disk('fake')->path('template.xlsx'),
+            'template.xlsx',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            null,
+            true,
+        );
+
+        $response = $this->actingAs($this->hrAdmin())->post(route('template-bank-soal.import.parse'), ['file' => $file]);
+
+        $response->assertRedirect(route('template-bank-soal.create'));
+        $response->assertSessionMissing('import_errors');
+        $response->assertSessionHas('question_import', function (array $data): bool {
+            return count($data['questions']) === 3
+                && array_column($data['questions'], 'tipe') === ['mc', 'essay', 'image'];
+        });
     }
 
     public function test_parsing_valid_file_fills_form_without_saving(): void

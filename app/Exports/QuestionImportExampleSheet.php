@@ -6,20 +6,33 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class QuestionImportExampleSheet implements FromArray, ShouldAutoSize, WithHeadings, WithStyles
+class QuestionImportExampleSheet implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
+    public function title(): string
+    {
+        return 'Contoh';
+    }
+
     /**
-     * @return array<int, array<int, string>>
+     * Satu baris contoh valid untuk setiap tipe soal (mc, essay, image).
+     *
+     * @var array<int, array<int, string|int>>
+     */
+    public const ROWS = [
+        ['Pilihan Ganda', 'Apa fungsi utama hemoglobin?', 10, 'Mengangkut oksigen', 'Mencerna makanan', 'Melawan infeksi', 'Mengatur gula darah', 'A'],
+        ['Esai', 'Jelaskan prosedur sterilisasi alat medis.', 20, '', '', '', '', '-'],
+        ['Unggah Gambar', 'Unggah foto hasil pemeriksaan Anda.', 15, '', '', '', '', '-'],
+    ];
+
+    /**
+     * @return array<int, array<int, string|int>>
      */
     public function array(): array
     {
-        return [
-            ['Pilihan Ganda', 'Apa fungsi utama hemoglobin?', 10, 'Mengangkut oksigen', 'Mencerna makanan', 'Melawan infeksi', 'Mengatur gula darah', 'A'],
-            ['Esai', 'Jelaskan prosedur sterilisasi alat medis.', 20, '', '', '', '', '-'],
-            ['Unggah Gambar', 'Unggah foto hasil pemeriksaan Anda.', 15, '', '', '', '', '-'],
-        ];
+        return self::ROWS;
     }
 
     /**
