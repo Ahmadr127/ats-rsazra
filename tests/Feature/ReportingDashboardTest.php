@@ -324,6 +324,24 @@ class ReportingDashboardTest extends TestCase
             ->assertSee('page=2', false);
     }
 
+    public function test_application_list_per_page_can_be_chosen(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
+
+        for ($i = 0; $i < 16; $i++) {
+            $this->makeApplication($vacancy);
+        }
+
+        $response = $this->actingAs($admin)->get(route('dashboard', ['per_page' => 10]));
+
+        $response->assertOk()
+            ->assertSee('Menampilkan 1–10 dari 16 pengajuan')
+            ->assertSee('name="per_page"', false)
+            ->assertSee('value="10"', false);
+    }
+
     public function test_application_list_can_be_searched_by_candidate_name(): void
     {
         $this->seedStages();

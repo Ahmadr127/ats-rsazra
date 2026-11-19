@@ -24,6 +24,16 @@
                     placeholder="Cari nama, posisi, atau unit..."
                     class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 w-56 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
+                <select
+                    name="per_page"
+                    onchange="this.form.submit()"
+                    class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    title="Jumlah data per halaman"
+                >
+                    @foreach ([10, 15, 25, 50] as $option)
+                        <option value="{{ $option }}" @selected((int) ($filters['per_page'] ?? 15) === $option)>{{ $option }} / halaman</option>
+                    @endforeach
+                </select>
                 <button type="submit" class="text-xs px-3 py-1.5 rounded-lg bg-primary text-white font-medium hover:bg-primary/90">Cari</button>
                 @if (! empty($filters['search']))
                     <a href="{{ route('dashboard', array_filter($filters, fn ($key) => $key !== 'search', ARRAY_FILTER_USE_KEY)) }}" class="text-xs text-gray-500 hover:text-primary">Reset</a>

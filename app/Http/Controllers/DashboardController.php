@@ -27,6 +27,7 @@ class DashboardController extends Controller
             'unit_id' => 'nullable|integer|exists:units,id',
             'vacancy_id' => 'nullable|integer|exists:vacancies,id',
             'search' => ['nullable', 'string', 'max:100'],
+            'per_page' => ['nullable', 'integer', 'in:10,15,25,50'],
         ]);
 
         $lockedUnit = null;
@@ -69,7 +70,7 @@ class DashboardController extends Controller
                 });
             })
             ->latest()
-            ->paginate(15)
+            ->paginate((int) ($filters['per_page'] ?? 15))
             ->withQueryString();
 
         return view('dashboard', [
