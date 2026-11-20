@@ -191,6 +191,55 @@ class ApplicationPipelineService
     }
 
     /**
+     * Roll a recorded "lulus" decision back to "gagal" or "reserved" and
+     * park the application at that stage again. Only safe while the next
+     * stage has not been filled.
+     */
+    public function retract(Application $application, ApplicationStage $stage, string $keputusan): void
+    {
+        $application->load(['candidate', 'vacancy']);
+
+        DB::transaction(function () use ($application, $stage, $keputusan): void {
+            $stages = $application->stages()->lockForUpdate()->orderBy('position')->get();
+
+            $currentStage = $stages->firstWhere('id', $stage->id);
+            $nextStage = $stages->first(
+                fn ($s) => $s->position > $currentStage->position
+            );
+
+            if ($nextStage && $nextStage->status !== ApplicationStageStatus::Pending) {
+                $nextStage->update(['status' => ApplicationStageStatus::Pending]);
+            }
+
+            $currentStage->update([
+                'status' => $keputusan === 'gagal'
+                    ? ApplicationStageStatus::Gagal
+                    : ApplicationStageStatus::Reserved,
+            ]);
+        });
+
+        $emailKey = match ($keputusan) {
+            'gagal' => 'kandidat_ditolak',
+            'reserved' => 'transisi_tahap',
+            default => null,
+        };
+
+        if (! $emailKey) {
+            return;
+        }
+
+        try {
+            $this->emailNotificationService->dispatch($emailKey, $application->candidate->email, [
+                'nama_kandidat' => $application->candidate->nama_lengkap,
+                'judul_lowongan' => $application->vacancy->judul_posisi,
+                'link_status' => route('karier.lamaran.konfirmasi', $application->token),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
      * Fail/reject the application at the current stage.
      *
      * @throws \RuntimeException when no active stage exists

@@ -202,6 +202,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/lowongan/{lowongan}/template-wawancara', [VacancyInterviewTemplateController::class, 'save'])->name('lowongan.template-wawancara.save');
 
     Route::post('/lowongan/{lowongan}/wawancara/{application}/keputusan', [InterviewController::class, 'decide'])->scopeBindings()->name('lowongan.wawancara.keputusan');
+    Route::put('/lowongan/{lowongan}/wawancara/{application}/tahap/{stage}/keputusan', [InterviewController::class, 'update'])->scopeBindings()->name('lowongan.wawancara.keputusan.update');
     Route::post('/lowongan/{lowongan}/wawancara/{application}/jadwal', [InterviewScheduleController::class, 'store'])->scopeBindings()->name('lowongan.wawancara.jadwal');
     Route::put('/lowongan/{lowongan}/wawancara/{application}/jadwal', [InterviewScheduleController::class, 'update'])->scopeBindings()->name('lowongan.wawancara.jadwal.update');
 

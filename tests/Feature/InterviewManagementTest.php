@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\ApplicationStageStatus;
 use App\Enums\InterviewTemplateType;
+use App\Mail\TemplatedMail;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Candidate;
@@ -20,6 +21,7 @@ use App\Models\VacancyInterviewTemplate;
 use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class InterviewManagementTest extends TestCase
@@ -1107,6 +1109,405 @@ class InterviewManagementTest extends TestCase
 
         $response = $this->actingAs($otherUnitHead)->post(
             route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings]
+        );
+
+        $response->assertForbidden();
+    }
+
+    // ── Edit Until Next Stage Is Filled ───────────────────────────────────────
+
+    public function test_interview_form_stays_editable_until_next_stage_is_filled(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user', 'wawancara_manajer_hr']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            [
+                'keputusan' => 'lulus',
+                'catatan' => 'Lulus awal.',
+                'ratings' => $this->criteriaRatingsFor($vacancy, 'wawancara_user'),
+            ]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+
+        // wawancara_manajer_hr is Aktif but has no result yet, so the user
+        // stage form must still be editable.
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
+
+        $response->assertOk();
+        $response->assertSee('Hasil Wawancara Sebelumnya');
+        // The recorded "lulus" can still be corrected while the next stage is open.
+        $response->assertSee('value="gagal"', false);
+        $response->assertSee('value="reserved"', false);
+        $response->assertSee('Simpan Perubahan');
+        $response->assertSee(route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]), false);
+    }
+
+    public function test_previous_interview_form_locks_once_next_stage_is_filled(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $hrManager = $this->makeHrManager();
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user', 'wawancara_manajer_hr']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $this->criteriaRatingsFor($vacancy, 'wawancara_user')]
+        );
+
+        $this->actingAs($hrManager)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'reserved', 'ratings' => $this->criteriaRatingsFor($vacancy, 'wawancara_manajer_hr')]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
+
+        $response->assertOk();
+        $response->assertDontSee(route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]), false);
+        $response->assertDontSee('Dapat diperbarui sampai tahap berikutnya terisi.');
+    }
+
+    public function test_previous_interview_result_can_be_updated_in_place(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            [
+                'keputusan' => 'lulus',
+                'catatan' => 'Catatan awal.',
+                'ratings' => $this->criteriaRatingsFor($vacancy, 'wawancara_user'),
+            ]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+        $result = InterviewResult::where('application_stage_id', $userStage->id)->firstOrFail();
+
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_user');
+        $ratings[0]['nilai'] = 1;
+
+        $response = $this->actingAs($unitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
+            ['keputusan' => 'lulus', 'catatan' => 'Catatan revisi.', 'ratings' => $ratings]
+        );
+
+        $response->assertRedirect(route('lowongan.pipeline.show', [$vacancy, $application]));
+        $response->assertSessionHasNoErrors();
+
+        $this->assertSame(1, InterviewResult::where('application_stage_id', $userStage->id)->count());
+
+        $result->refresh();
+        $this->assertSame('lulus', $result->keputusan);
+        $this->assertSame('Catatan revisi.', $result->catatan);
+        $this->assertSame(count($ratings), $result->ratings()->count());
+        $this->assertSame(1, $result->ratings()->where('nilai', 1)->count());
+
+        $userStage->refresh();
+        $this->assertEquals(ApplicationStageStatus::Selesai, $userStage->status);
+        $this->assertEquals(
+            ApplicationStageStatus::Aktif,
+            $application->stages()->where('key', 'wawancara_manajer_hr')->first()->status
+        );
+    }
+
+    public function test_update_replaces_ratings_and_readiness_answers(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user']);
+        $this->assignReadinessTemplate($vacancy, ['wawancara_user']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            [
+                'keputusan' => 'lulus',
+                'ratings' => $this->criteriaRatingsFor($vacancy, 'wawancara_user'),
+                'readiness_answers' => $this->readinessAnswersFor($vacancy, 'wawancara_user', true),
+            ]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+        $result = InterviewResult::where('application_stage_id', $userStage->id)->firstOrFail();
+        $ratingCount = $result->ratings()->count();
+        $readinessCount = $result->readinessAnswers()->count();
+
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_user');
+        foreach ($ratings as $index => $rating) {
+            $ratings[$index]['nilai'] = 1;
+        }
+
+        $response = $this->actingAs($unitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
+            [
+                'keputusan' => 'lulus',
+                'ratings' => $ratings,
+                'readiness_answers' => $this->readinessAnswersFor($vacancy, 'wawancara_user', false),
+            ]
+        );
+
+        $response->assertSessionHasNoErrors();
+
+        $this->assertSame($ratingCount, $result->ratings()->count());
+        $this->assertSame($ratingCount, $result->ratings()->where('nilai', 1)->count());
+        $this->assertSame($readinessCount, $result->readinessAnswers()->count());
+        $this->assertSame($readinessCount, $result->readinessAnswers()->where('jawaban', false)->count());
+    }
+
+    public function test_reserved_decision_cannot_be_changed_via_update(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_user');
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'reserved', 'ratings' => $ratings]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+        $result = InterviewResult::where('application_stage_id', $userStage->id)->firstOrFail();
+        $this->assertEquals(ApplicationStageStatus::Reserved, $userStage->status);
+
+        $response = $this->actingAs($unitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings]
+        );
+
+        $response->assertSessionHasErrors('interview');
+
+        $userStage->refresh();
+        $this->assertEquals(ApplicationStageStatus::Reserved, $userStage->status);
+        $this->assertSame('reserved', $result->fresh()->keputusan);
+    }
+
+    public function test_failed_decision_cannot_be_changed_via_update(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_user');
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'gagal', 'ratings' => $ratings]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+        $result = InterviewResult::where('application_stage_id', $userStage->id)->firstOrFail();
+        $this->assertEquals(ApplicationStageStatus::Gagal, $userStage->status);
+
+        $response = $this->actingAs($unitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings]
+        );
+
+        $response->assertSessionHasErrors('interview');
+
+        $userStage->refresh();
+        $this->assertEquals(ApplicationStageStatus::Gagal, $userStage->status);
+        $this->assertSame('gagal', $result->fresh()->keputusan);
+    }
+
+    public function test_lulus_decision_can_be_rolled_back_to_failed(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_user');
+
+        Mail::fake();
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+        $result = InterviewResult::where('application_stage_id', $userStage->id)->firstOrFail();
+
+        $response = $this->actingAs($unitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
+            ['keputusan' => 'gagal', 'ratings' => $ratings]
+        );
+
+        $response->assertSessionHasNoErrors();
+
+        Mail::assertQueued(TemplatedMail::class, fn ($mail) => $mail->key === 'kandidat_ditolak');
+
+        $userStage->refresh();
+        $this->assertEquals(ApplicationStageStatus::Gagal, $userStage->status);
+        $this->assertEquals(
+            ApplicationStageStatus::Pending,
+            $application->stages()->where('key', 'wawancara_manajer_hr')->first()->status
+        );
+        $this->assertSame(1, InterviewResult::where('application_stage_id', $userStage->id)->count());
+        $this->assertSame('gagal', $result->fresh()->keputusan);
+    }
+
+    public function test_lulus_decision_can_be_rolled_back_to_reserved(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_user');
+
+        Mail::fake();
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+        $result = InterviewResult::where('application_stage_id', $userStage->id)->firstOrFail();
+
+        $response = $this->actingAs($unitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
+            ['keputusan' => 'reserved', 'ratings' => $ratings]
+        );
+
+        $response->assertSessionHasNoErrors();
+
+        Mail::assertQueued(TemplatedMail::class, fn ($mail) => $mail->key === 'transisi_tahap');
+
+        $userStage->refresh();
+        $this->assertEquals(ApplicationStageStatus::Reserved, $userStage->status);
+        $this->assertEquals(
+            ApplicationStageStatus::Pending,
+            $application->stages()->where('key', 'wawancara_manajer_hr')->first()->status
+        );
+        $this->assertSame(1, InterviewResult::where('application_stage_id', $userStage->id)->count());
+        $this->assertSame('reserved', $result->fresh()->keputusan);
+    }
+
+    public function test_data_only_update_still_allowed_after_advance(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_user');
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+        $result = InterviewResult::where('application_stage_id', $userStage->id)->firstOrFail();
+
+        $response = $this->actingAs($unitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
+            ['keputusan' => 'lulus', 'catatan' => 'Catatan tambahan.', 'ratings' => $ratings]
+        );
+
+        $response->assertSessionHasNoErrors();
+
+        $userStage->refresh();
+        $this->assertEquals(ApplicationStageStatus::Selesai, $userStage->status);
+        $this->assertEquals(
+            ApplicationStageStatus::Aktif,
+            $application->stages()->where('key', 'wawancara_manajer_hr')->first()->status
+        );
+        $this->assertSame('Catatan tambahan.', $result->fresh()->catatan);
+    }
+
+    public function test_previous_interview_cannot_be_updated_after_next_stage_has_result(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $hrManager = $this->makeHrManager();
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user', 'wawancara_manajer_hr']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $unitHead);
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $this->criteriaRatingsFor($vacancy, 'wawancara_user')]
+        );
+
+        $this->actingAs($hrManager)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'reserved', 'ratings' => $this->criteriaRatingsFor($vacancy, 'wawancara_manajer_hr')]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+
+        $response = $this->actingAs($unitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
+            ['keputusan' => 'lulus', 'ratings' => $this->criteriaRatingsFor($vacancy, 'wawancara_user')]
+        );
+
+        $response->assertForbidden();
+    }
+
+    public function test_non_assigned_unit_head_cannot_update_interview_result(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $assignedUnitHead = $this->makeUnitHead($unit);
+        $otherUnitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_user']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_user', $assignedUnitHead);
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_user');
+
+        $this->actingAs($assignedUnitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings]
+        );
+
+        $application->refresh()->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'wawancara_user');
+
+        $response = $this->actingAs($otherUnitHead)->put(
+            route('lowongan.wawancara.keputusan.update', [$vacancy, $application, $userStage]),
             ['keputusan' => 'lulus', 'ratings' => $ratings]
         );
 

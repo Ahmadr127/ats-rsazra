@@ -236,7 +236,6 @@
                         'currentStage' => $currentStage,
                         'assignedTemplates' => $assignedTemplates,
                         'assignedReadinessTemplates' => $assignedReadinessTemplates,
-                        'priorInterviews' => $priorInterviews,
                     ])
                 @elseif ($stageKey === 'surat_penawaran')
                     @include('vacancies.partials._aksi-surat-penawaran', [
@@ -262,6 +261,13 @@
                     </div>
                 @endif
             @endif
+
+            @include('vacancies.partials._hasil-wawancara-sebelumnya', [
+                'application' => $application,
+                'lowongan' => $lowongan,
+                'interviewStages' => $interviewStages,
+                'interviewTemplatesByStage' => $interviewTemplatesByStage,
+            ])
 
         </div>
     </div>

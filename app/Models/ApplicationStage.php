@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ApplicationStageStatus;
+use App\Support\InterviewStageMap;
 use Database\Factories\ApplicationStageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,6 +50,77 @@ class ApplicationStage extends Model
     public function activeInterviewResult(): HasOne
     {
         return $this->hasOne(InterviewResult::class)->where('is_superseded', false);
+    }
+
+    public function isInterviewStage(): bool
+    {
+        return in_array($this->key, InterviewStageMap::keys(), true);
+    }
+
+    public function hasInterviewResult(): bool
+    {
+        if ($this->relationLoaded('activeInterviewResult')) {
+            return $this->activeInterviewResult !== null;
+        }
+
+        return $this->activeInterviewResult()->exists();
+    }
+
+    public function nextStage(): ?ApplicationStage
+    {
+        return static::query()
+            ->where('application_id', $this->application_id)
+            ->where('position', '>', $this->position)
+            ->orderBy('position')
+            ->first();
+    }
+
+    /**
+     * A stage counts as "filled" once it has a decision. Pending/Aktif stages
+     * are still open, so the previous interview form stays editable.
+     */
+    public function isNextStageFilled(): bool
+    {
+        $next = $this->nextStage();
+
+        if (! $next) {
+            return true;
+        }
+
+        if (in_array($next->status, [ApplicationStageStatus::Pending, ApplicationStageStatus::Aktif], true)) {
+            return $next->hasInterviewResult();
+        }
+
+        return true;
+    }
+
+    public function isInterviewEditable(): bool
+    {
+        return $this->isInterviewStage()
+            && $this->hasInterviewResult()
+            && ! $this->isNextStageFilled();
+    }
+
+    /**
+     * A recorded "lulus" decision can still be corrected to "gagal" or
+     * "reserved" while the next stage has not been filled. Reserved/Gagal
+     * results are corrected through the resume callback instead.
+     */
+    public function canChangeInterviewDecision(): bool
+    {
+        if (! $this->isInterviewStage() || ! $this->hasInterviewResult()) {
+            return false;
+        }
+
+        $result = $this->relationLoaded('activeInterviewResult')
+            ? $this->activeInterviewResult
+            : $this->activeInterviewResult()->first();
+
+        if (! $result || $result->keputusan !== 'lulus') {
+            return false;
+        }
+
+        return ! $this->isNextStageFilled();
     }
 
     public function mcuResult(): HasOne

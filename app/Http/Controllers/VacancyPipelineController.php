@@ -92,6 +92,8 @@ class VacancyPipelineController extends Controller
             'candidate.applications.vacancy.unit',
             'stages.interviewResult.ratings.interviewTemplate',
             'stages.interviewResult.readinessAnswers.interviewTemplate',
+            'stages.activeInterviewResult.ratings.interviewTemplate',
+            'stages.activeInterviewResult.readinessAnswers.interviewTemplate',
             'stages.interviewer',
             'stages.mcuResult',
             'testSubmission.answers.question.options',
@@ -107,36 +109,37 @@ class VacancyPipelineController extends Controller
         $snapshotStages = $lowongan->workflowTemplateSnapshot->stages->sortBy('position')->values();
         $currentStage = $application->currentStage();
 
-        $assignedTemplates = collect();
-        $assignedReadinessTemplates = collect();
-        $interviewStageKeys = ['wawancara_user', 'wawancara_manajer_hr', 'wawancara_direktur'];
+        // Templates are keyed per interview stage so prior-stage forms keep the
+        // criteria that belong to them.
+        $interviewTemplatesByStage = collect(InterviewStageMap::keys())
+            ->mapWithKeys(fn (string $key) => [$key => [
+                'ratings' => $lowongan->interviewTemplates()
+                    ->wherePivot('stage_key', $key)
+                    ->where('tipe', InterviewTemplateType::KriteriaPenilaian)
+                    ->with('items')
+                    ->get(),
+                'readiness' => $lowongan->interviewTemplates()
+                    ->wherePivot('stage_key', $key)
+                    ->where('tipe', InterviewTemplateType::Kesiapan)
+                    ->with('items')
+                    ->get(),
+            ]]);
 
-        if ($currentStage && in_array($currentStage->key, $interviewStageKeys, true)) {
-            $assignedTemplates = $lowongan->interviewTemplates()
-                ->wherePivot('stage_key', $currentStage->key)
-                ->where('tipe', InterviewTemplateType::KriteriaPenilaian)
-                ->with('items')
-                ->get();
+        $currentTemplates = $currentStage
+            ? $interviewTemplatesByStage->get($currentStage->key)
+            : null;
 
-            $assignedReadinessTemplates = $lowongan->interviewTemplates()
-                ->wherePivot('stage_key', $currentStage->key)
-                ->where('tipe', InterviewTemplateType::Kesiapan)
-                ->with('items')
-                ->get();
-        }
+        $assignedTemplates = $currentTemplates['ratings'] ?? collect();
+        $assignedReadinessTemplates = $currentTemplates['readiness'] ?? collect();
 
-        $priorInterviewStageKeys = [];
-        if ($currentStage) {
-            $priorInterviewStageKeys = match ($currentStage->key) {
-                'wawancara_manajer_hr' => ['wawancara_user'],
-                'wawancara_direktur' => ['wawancara_user', 'wawancara_manajer_hr'],
-                default => [],
-            };
-        }
-
-        $priorInterviews = $application->stages
-            ->whereIn('key', $priorInterviewStageKeys)
-            ->filter(fn ($s) => $s->interviewResult !== null);
+        // Prior interview stages still inside the edit window: the next stage
+        // has not recorded a decision yet.
+        $interviewStages = $application->stages
+            ->filter(fn (ApplicationStage $stage) => $stage->isInterviewStage()
+                && $stage->id !== $currentStage?->id
+                && $stage->hasInterviewResult()
+                && ($currentStage?->isInterviewStage() || $stage->isInterviewEditable()))
+            ->values();
 
         $testAllReviewed = false;
         if ($application->testSubmission?->submitted_at) {
@@ -185,7 +188,8 @@ class VacancyPipelineController extends Controller
             'currentStage',
             'assignedTemplates',
             'assignedReadinessTemplates',
-            'priorInterviews',
+            'interviewTemplatesByStage',
+            'interviewStages',
             'testAllReviewed',
             'isUserPic',
             'picLabel',

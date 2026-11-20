@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\InterviewTemplateType;
+use App\Models\ApplicationStage;
 use App\Support\InterviewStageMap;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Collection;
@@ -30,6 +31,7 @@ class StoreInterviewResultRequest extends FormRequest
         $readinessTemplates = $this->resolveAssignedReadinessTemplates();
 
         $base = [
+            'stage_id' => ['nullable', 'integer'],
             'keputusan' => ['required', 'in:lulus,gagal,reserved'],
             'catatan' => ['nullable', 'string', 'max:2000'],
         ];
@@ -81,6 +83,12 @@ class StoreInterviewResultRequest extends FormRequest
 
     private function resolveStageKey(): string
     {
+        $stage = $this->route('stage');
+
+        if ($stage instanceof ApplicationStage) {
+            return $stage->key;
+        }
+
         return InterviewStageMap::stageKeyForDecider($this->user()) ?? InterviewStageMap::USER;
     }
 
