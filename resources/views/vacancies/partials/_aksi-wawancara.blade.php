@@ -32,24 +32,6 @@
         && (! $isWawancaraUser || ($currentStage->interviewer_id !== null && $currentStage->interviewer_id === $authUser->id));
 @endphp
 
-{{-- Actions for reserved / failed --}}
-{{-- @if (($currentStage?->status === \App\Enums\ApplicationStageStatus::Reserved || $currentStage?->status === \App\Enums\ApplicationStageStatus::Gagal) && $authUser->hasPermission(\App\Support\Permissions::VACANCY_VIEW) && ($authUser->hasPermission(\App\Support\Permissions::VACANCY_VIEW_ORG) || $authUser->isInUnit($lowongan->unit_id)))
-    <div class="bg-white rounded-xl border border-gray-100 p-5 mb-4">
-        <h2 class="text-sm font-semibold text-gray-800 mb-2">Aksi Pelamar</h2>
-        <p class="text-xs text-gray-500 mb-3">Pilih tindak lanjut untuk kandidat ini.</p>
-        <div class="flex flex-wrap items-center gap-2">
-            <form method="POST" action="{{ route('lowongan.lamaran.resume', [$lowongan, $application]) }}">
-                @csrf
-                <button type="submit" class="px-4 py-2 text-xs font-medium bg-primary text-white rounded-lg hover:bg-primary-dark">Lanjutkan</button>
-            </form>
-            <form method="POST" action="{{ route('lowongan.lamaran.ulang', [$lowongan, $application]) }}">
-                @csrf
-                <button type="submit" class="px-4 py-2 text-xs font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400">Ulang dari Skrining</button>
-            </form>
-        </div>
-    </div>
-@endif --}}
-
 {{-- Phase 1: No schedule yet — only schedulers (interview.schedule) may fill this form --}}
 @if ($currentStage?->status->isAdvanceable() && ! $hasSchedule)
     @if ($authUser->hasPermission(\App\Support\Permissions::INTERVIEW_SCHEDULE))
