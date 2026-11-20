@@ -39,20 +39,53 @@
     }
 @endphp
 
-<div class="bg-white rounded-xl border border-gray-100 p-5">
-    <div class="flex items-start justify-between gap-3 mb-4">
-        <div>
-            <h2 class="text-sm font-semibold text-gray-800">{{ $heading }}</h2>
-            @if (! empty($subheading))
-                <p class="text-[11px] text-gray-500 mt-0.5">{{ $subheading }}</p>
-            @endif
+<div class="bg-white rounded-xl border border-gray-100 {{ $isEdit ? 'overflow-hidden' : 'p-5' }}" @if ($isEdit) x-data="{ open: false }" @endif>
+    @if ($isEdit)
+        {{-- Accordion header (hanya mode edit) --}}
+        <button
+            type="button"
+            @click="open = !open"
+            class="w-full flex items-center justify-between gap-3 p-5 text-left hover:bg-gray-50/60 transition-colors ease-out duration-150"
+            aria-expanded="false"
+            :aria-expanded="open.toString()"
+        >
+            <div class="flex items-center gap-3 min-w-0">
+                <h2 class="text-sm font-semibold text-gray-800">{{ $heading }}</h2>
+                @if (! empty($subheading))
+                    <p class="text-[11px] text-gray-500 truncate">{{ $subheading }}</p>
+                @endif
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium {{ $decisionMeta[0] }}">
+                    {{ $decisionMeta[1] }}
+                </span>
+            </div>
+            <svg
+                class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"
+                :class="{ 'rotate-180': open }"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
+
+        {{-- Accordion body (hanya mode edit) --}}
+        <div
+            x-show="open"
+            x-collapse
+            class="px-5 pb-5"
+        >
+    @else
+        <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+                <h2 class="text-sm font-semibold text-gray-800">{{ $heading }}</h2>
+                @if (! empty($subheading))
+                    <p class="text-[11px] text-gray-500 mt-0.5">{{ $subheading }}</p>
+                @endif
+            </div>
         </div>
-        @if ($isEdit)
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium {{ $decisionMeta[0] }}">
-                {{ $decisionMeta[1] }}
-            </span>
-        @endif
-    </div>
+    @endif
 
     @if ($assignedTemplates->isEmpty() && (! $isEdit || $canEdit))
         <div class="text-center py-4">
@@ -206,22 +239,37 @@
                 </div>
             @else
                 <div class="space-y-2 mb-4">
-                    @foreach (['lulus' => ['Lulus', 'bg-green-50 border-green-300 text-green-700'], 'reserved' => ['Tunda', 'bg-amber-50 border-amber-300 text-amber-700'], 'gagal' => ['Gagal', 'bg-red-50 border-red-300 text-red-700']] as $value => $config)
-                        <label
-                            class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ease-out duration-150"
-                            :class="keputusan === '{{ $value }}' ? '{{ $config[1] }}' : 'border-gray-200 hover:border-gray-300'"
-                        >
-                            <input
-                                type="radio"
-                                name="keputusan"
-                                value="{{ $value }}"
-                                x-model="keputusan"
-                                class="w-4 h-4 accent-current"
-                                @if ($selectedKeputusan === $value) checked @endif
-                            >
-                            <span class="text-sm font-medium" :class="keputusan === '{{ $value }}' ? '' : 'text-gray-700'">{{ $config[0] }}</span>
+                    @if ($isEdit)
+                        <label class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1">
+                            Keputusan
                         </label>
-                    @endforeach
+                        <select
+                            name="keputusan"
+                            x-model="keputusan"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 bg-white"
+                        >
+                            @foreach (['lulus' => 'Lulus', 'reserved' => 'Tunda', 'gagal' => 'Gagal'] as $value => $label)
+                                <option value="{{ $value }}" @if ($selectedKeputusan === $value) selected @endif>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    @else
+                        @foreach (['lulus' => ['Lulus', 'bg-green-50 border-green-300 text-green-700'], 'reserved' => ['Tunda', 'bg-amber-50 border-amber-300 text-amber-700'], 'gagal' => ['Gagal', 'bg-red-50 border-red-300 text-red-700']] as $value => $config)
+                            <label
+                                class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ease-out duration-150"
+                                :class="keputusan === '{{ $value }}' ? '{{ $config[1] }}' : 'border-gray-200 hover:border-gray-300'"
+                            >
+                                <input
+                                    type="radio"
+                                    name="keputusan"
+                                    value="{{ $value }}"
+                                    x-model="keputusan"
+                                    class="w-4 h-4 accent-current"
+                                    @if ($selectedKeputusan === $value) checked @endif
+                                >
+                                <span class="text-sm font-medium" :class="keputusan === '{{ $value }}' ? '' : 'text-gray-700'">{{ $config[0] }}</span>
+                            </label>
+                        @endforeach
+                    @endif
                 </div>
             @endif
 
@@ -249,5 +297,9 @@
                 {{ $isEdit ? 'Simpan Perubahan' : 'Simpan Keputusan' }}
             </button>
         </form>
+    @endif
+
+    @if ($isEdit)
+        </div> {{-- close accordion body --}}
     @endif
 </div>

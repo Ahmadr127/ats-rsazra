@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(Select-String:*)",
+      "Shell(Select-Object:*)",
+      "Shell(php artisan test --compact tests/Feature/CallbackInviteTest.php)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

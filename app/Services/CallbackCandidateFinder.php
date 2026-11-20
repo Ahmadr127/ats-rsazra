@@ -20,7 +20,8 @@ class CallbackCandidateFinder
 
     /**
      * Build the callback list for a target Vacancy: one row per prior Gagal or
-     * Reserved application under the same JobTemplate, with per-candidate badges.
+     * Reserved application under the same JobTemplate, plus applications parked
+     * in the target Vacancy itself, with per-candidate badges.
      *
      * Hard-excludes candidates already hired (completed onboarding) and
      * candidates who self-applied to the target Vacancy without an invite.
@@ -85,8 +86,9 @@ class CallbackCandidateFinder
 
     /**
      * Callback applications: prior Gagal/Reserved from other vacancies under the
-     * same JobTemplate, plus applications already Reserved in the target Vacancy
-     * itself (so their process can simply be resumed from this page).
+     * same JobTemplate, plus applications parked in the target Vacancy itself
+     * (Reserved to resume, or Gagal after a re-application) so their process can
+     * simply be resumed (or re-invited) from this page.
      *
      * @return Collection<int, Application>
      */
@@ -112,13 +114,19 @@ class CallbackCandidateFinder
             ->with(['candidate', 'stages', 'vacancy:id,judul_posisi'])
             ->get();
 
-        $currentReserved = Application::query()
+        // Failures parked in the target Vacancy itself (re-application after an
+        // invite that failed again, or a decision recorded here) are callback
+        // candidates as well — not only Reserved ones.
+        $current = Application::query()
             ->where('vacancy_id', $vacancy->id)
-            ->whereHas('stages', fn ($query) => $stageFilter($query, [ApplicationStageStatus::Reserved]))
+            ->whereHas('stages', fn ($query) => $stageFilter($query, [
+                ApplicationStageStatus::Gagal,
+                ApplicationStageStatus::Reserved,
+            ]))
             ->with(['candidate', 'stages', 'vacancy:id,judul_posisi'])
             ->get();
 
-        $applications = $prior->concat($currentReserved)->unique('id')->values();
+        $applications = $prior->concat($current)->unique('id')->values();
         $candidateIds = $applications->pluck('candidate_id')->unique();
         $invitedIds = $this->invitedIds($vacancy, $candidateIds);
         $appliedToTargetIds = $this->appliedToTargetIds($vacancy, $candidateIds);
@@ -128,7 +136,7 @@ class CallbackCandidateFinder
             $candidateIds,
             $invitedIds,
             $appliedToTargetIds,
-            $currentReserved->pluck('id'),
+            $current->pluck('id'),
         );
     }
 

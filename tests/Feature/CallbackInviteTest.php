@@ -182,6 +182,22 @@ class CallbackInviteTest extends TestCase
         $response->assertDontSee('Citra Other');
     }
 
+    public function test_failed_application_in_target_vacancy_is_listed_for_callback(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $target = $this->vacancyWithStages($template->id);
+
+        $candidate = Candidate::factory()->create(['nama_lengkap' => 'Budi Gagal Langsung']);
+        $this->gagalApplication($target, $candidate, 'wawancara_user');
+
+        // Candidate failed inside the open target Vacancy (e.g. re-application
+        // after a callback invite) — must still surface on the callback list.
+        $this->actingAs($admin)->get(route('callback.index', $target))
+            ->assertOk()
+            ->assertSee('Budi Gagal Langsung');
+    }
+
     public function test_default_filter_hides_screening_failures_and_widen_shows_them(): void
     {
         $admin = User::factory()->hrAdmin()->create();
